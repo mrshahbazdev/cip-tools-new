@@ -20,12 +20,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Agar environment production hai ya local nahi hai
-        if ($this->app->environment('production') || config('app.env') !== 'local') {
+        // Agar hum Localhost par nahi hain (yani Server par hain)
+        if ($this->app->environment('production') || request()->server('HTTP_X_FORWARDED_PROTO') == 'https') {
+
+            // 1. URL Scheme Force Karein
             \Illuminate\Support\Facades\URL::forceScheme('https');
 
-            // Ye line add karein taaki CSS/JS bhi HTTPS ho jayein
-            $this->app['request']->server->set('HTTPS', 'on');
+            // 2. Request ko batayein ke ye HTTPS hai
+            request()->server->set('HTTPS', 'on');
         }
     }
 }

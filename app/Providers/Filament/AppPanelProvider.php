@@ -19,7 +19,8 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain; // <-- Import
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains; // <-- Import
-
+use Illuminate\Support\Facades\Blade;
+use Filament\View\PanelsRenderHook;
 class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -51,6 +52,10 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->login()
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => Blade::render('<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">')
+            );
             // ->domain(...)  <-- IS LINE KO REMOVE KAR DEIN (Humne upar logic likh di hai)
             ->colors([
                 'primary' => Color::Amber,

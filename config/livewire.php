@@ -191,5 +191,5 @@ return [
     | Force Livewire to load assets from a specific URL (HTTPS).
     |
     */
-    'asset_url' => env('ASSET_URL', null),
+    'asset_url' => env('ASSET_URL', 'https://cip-tools.de'),
 ];
