@@ -183,13 +183,5 @@ return [
     */
 
     'release_token' => 'a',
-    /*
-    |---------------------------------------------------------------------------
-    | Asset URL
-    |---------------------------------------------------------------------------
-    |
-    | Force Livewire to load assets from a specific URL (HTTPS).
-    |
-    */
-    'asset_url' => env('ASSET_URL', 'https://cip-tools.de'),
+
 ];
