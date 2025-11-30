@@ -28,7 +28,7 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->path('') // Khali rakha hai taaki 'subdomain.site.com/' par direct khule
-            ->domain('{tenant}.cip-tools.de')
+
             ->login()
             ->colors([
                 'primary' => Color::Amber,
