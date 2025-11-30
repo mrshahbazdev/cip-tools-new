@@ -3,13 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
+// Ab hum routes yahan nahi likhenge, Filament khud handle karega.
+// Lekin agar future me custom routes chahiye hon, to yahan likh sakte hain.
+
 Route::middleware([
     'web',
-    InitializeTenancyByDomain::class, // Ye sabse important line hai
+    InitializeTenancyByDomain::class,
 ])->group(function () {
-
-    Route::get('/', function () {
-        return '<h1>Success!yYou are on Tenant: ' . tenant('id') . '</h1>';
-    });
-
+    // Route::get('/', function () {
+    //    return 'This will now be handled by Filament';
+    // });
 });

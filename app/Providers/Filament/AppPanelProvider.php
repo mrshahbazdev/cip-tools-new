@@ -3,7 +3,6 @@
 namespace App\Providers\Filament;
 
 use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
@@ -15,8 +14,11 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain; // <-- Import
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains; // <-- Import
 
 class AppPanelProvider extends PanelProvider
 {
@@ -25,7 +27,7 @@ class AppPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('app')
-            ->path('app')
+            ->path('') // Khali rakha hai taaki 'subdomain.site.com/' par direct khule
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -51,6 +53,11 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            // YAHAN HUMNE TENANCY MIDDLEWARE ADD KIYA HAI
+            ->middleware([
+                InitializeTenancyByDomain::class,
+                PreventAccessFromCentralDomains::class,
+            ], isPersistent: true) // Persistent zaroori hai
             ->authMiddleware([
                 Authenticate::class,
             ]);
