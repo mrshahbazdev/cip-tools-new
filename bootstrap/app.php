@@ -12,12 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
-        // --- YE LINE ADD KAREIN ---
-        // SiteGround ke proxies par trust karein
+        // SiteGround Proxy Fix
         $middleware->trustProxies(at: '*');
 
-        // Agar zaroorat ho to ye bhi add kar sakte hain (filhal sirf upar wala kaafi hai)
-        // $middleware->trustHelpers();
+        // Ye headers zaroori hain SiteGround ke liye
+        $middleware->trustProxies(headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO |
+            \Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB
+        );
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
