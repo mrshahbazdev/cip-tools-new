@@ -21,8 +21,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use Illuminate\Support\Facades\Blade;
 use Filament\View\PanelsRenderHook;
-use Illuminate\Http\Request;
-use Closure; // <-- Zaroori Import
+
 
 class AppPanelProvider extends PanelProvider
 {
@@ -70,13 +69,7 @@ class AppPanelProvider extends PanelProvider
                 // Tenancy Middleware ko sabse upar rakhein
                 InitializeTenancyByDomain::class,
                 PreventAccessFromCentralDomains::class,
-                // --- DEBUG INJECTION START ---
-                // Yahan hum dekhenge ke DB switch hua ya nahi
-                function (Request $request, Closure $next) {
-                    \Log::error('DEBUG_CONNECTION: ' . \DB::connection()->getDatabaseName());
-                    return $next($request);
-                },
-                // --- DEBUG INJECTION END ---
+
                 // Phir Standard Middleware aayenge
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
