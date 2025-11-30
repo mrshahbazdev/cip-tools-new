@@ -1,16 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\PreventAccessFromTenantDomains;
 
-// Ye middleware ensure karega ke ye routes sirf Central Domain par hi khulein
-Route::middleware([
-    'web',
-    PreventAccessFromTenantDomains::class,
-])->group(function () {
+// Config se central domains utha kar sirf unhi par ye routes chalayenge
+foreach (config('tenancy.central_domains') as $domain) {
+    Route::domain($domain)->group(function () {
 
-    Route::get('/', function () {
-        return '<h1>Welcome to Central Domain (cip-tools.de)</h1>';
+        Route::middleware(['web'])->group(function () {
+            Route::get('/', function () {
+                return '<h1>Welcome to Central Domain (cip-tools.de)</h1>';
+            });
+
+            // Future mein Registration routes yahan ayenge
+        });
+
     });
-
-});
+}
