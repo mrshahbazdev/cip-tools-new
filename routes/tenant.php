@@ -1,17 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 Route::middleware([
     'web',
-    InitializeTenancyByDomain::class,
-    PreventAccessFromCentralDomains::class,
+    InitializeTenancyByDomain::class, // Ye sabse important line hai
 ])->group(function () {
+
     Route::get('/', function () {
-        return '<h1>This is User Project: ' . tenant('id') . '</h1>';
+        return '<h1>Success! You are on Tenant: ' . tenant('id') . '</h1>';
     });
+
 });
