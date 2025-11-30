@@ -49,7 +49,7 @@ class RegisterTenant extends Component
         User::create([
             'name' => $this->company_name, // Filhal Company name hi User name hai
             'email' => $this->email,
-            'password' => bcrypt($this->password), // Password encrypt karein
+            'password' => $this->password, // Password encrypt karein
         ]);
 
         tenancy()->end(); // Wapas Central context me aa jayen
