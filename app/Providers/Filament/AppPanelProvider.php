@@ -38,7 +38,7 @@ class AppPanelProvider extends PanelProvider
         if ($isCentral) {
             $panel->path('app'); // Central domain par ye /app par khulega
         } else {
-            $panel->path('admin'); // Tenant par ye /admin par khulega (Safer for loops)
+            $panel->path(''); // Tenant par ye /admin par khulega (Safer for loops)
 
             // Domain parameter error fix karne ke liye hardcode domain
             if (!app()->runningInConsole()) {
