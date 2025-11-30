@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
-use Stancl\Tenancy\Database\Concerns\HasDomains; // Ye line check karein
+use Stancl\Tenancy\Database\Concerns\HasDomains;
+use Stancl\Tenancy\Contracts\TenantWithDatabase; // 1. Ye Import kiya
 
-class Tenant extends BaseTenant
+// 2. Yahan 'implements TenantWithDatabase' lagaya
+class Tenant extends BaseTenant implements TenantWithDatabase
 {
-    use HasDatabase, HasDomains; // Ye line SABSE important hai
+    use HasDatabase, HasDomains;
 
     public static function getCustomColumns(): array
     {
