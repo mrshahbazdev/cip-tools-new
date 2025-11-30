@@ -30,7 +30,13 @@ return [
     */
 
     'connections' => [
-
+        'tenant_sqlite' => [
+            'driver' => 'sqlite',
+            'url' => env('DATABASE_URL'),
+            'database' => database_path('tenants/tenant.sqlite'), // Default placeholder
+            'prefix' => '',
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+        ],
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
