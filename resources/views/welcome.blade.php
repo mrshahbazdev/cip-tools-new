@@ -80,42 +80,7 @@
                     <div class="absolute -top-10 -right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
                     <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
 
-                    <div class="relative bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-                        <div class="mb-6">
-                            <h3 class="text-xl font-bold text-slate-900">Create Your Project</h3>
-                            <p class="text-sm text-slate-500">Claim your unique subdomain URL instantly.</p>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
-                                <input type="text" placeholder="e.g. Acme Corp" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-gray-50">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Desired Subdomain</label>
-                                <div class="flex">
-                                    <input type="text" placeholder="acme" class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-gray-50">
-                                    <span class="inline-flex items-center px-3 border border-l-0 border-gray-300 bg-gray-100 text-gray-500 text-sm rounded-r-lg">
-                                        .cip-tools.de
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-                                <input type="email" placeholder="you@company.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-gray-50">
-                            </div>
-
-                            <button class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-indigo-200/50 flex justify-center items-center gap-2">
-                                Start Free Trial
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                            </button>
-                        </div>
-                        <p class="text-center text-xs text-slate-400 mt-4">
-                            By creating an account, you agree to our Terms & Conditions.
-                        </p>
-                    </div>
+                    <livewire:register-tenant />
                 </div>
 
             </div>
