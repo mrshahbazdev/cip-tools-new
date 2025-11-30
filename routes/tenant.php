@@ -9,7 +9,7 @@ Route::middleware([
 ])->group(function () {
 
     Route::get('/', function () {
-        return '<h1>Success! You are on Tenant: ' . tenant('id') . '</h1>';
+        return '<h1>Success!yYou are on Tenant: ' . tenant('id') . '</h1>';
     });
 
 });
