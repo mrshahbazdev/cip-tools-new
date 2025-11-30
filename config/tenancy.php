@@ -19,6 +19,8 @@ return [
     'central_domains' => [
         '127.0.0.1',
         'localhost',
+        'cip-tools.de',
+        'www.cip-tools.de',
     ],
 
     /**
