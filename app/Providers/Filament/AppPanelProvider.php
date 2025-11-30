@@ -24,25 +24,38 @@ class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        // Check karein ke current request Central Domain se hai ya nahi
+        $isCentral = false;
+
+        if (!app()->runningInConsole()) {
+            $host = request()->getHost();
+            $centralDomains = config('tenancy.central_domains') ?? [];
+            $isCentral = in_array($host, $centralDomains);
+        }
+
+        // Logic:
+        // Agar Central hai -> Path change karo ('app') taaki Landing Page '/' par chal sake.
+        // Agar Tenant hai -> Path '/' rakho aur Domain fix karo taaki error na aaye.
+
+        if ($isCentral) {
+            $panel->path('app'); // Central domain par ye /app par khulega
+        } else {
+            $panel->path('');    // Tenant par ye direct / par khulega
+
+            if (!app()->runningInConsole()) {
+                $panel->domain(request()->getHost()); // Parameter error fix karne ke liye static domain
+            }
+        }
+
         return $panel
             ->default()
             ->id('app')
-            ->path('') // Khali rakha hai taaki 'subdomain.site.com/' par direct khule
-
             ->login()
+            // ->domain(...)  <-- IS LINE KO REMOVE KAR DEIN (Humne upar logic likh di hai)
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                Pages\Dashboard::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
-            ])
+            // ... Baaki code same rahega ...
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -54,11 +67,10 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            // YAHAN HUMNE TENANCY MIDDLEWARE ADD KIYA HAI
             ->middleware([
                 InitializeTenancyByDomain::class,
                 PreventAccessFromCentralDomains::class,
-            ], isPersistent: true) // Persistent zaroori hai
+            ], isPersistent: true)
             ->authMiddleware([
                 Authenticate::class,
             ]);
