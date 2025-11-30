@@ -10,9 +10,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
+
+        // --- YE LINE ADD KAREIN ---
+        // SiteGround ke proxies par trust karein
+        $middleware->trustProxies(at: '*');
+
+        // Agar zaroorat ho to ye bhi add kar sakte hain (filhal sirf upar wala kaafi hai)
+        // $middleware->trustHelpers();
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
