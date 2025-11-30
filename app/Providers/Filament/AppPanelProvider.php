@@ -55,7 +55,7 @@ class AppPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
                 fn (): string => Blade::render('<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">')
-            );
+            )
             // ->domain(...)  <-- IS LINE KO REMOVE KAR DEIN (Humne upar logic likh di hai)
             ->colors([
                 'primary' => Color::Amber,
