@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Tenant;
 use App\Models\User; // <-- Ye User Model import karna zaroori hai
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class RegisterTenant extends Component
 {
@@ -49,7 +50,7 @@ class RegisterTenant extends Component
         User::create([
             'name' => $this->company_name, // Filhal Company name hi User name hai
             'email' => $this->email,
-            'password' => $this->password, // Password encrypt karein
+            'password' => Hash::make($this->password), // Password encrypt karein
         ]);
 
         tenancy()->end(); // Wapas Central context me aa jayen
