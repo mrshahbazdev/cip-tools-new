@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL; // <-- Import karein
+use Stancl\Tenancy\Events\TenancyInitialized; // Import karein
+use Illuminate\Support\Facades\Event;
+use App\Models\User; // Import karein
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +32,12 @@ class AppServiceProvider extends ServiceProvider
             // 2. Request ko batayein ke ye HTTPS hai
             request()->server->set('HTTPS', 'on');
         }
+            Event::listen(TenancyInitialized::class, function (TenancyInitialized $event) {
+            if (auth()->check()) {
+                // Agar user session mein hai, toh user object ko dobara load karo
+                // naye (tenant) database connection se.
+                auth()->setUser(User::find(auth()->id()));
+            }
+        });
     }
 }
