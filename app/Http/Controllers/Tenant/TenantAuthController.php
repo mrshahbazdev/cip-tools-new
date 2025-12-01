@@ -30,7 +30,7 @@ class TenantAuthController extends Controller
             $request->session()->regenerate();
 
             // Login successful hone par dashboard par redirect karein
-            return redirect()->intended(route('tenant.dashboard'));
+            return redirect()->route('tenant.dashboard');
         }
 
         // Login fail hone par error ke saath wapas bhejein

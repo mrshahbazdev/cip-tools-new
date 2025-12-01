@@ -26,15 +26,19 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
 
     // 4. ROOT URL (Landing Page vs Dashboard Check)
     Route::get('/', function () {
-        if (auth()->check()) {
-            return redirect()->route('tenant.dashboard');
-        }
+        // CRITICAL FIX: Public Landing Page dikhao
         return view('tenant.landing');
     })->name('tenant.landing');
 
     // --- LOGGED IN ROUTES (Private) ---
     Route::middleware('auth')->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('tenant.dashboard');
+        });
 
+        // 4. REGISTRATION FORM ROUTE
+        Route::get('/register', TenantUserRegistration::class)
+            ->name('tenant.register');  // <-- CRITICAL FIX: The form action name goes here!
         // 5. DASHBOARD ROUTE
         Route::get('/dashboard', function () {
             return view('tenant.dashboard');
