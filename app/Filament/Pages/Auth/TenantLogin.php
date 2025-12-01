@@ -7,14 +7,20 @@ use Filament\Forms\Form;
 use Filament\Pages\Auth\Login as BaseLogin;
 use Illuminate\Support\Facades\Log; // Added for debugging
 use Illuminate\Support\Facades\DB;  // Added for debugging
+use Illuminate\Support\Facades\Route; // <-- Ye import zaroori hai
 
 class TenantLogin extends BaseLogin
 {
     // Override the form method to add the debug check
     protected function successfulAuthentication(): void
     {
-        // Seedha root path ('/') par redirect karein
-        $this->redirect('/');
+        // FILAMENT REDIRECT FIX: Target page ka named route use karein
+        $this->redirect(route('filament.app.pages.tenant-user-home-page'));
+    }
+    protected function getRedirectUrl(): string
+    {
+        // CRITICAL FIX: Explicitly redirect to the Tenant User Home Page
+        return \App\Filament\Pages\TenantUserHomePage::getUrl();
     }
     public function form(Form $form): Form
     {
@@ -27,11 +33,7 @@ class TenantLogin extends BaseLogin
             ])
             ->statePath('data');
     }
-    protected function getRedirectUrl(): string
-    {
-        // CRITICAL FIX: Explicitly redirect to the Tenant User Home Page
-        return \App\Filament\Pages\TenantUserHomePage::getUrl();
-    }
+
     // Override the credential fetching method to inject the debugger (Existing logic)
     protected function getCredentialsFromFormData(array $data): array
     {
