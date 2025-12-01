@@ -14,7 +14,7 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
     // 1. LOGIN FORM ROUTE (GET)
     Route::get('/login', [TenantAuthController::class, 'showLoginForm'])
         ->name('tenant.login')
-        ->name('login'); // <-- FINAL FIX: Global fallback login name
+        ->name('login'); // <-- CRITICAL: Global Fallback Name
 
     // 2. LOGIN PROCESS ROUTE (POST)
     Route::post('/login', [TenantAuthController::class, 'login']);
@@ -43,6 +43,6 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
         // 6. LOGOUT ROUTE
         Route::post('/logout', [TenantAuthController::class, 'logout'])
             ->name('tenant.logout')
-            ->name('logout'); // <-- FINAL FIX: Global fallback logout name
+            ->name('logout'); // <-- CRITICAL: Global Fallback Logout Name
     });
 });
