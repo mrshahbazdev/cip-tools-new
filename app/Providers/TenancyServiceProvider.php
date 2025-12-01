@@ -15,80 +15,40 @@ use Stancl\Tenancy\Middleware;
 
 class TenancyServiceProvider extends ServiceProvider
 {
-    // By default, no namespace is used to support the callable array syntax.
+    // Single DB setup mein iski zarurat nahi, lekin code mein rehne dein.
     public static string $controllerNamespace = '';
 
     public function events()
     {
         return [
-            // Tenant events
-            Events\CreatingTenant::class => [],
+            // Tenant Created event. Jobs hata diye gaye hain kyunki hum Single DB mein hain.
             Events\TenantCreated::class => [
                 JobPipeline::make([
-                    //Jobs\CreateDatabase::class,
-                    //Jobs\MigrateDatabase::class,
-                    // Jobs\SeedDatabase::class,
-
-                    // Your own jobs to prepare the tenant.
-                    // Provision API keys, create S3 buckets, anything you want!
-
+                    // Jobs\CreateDatabase::class, // REMOVED (No permission)
+                    // Jobs\MigrateDatabase::class, // REMOVED (Table per tenant)
                 ])->send(function (Events\TenantCreated $event) {
                     return $event->tenant;
-                })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
+                })->shouldBeQueued(false),
             ],
-            Events\SavingTenant::class => [],
-            Events\TenantSaved::class => [],
-            Events\UpdatingTenant::class => [],
-            Events\TenantUpdated::class => [],
-            Events\DeletingTenant::class => [],
+
+            // Tenant Deleted event. Jobs hata diye gaye hain taaki DROP DATABASE error na aaye.
             Events\TenantDeleted::class => [
                 JobPipeline::make([
-                    Jobs\DeleteDatabase::class,
+                    // Jobs\DeleteDatabase::class, // REMOVED (No permission)
                 ])->send(function (Events\TenantDeleted $event) {
                     return $event->tenant;
-                })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
+                })->shouldBeQueued(false),
             ],
 
-            // Domain events
-            Events\CreatingDomain::class => [],
-            Events\DomainCreated::class => [],
-            Events\SavingDomain::class => [],
-            Events\DomainSaved::class => [],
-            Events\UpdatingDomain::class => [],
-            Events\DomainUpdated::class => [],
-            Events\DeletingDomain::class => [],
-            Events\DomainDeleted::class => [],
-
-            // Database events
-            Events\DatabaseCreated::class => [],
-            Events\DatabaseMigrated::class => [],
-            Events\DatabaseSeeded::class => [],
-            Events\DatabaseRolledBack::class => [],
-            Events\DatabaseDeleted::class => [],
-
-            // Tenancy events
-            Events\InitializingTenancy::class => [],
+            // Core Tenancy events (Ye zaruri hain context switching ke liye)
             Events\TenancyInitialized::class => [
                 Listeners\BootstrapTenancy::class,
             ],
-
-            Events\EndingTenancy::class => [],
             Events\TenancyEnded::class => [
                 Listeners\RevertToCentralContext::class,
             ],
 
-            Events\BootstrappingTenancy::class => [],
-            Events\TenancyBootstrapped::class => [],
-            Events\RevertingToCentralContext::class => [],
-            Events\RevertedToCentralContext::class => [],
-
-            // Resource syncing
-            Events\SyncedResourceSaved::class => [
-                Listeners\UpdateSyncedResource::class,
-            ],
-
-            // Fired only when a synced resource is changed in a different DB than the origin DB (to avoid infinite loops)
-            Events\SyncedResourceChangedInForeignDatabase::class => [],
+            // ... baaki default events ...
         ];
     }
 
@@ -102,7 +62,8 @@ class TenancyServiceProvider extends ServiceProvider
         $this->bootEvents();
         $this->mapRoutes();
 
-        $this->makeTenancyMiddlewareHighestPriority();
+        // Middleware priority is being handled in AppPanelProvider for this setup.
+        // $this->makeTenancyMiddlewareHighestPriority();
     }
 
     protected function bootEvents()
@@ -118,6 +79,7 @@ class TenancyServiceProvider extends ServiceProvider
         }
     }
 
+    // Ye method routes/tenant.php ko load karta hai (Filament is par depend karta hai)
     protected function mapRoutes()
     {
         $this->app->booted(function () {
@@ -128,21 +90,9 @@ class TenancyServiceProvider extends ServiceProvider
         });
     }
 
+    // Optional: Is method ko comment kar dein agar aapne use nahi kiya
     protected function makeTenancyMiddlewareHighestPriority()
     {
-        $tenancyMiddleware = [
-            // Even higher priority than the initialization middleware
-            Middleware\PreventAccessFromCentralDomains::class,
-
-            Middleware\InitializeTenancyByDomain::class,
-            Middleware\InitializeTenancyBySubdomain::class,
-            Middleware\InitializeTenancyByDomainOrSubdomain::class,
-            Middleware\InitializeTenancyByPath::class,
-            Middleware\InitializeTenancyByRequestData::class,
-        ];
-
-        foreach (array_reverse($tenancyMiddleware) as $middleware) {
-            $this->app[\Illuminate\Contracts\Http\Kernel::class]->prependToMiddlewarePriority($middleware);
-        }
+        // ...
     }
 }
