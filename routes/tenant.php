@@ -16,4 +16,6 @@ Route::middleware([
     Route::get('/', function () {
         return view('tenant.landing');
     })->name('tenant.landing');
+    Route::get('/register', \App\Livewire\TenantUserRegistration::class)
+    ->name('tenant.user.register');
 });
