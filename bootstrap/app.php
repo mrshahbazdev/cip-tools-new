@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException; // <-- Import 2]
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,5 +27,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->renderable(function (TenantCouldNotBeIdentifiedOnDomainException $e, Request $request) {
+
+            // 1. Check if the current host is NOT in the list of central domains
+            if (! in_array($request->getHost(), config('tenancy.central_domains'))) {
+                // 2. Agar tenant ID nahi mila, toh 404 Not Found return karo
+                return response()->view('errors.404', [], 404);
+            }
+        });
     })->create();
