@@ -52,8 +52,8 @@ class TenantUserRegistration extends Component
 
     public function render()
     {
-        // Sirf view ko render karein, koi layout use na karein
+        // Naya layout file use karein
         return view('livewire.tenant-user-registration')
-            ->layout(null);
+            ->layout('components.layouts.guest'); // <-- Naya layout set karein
     }
 }
