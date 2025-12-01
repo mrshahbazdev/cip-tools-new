@@ -6,7 +6,7 @@ use Livewire\Component;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
-
+use App\Models\TenantUser; // CRITICAL: TenantUser model import karein
 class TenantUserRegistration extends Component
 {
     public $name = '';
@@ -37,17 +37,20 @@ class TenantUserRegistration extends Component
     {
         $this->validate();
 
-        // User creation (Scoped to Tenant)
-        User::create([
+        // CRITICAL FIX: TenantUser model use karein
+        $user = TenantUser::create([
             'name' => $this->name,
             'email' => $this->email,
-            'password' => Hash::make($this->password), // Password encrypt karein
-            'tenant_id' => tenant('id'),              // User ko current tenant se jodein
-            'is_tenant_admin' => false,               // Ye regular user hai, admin nahi
+            'password' => $this->password, // Password ab automatic hash ho jayega (Model Cast ki wajah se)
+            'tenant_id' => tenant('id'),
+            'is_tenant_admin' => false,
         ]);
 
-        // Redirect to login page
-        return redirect()->to(url('/'))->with('status', 'Registration successful! Please log in.');
+        // Optional: Agar aap chahte hain ki user register hote hi login ho jaye:
+        // auth()->login($user);
+        // return redirect()->route('tenant.dashboard');
+
+        return redirect()->route('tenant.login')->with('status', 'Registration successful! Please log in.');
     }
 
     public function render()

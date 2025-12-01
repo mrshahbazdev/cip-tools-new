@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\URL; // <-- Import karein
 use Stancl\Tenancy\Events\TenancyInitialized; // Import karein
 use Illuminate\Support\Facades\Event;
 use App\Models\User; // Import karein
-
+use App\Models\TenantUser;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -33,11 +33,11 @@ class AppServiceProvider extends ServiceProvider
             request()->server->set('HTTPS', 'on');
         }
             Event::listen(TenancyInitialized::class, function (TenancyInitialized $event) {
-            if (auth()->check()) {
-                // Agar user session mein hai, toh user object ko dobara load karo
-                // naye (tenant) database connection se.
-                auth()->setUser(User::find(auth()->id()));
-            }
-        });
+                // web guard ke 'provider' (users) ko 'tenant_users' model par set karein
+                config(['auth.providers.users.model' => TenantUser::class]);
+
+                // Ensure the web guard still uses the 'users' provider
+                config(['auth.guards.web.provider' => 'users']);
+            });
     }
 }
