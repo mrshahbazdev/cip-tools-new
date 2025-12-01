@@ -19,6 +19,10 @@ use Filament\Forms\Components\TextInput; // <-- Ye line add karein
 use Filament\Forms\Components\DatePicker; // <-- Ye line add karein
 use Filament\Forms\Components\Select; // <-- Ye line add karein
 use Filament\Resources\Resource;
+use Filament\Tables\Filters\Filter; // <-- Ye line bhi zaroori hai
+use Filament\Tables\Actions\DeleteAction; // <-- Ye line bhi zaroori hai
+use Filament\Tables\Actions\BulkActionGroup; // <-- Ye line bhi zaroori hai
+use Filament\Tables\Actions\DeleteBulkAction; // <-- Ye line bhi zaroori hai
 class TenantResource extends Resource
 {
     // Tenant model use ho raha hai
