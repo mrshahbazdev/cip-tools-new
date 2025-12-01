@@ -5,23 +5,24 @@ use App\Http\Controllers\Tenant\TenantAuthController;
 use App\Livewire\TenantUserRegistration;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
-// Tenants must run under this middleware to identify the domain
 Route::middleware(['web', InitializeTenancyByDomain::class])
     ->group(function () {
 
     // --- PUBLIC AUTH ROUTES ---
 
     // 1. LOGIN FORM ROUTE (GET)
+    // Use just 'login' since auth middleware looks for this name
     Route::get('/login', [TenantAuthController::class, 'showLoginForm'])
-        ->name('tenant.login')
-        ->name('login'); // <-- CRITICAL: Global Fallback Name
+        ->name('login'); // Global fallback name (for redirecting unauthed users)
 
-    // 2. LOGIN PROCESS ROUTE (POST)
-    Route::post('/login', [TenantAuthController::class, 'login']);
+    // 2. LOGIN PROCESS ROUTE (POST) - This is the form action
+    Route::post('/login', [TenantAuthController::class, 'login'])
+        ->name('tenant.login'); // <-- CRITICAL FIX: The form action name goes here!
 
-    // 3. REGISTRATION ROUTE
-    Route::get('/register', TenantUserRegistration::class)->name('tenant.register');
-
+    // 3. LOGOUT ROUTE
+    Route::post('/logout', [TenantAuthController::class, 'logout'])
+        ->name('tenant.logout')
+        ->name('logout');
 
     // 4. ROOT URL (Landing Page vs Dashboard Check)
     Route::get('/', function () {
@@ -30,7 +31,6 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
         }
         return view('tenant.landing');
     })->name('tenant.landing');
-
 
     // --- LOGGED IN ROUTES (Private) ---
     Route::middleware('auth')->group(function () {
@@ -41,8 +41,8 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
         })->name('tenant.dashboard');
 
         // 6. LOGOUT ROUTE
+        // Use just 'logout' since Laravel's default expects this
         Route::post('/logout', [TenantAuthController::class, 'logout'])
-            ->name('tenant.logout')
-            ->name('logout'); // <-- CRITICAL: Global Fallback Logout Name
+            ->name('logout');
     });
 });
