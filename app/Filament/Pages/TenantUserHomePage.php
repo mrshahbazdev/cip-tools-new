@@ -11,10 +11,10 @@ class TenantUserHomePage extends Page
     protected static string $view = 'filament.pages.tenant-user-home-page';
 
     // CRITICAL FIX: Ye page har authenticated user ko accessible hai
-    public static function canAccess(): bool
-    {
-        return auth()->check();
-    }
+    // public static function canAccess(): bool
+    // {
+    //     return auth()->check();
+    // }
 
     public function getTitle(): string
     {
