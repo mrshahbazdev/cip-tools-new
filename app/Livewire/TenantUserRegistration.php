@@ -47,7 +47,7 @@ class TenantUserRegistration extends Component
         ]);
 
         // Redirect to login page
-        return redirect()->to(url('/login'))->with('status', 'Registration successful! Please log in.');
+        return redirect()->to(url('/'))->with('status', 'Registration successful! Please log in.');
     }
 
     public function render()

@@ -18,7 +18,7 @@
             <span class="font-extrabold text-xl text-indigo-600 tracking-tight">
                 {{ strtoupper(tenant('id')) }}
             </span>
-            <a href="/login" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition">
+            <a href="/app-dashboard/login" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition">
                 Sign In
             </a>
         </div>
