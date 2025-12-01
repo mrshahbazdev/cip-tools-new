@@ -16,7 +16,7 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-            <input type="email" wire:model="email" placeholder="user@{{ $tenantId }}.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition">
+            <input type="email" wire:model="email" placeholder="you@company.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition">
             @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
 
