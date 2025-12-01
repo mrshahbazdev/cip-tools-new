@@ -16,11 +16,11 @@ class TenantUserHomePage extends Page
     //     return auth()->check();
     // }
 
-    public function getTitle(): string
-    {
-        // CRITICAL FIX: Pehle check karein ke user logged in hai ya nahi
-        $userName = auth()->check() ? auth()->user()->name : 'Guest';
+    // public function getTitle(): string
+    // {
+    //     // CRITICAL FIX: Pehle check karein ke user logged in hai ya nahi
+    //     $userName = auth()->check() ? auth()->user()->name : 'Guest';
 
-        return 'Welcome, ' . $userName . '!';
-    }
+    //     return 'Welcome, ' . $userName . '!';
+    // }
 }

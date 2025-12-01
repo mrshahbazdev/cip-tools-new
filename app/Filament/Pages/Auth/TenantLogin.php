@@ -39,7 +39,7 @@ class TenantLogin extends BaseLogin
     {
         // --- DEBUG INJECTION START ---
         // Final check: Agar ye Central DB aaya, to Login fail hoga
-        Log::warning('FINAL_AUTH_DEBUG: Active DB Connection: ' . DB::connection()->getDatabaseName());
+       // Log::warning('FINAL_AUTH_DEBUG: Active DB Connection: ' . DB::connection()->getDatabaseName());
         // --- DEBUG INJECTION END ---
 
         return [
