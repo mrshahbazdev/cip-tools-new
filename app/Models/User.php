@@ -46,9 +46,13 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_tenant_admin' => 'boolean',
         ];
     }
-
+    public function isTenantAdmin(): bool
+    {
+        return $this->is_tenant_admin;
+    }
     // 4. Ye Method Add Karein (Sabse Important)
     public function canAccessPanel(Panel $panel): bool
     {

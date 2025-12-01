@@ -13,4 +13,7 @@ Route::middleware([
     // Route::get('/', function () {
     //    return 'This will now be handled by Filament';
     // });
+    Route::get('/', function () {
+        return view('tenant.landing');
+    })->name('tenant.landing');
 });

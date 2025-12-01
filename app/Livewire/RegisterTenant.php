@@ -20,6 +20,7 @@ class RegisterTenant extends Component
         'subdomain' => 'required|alpha_dash|min:3|unique:domains,domain|unique:tenants,id',
         'email' => 'required|email',
         'password' => 'required|min:8',
+
     ];
 
     public function updatedSubdomain()
@@ -61,6 +62,7 @@ class RegisterTenant extends Component
             'name' => $this->company_name, // Filhal Company name hi User name hai
             'email' => $this->email,
             'password' => Hash::make($this->password), // Password encrypt karein
+            'is_tenant_admin' => true, // Ye user tenant admin hoga
         ]);
 
         tenancy()->end(); // Wapas Central context me aa jayen
