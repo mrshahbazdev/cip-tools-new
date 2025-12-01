@@ -52,8 +52,12 @@ class TenantUserRegistration extends Component
 
     public function render()
     {
-        // Naya layout file use karein
+        // Fix: render()->layout(null) ki jagah, sirf view ko return karein
         return view('livewire.tenant-user-registration')
-            ->layout('components.layouts.guest'); // <-- Naya layout set karein
+            ->with([
+                'tenantId' => tenant('id'), // Tenant ID ko view mein pass karein
+                'tenantName' => strtoupper(tenant('id')), // Naam ko capitalize karein
+            ])
+            ->layout('components.layouts.guest'); // Guest layout use karein
     }
 }
