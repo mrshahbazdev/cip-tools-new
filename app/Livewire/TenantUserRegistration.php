@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use App\Models\TenantUser; // CRITICAL: TenantUser model import karein
+use App\Models\Tenant;
 class TenantUserRegistration extends Component
 {
     public $name = '';
@@ -37,19 +38,31 @@ class TenantUserRegistration extends Component
     {
         $this->validate();
 
-        // CRITICAL FIX: TenantUser model use karein
-        $user = TenantUser::create([
+        // Hostname se tenant ID nikalna
+        $hostname = request()->getHost();
+
+        // Domain ke zariye tenant model dhoondein
+        $tenantModel = Tenant::query()->whereDomain($hostname)->first();
+
+        // Check karein ki tenant mila ya nahi
+        if (!$tenantModel) {
+            // Agar tenant nahi mila, to ghalti wapas bhej dein
+            throw new \Exception("Could not identify tenant for registration.");
+        }
+
+        // User creation (Scoped to Tenant)
+        User::create([
             'name' => $this->name,
             'email' => $this->email,
-            'password' => $this->password, // Password ab automatic hash ho jayega (Model Cast ki wajah se)
-            'tenant_id' => tenant('id'),
+            'password' => Hash::make($this->password),
+
+            // CRITICAL FIX: Tenant ID ko hardcoded string se set karein
+            'tenant_id' => $tenantModel->id,
+
             'is_tenant_admin' => false,
         ]);
 
-        // Optional: Agar aap chahte hain ki user register hote hi login ho jaye:
-        // auth()->login($user);
-        // return redirect()->route('tenant.dashboard');
-
+        // Redirect to login page
         return redirect()->route('tenant.login')->with('status', 'Registration successful! Please log in.');
     }
 
