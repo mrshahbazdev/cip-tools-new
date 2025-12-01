@@ -39,7 +39,7 @@ class AppPanelProvider extends PanelProvider
         if ($isCentral) {
             $panel->path('app'); // Central domain par ye /app par khulega
         } else {
-            $panel->path(''); // Tenant par ye /admin par khulega (Safer for loops)
+            $panel->path('app-dashboard'); // Tenant par ye /admin par khulega (Safer for loops)
 
             // Domain parameter error fix karne ke liye hardcode domain
             if (!app()->runningInConsole()) {
@@ -57,8 +57,7 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                //Pages\Dashboard::class,
-                \App\Filament\Pages\TenantDashboard::class,
+                Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

@@ -24,9 +24,9 @@ class TenantDashboard extends Page
     protected function authorizeAccess(): void
     {
         static::authorizeAccess();
-        if (! auth()->check() || ! auth()->user()->isTenantAdmin()) {
-            // Unhe seedha landing page par bhej do (Step 3.2 mein define hoga)
-            redirect()->to(url('/'))->send();
-        }
+        // if (! auth()->check() || ! auth()->user()->isTenantAdmin()) {
+        //     // Unhe seedha landing page par bhej do (Step 3.2 mein define hoga)
+        //     redirect()->to(url('/'))->send();
+        // }
     }
 }
