@@ -44,7 +44,7 @@
         </form>
         <p class="text-center text-sm text-gray-500">
             Don't have an account?
-            <a href="{{ route('tenant.register') }}" class="font-medium text-indigo-600 hover:text-indigo-500">Register here</a>
+            <a href="{{ url('/register') }}" class="font-medium text-indigo-600 hover:text-indigo-500">Register here</a>
         </p>
     </div>
 </body>
