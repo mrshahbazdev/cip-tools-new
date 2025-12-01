@@ -6,11 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Filament\Models\Contracts\FilamentUser; // <-- 1. Import Karein
-use Filament\Panel; // <-- 2. Import Karein
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant; // <-- New Import
 // 3. 'implements FilamentUser' add karein
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
     use HasFactory, Notifiable, BelongsToTenant; // <-- BelongsToTenant trait use karein
 

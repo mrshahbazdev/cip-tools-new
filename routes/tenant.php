@@ -1,22 +1,35 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use App\Http\Controllers\Tenant\TenantAuthController; // Naya controller use karenge
+use App\Livewire\TenantUserRegistration; // Existing Livewire component
 
-// Ab hum routes yahan nahi likhenge, Filament khud handle karega.
-// Lekin agar future me custom routes chahiye hon, to yahan likh sakte hain.
+// Tenant Routes must run under this middleware to identify the domain
+Route::middleware(['web', \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class])
+    ->group(function () {
 
-Route::middleware([
-    'web',
-    InitializeTenancyByDomain::class,
-])->group(function () {
-    // Route::get('/', function () {
-    //    return 'This will now be handled by Filament';
-    // });
+    // --- PUBLIC AUTH ROUTES ---
+    // User registration (Livewire component use karein)
+    Route::get('/register', TenantUserRegistration::class)->name('tenant.register');
+
+    // Custom Login Controller
+    Route::get('/login', [TenantAuthController::class, 'showLoginForm'])->name('tenant.login');
+    Route::post('/login', [TenantAuthController::class, 'login']);
+
+    // Tenant Root/Landing Page (Jahan sabse pehle user dekhega)
     Route::get('/', function () {
-        return view('tenant.landing');
+        if (auth()->check()) {
+            return view('tenant.dashboard'); // Agar logged in ho
+        }
+        return view('tenant.landing'); // Agar logged out ho
     })->name('tenant.landing');
-    Route::get('/register', \App\Livewire\TenantUserRegistration::class)
-    ->name('tenant.user.register');
-    Route::get('tenant-user-home-page', \App\Filament\Pages\TenantUserHomePage::class   )->name('filament.app.pages.tenant-user-home-page');
+
+    // --- LOGGED IN ROUTES (Private) ---
+    Route::middleware('auth')->group(function () {
+        Route::get('/dashboard', function () {
+             return view('tenant.dashboard'); // Simple Dashboard view
+        })->name('tenant.dashboard');
+
+        Route::post('/logout', [TenantAuthController::class, 'logout'])->name('tenant.logout');
+    });
 });
