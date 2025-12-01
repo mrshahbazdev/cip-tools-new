@@ -18,6 +18,9 @@ class TenantUserHomePage extends Page
 
     public function getTitle(): string
     {
-        return 'Welcome, ' . auth()->user()->name . '!';
+        // CRITICAL FIX: Pehle check karein ke user logged in hai ya nahi
+        $userName = auth()->check() ? auth()->user()->name : 'Guest';
+
+        return 'Welcome, ' . $userName . '!';
     }
 }
