@@ -18,7 +18,7 @@ class RegisterTenant extends Component
     protected $rules = [
         'company_name' => 'required|min:3',
         'subdomain' => 'required|alpha_dash|min:3|unique:domains,domain|unique:tenants,id',
-        'email' => ['required', 'email', Rule::unique('users')->where(fn ($query) => $query->where('tenant_id', $this->subdomain)),],
+        'email' => 'required|email',
         'password' => 'required|min:8',
     ];
 
@@ -29,6 +29,16 @@ class RegisterTenant extends Component
 
     public function register()
     {
+        $this->validate([
+            'email' => [
+                'required',
+                'email',
+                // User ko same email se dubara register hone se rokein, jab tak tenant_id alag na ho
+                Rule::unique('users')->where(function ($query) {
+                    return $query->where('tenant_id', $this->subdomain);
+                }),
+            ],
+        ]);
         $this->validate();
 
         // 1. Create Tenant
