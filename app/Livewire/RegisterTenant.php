@@ -59,7 +59,7 @@ class RegisterTenant extends Component
         $protocol = request()->secure() ? 'https://' : 'http://';
         $domain = $this->subdomain . '.cip-tools.de';
 
-        return redirect()->to($protocol . $domain . '/admin/login'); // Filament ka login path
+        return redirect()->to($protocol . $domain . '/login'); // Filament ka login path
     }
 
     public function render()
