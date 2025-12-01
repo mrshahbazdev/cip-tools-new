@@ -22,7 +22,11 @@ class TenantLogin extends BaseLogin
             ])
             ->statePath('data');
     }
-
+    protected function getRedirectUrl(): string
+    {
+        // CRITICAL FIX: Explicitly redirect to the Tenant User Home Page
+        return \App\Filament\Pages\TenantUserHomePage::getUrl();
+    }
     // Override the credential fetching method to inject the debugger (Existing logic)
     protected function getCredentialsFromFormData(array $data): array
     {
