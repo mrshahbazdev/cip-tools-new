@@ -7,7 +7,7 @@ use App\Models\Tenant;
 use App\Models\User; // <-- Ye User Model import karna zaroori hai
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Validation\Rule;
 class RegisterTenant extends Component
 {
     public $company_name = '';
@@ -18,7 +18,7 @@ class RegisterTenant extends Component
     protected $rules = [
         'company_name' => 'required|min:3',
         'subdomain' => 'required|alpha_dash|min:3|unique:domains,domain|unique:tenants,id',
-        'email' => 'required|email',
+        'email' => ['required', 'email', Rule::unique('users')->where(fn ($query) => $query->where('tenant_id', $this->subdomain)),],
         'password' => 'required|min:8',
     ];
 
