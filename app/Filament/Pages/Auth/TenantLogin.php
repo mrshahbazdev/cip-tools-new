@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;  // Added for debugging
 class TenantLogin extends BaseLogin
 {
     // Override the form method to add the debug check
+    protected function successfulAuthentication(): void
+    {
+        // Seedha root path ('/') par redirect karein
+        $this->redirect('/');
+    }
     public function form(Form $form): Form
     {
         return $form
