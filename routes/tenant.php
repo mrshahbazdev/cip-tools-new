@@ -8,45 +8,42 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 Route::middleware(['web', InitializeTenancyByDomain::class])
     ->group(function () {
 
-    // --- PUBLIC AUTH ROUTES ---
+    // --- PUBLIC ROUTES (Unauthenticated) ---
 
-    // 1. LOGIN FORM ROUTE (GET)
-    // Use just 'login' since auth middleware looks for this name
-    Route::get('/login', [TenantAuthController::class, 'showLoginForm'])
-        ->name('login'); // Global fallback name (for redirecting unauthed users)
-
-    // 2. LOGIN PROCESS ROUTE (POST) - This is the form action
-    Route::post('/login', [TenantAuthController::class, 'login'])
-        ->name('tenant.login'); // <-- CRITICAL FIX: The form action name goes here!
-
-    // 3. LOGOUT ROUTE
-    Route::post('/logout', [TenantAuthController::class, 'logout'])
-        ->name('tenant.logout')
-        ->name('logout');
-
-    // 4. ROOT URL (Landing Page vs Dashboard Check)
+    // 1. LANDING PAGE (Public)
     Route::get('/', function () {
-        // CRITICAL FIX: Public Landing Page dikhao
         return view('tenant.landing');
     })->name('tenant.landing');
 
-    // --- LOGGED IN ROUTES (Private) ---
-    Route::middleware('auth')->group(function () {
-        Route::get('/', function () {
-            return redirect()->route('tenant.dashboard');
-        });
+    // 2. LOGIN FORM (GET)
+    Route::get('/login', [TenantAuthController::class, 'showLoginForm'])
+        ->name('login')
+        ->middleware('guest'); // Only guests can access login page
 
-        // 4. REGISTRATION FORM ROUTE
-        Route::get('/register', TenantUserRegistration::class)
-            ->name('tenant.register');  // <-- CRITICAL FIX: The form action name goes here!
-        // 5. DASHBOARD ROUTE
+    // 3. LOGIN PROCESS (POST)
+    Route::post('/login', [TenantAuthController::class, 'login'])
+        ->name('login.post');
+
+    // 4. REGISTRATION FORM (GET)
+    Route::get('/register', TenantUserRegistration::class)
+        ->name('register')
+        ->middleware('guest'); // Only guests can access registration
+
+    // --- PROTECTED ROUTES (Require Authentication) ---
+    Route::middleware('auth')->group(function () {
+
+        // 5. DASHBOARD
         Route::get('/dashboard', function () {
             return view('tenant.dashboard');
-        })->name('tenant.dashboard');
+        })->name('dashboard');
 
-        // 6. LOGOUT ROUTE
-        // Use just 'logout' since Laravel's default expects this
+        // 6. LOGOUT
         Route::post('/logout', [TenantAuthController::class, 'logout'])
             ->name('logout');
+
+        // 7. Redirect root to dashboard when logged in
+        Route::get('/', function () {
+            return redirect()->route('dashboard');
+        });
     });
 });
