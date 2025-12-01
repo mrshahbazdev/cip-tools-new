@@ -42,27 +42,23 @@ class TenantUserRegistration extends Component
         // Hostname se tenant ID nikalna
         $hostname = request()->getHost();
 
-        // CRITICAL FIX: Hostname se Domain record dhoondein
+        // Domain ke zariye Tenant record dhoondein
         $domainRecord = Domain::where('domain', $hostname)->first();
 
-        // Check karein ki tenant mila ya nahi
         if (!$domainRecord) {
-            // Agar domain record nahi mila, to ghalti wapas bhej dein
             throw new \Exception("Could not identify project for registration on domain: " . $hostname);
         }
 
-        // Ab Domain record se tenant model fetch karein
         $tenantModel = $domainRecord->tenant;
 
-        // User creation (Scoped to Tenant)
-        User::create([
+        // User creation (Scoped to TenantUser table)
+        // CRITICAL FIX: User::create ki jagah TenantUser::create use karein
+        TenantUser::create([
             'name' => $this->name,
             'email' => $this->email,
             'password' => Hash::make($this->password),
 
-            // CRITICAL FIX: Tenant ID ko Domain Record se set karein
             'tenant_id' => $tenantModel->id,
-
             'is_tenant_admin' => false,
         ]);
 
