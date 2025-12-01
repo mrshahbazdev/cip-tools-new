@@ -51,6 +51,7 @@ class AppPanelProvider extends PanelProvider
             ->default()
             ->id('app')
             ->login(TenantLogin::class)
+            ->path('')
             ->homeUrl(fn () => \App\Filament\Pages\TenantUserHomePage::getUrl())
             ->colors([
                 'primary' => Color::Amber,
