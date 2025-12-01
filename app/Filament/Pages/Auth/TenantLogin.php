@@ -18,7 +18,7 @@ class TenantLogin extends BaseLogin
                 // Filament components are now accessed directly via the trait/class
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
-                $this->getRememberMeFormComponent(), // Ye method ab sahi se inherit hoga
+                //$this->getRememberMeFormComponent(), // Ye method ab sahi se inherit hoga
             ])
             ->statePath('data');
     }
