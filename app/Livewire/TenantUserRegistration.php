@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use App\Models\TenantUser; // CRITICAL: TenantUser model import karein
 use App\Models\Tenant;
+use Stancl\Tenancy\Database\Models\Domain;
 class TenantUserRegistration extends Component
 {
     public $name = '';
@@ -41,14 +42,17 @@ class TenantUserRegistration extends Component
         // Hostname se tenant ID nikalna
         $hostname = request()->getHost();
 
-        // Domain ke zariye tenant model dhoondein
-        $tenantModel = Tenant::query()->whereDomain($hostname)->first();
+        // CRITICAL FIX: Hostname se Domain record dhoondein
+        $domainRecord = Domain::where('domain', $hostname)->first();
 
         // Check karein ki tenant mila ya nahi
-        if (!$tenantModel) {
-            // Agar tenant nahi mila, to ghalti wapas bhej dein
-            throw new \Exception("Could not identify tenant for registration.");
+        if (!$domainRecord) {
+            // Agar domain record nahi mila, to ghalti wapas bhej dein
+            throw new \Exception("Could not identify project for registration on domain: " . $hostname);
         }
+
+        // Ab Domain record se tenant model fetch karein
+        $tenantModel = $domainRecord->tenant;
 
         // User creation (Scoped to Tenant)
         User::create([
@@ -56,7 +60,7 @@ class TenantUserRegistration extends Component
             'email' => $this->email,
             'password' => Hash::make($this->password),
 
-            // CRITICAL FIX: Tenant ID ko hardcoded string se set karein
+            // CRITICAL FIX: Tenant ID ko Domain Record se set karein
             'tenant_id' => $tenantModel->id,
 
             'is_tenant_admin' => false,
