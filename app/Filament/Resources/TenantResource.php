@@ -3,19 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TenantResource\Pages;
+// ... baaki imports ...
 use App\Models\Tenant;
+use Filament\Forms; // <-- Ye line missing thi ya ghalat jagah thi
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
+use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Columns\TextColumn; // <-- Ye line bhi zaroori hai
+use Filament\Tables\Actions\Action; // <-- Ye line bhi zaroori hai
+use Filament\Tables\Actions\EditAction; // <-- Ye line bhi zaroori hai
 
+// In teen lines ki wajah se error aa raha tha:
+use Filament\Forms\Components\TextInput; // <-- Ye line add karein
+use Filament\Forms\Components\DatePicker; // <-- Ye line add karein
+use Filament\Forms\Components\Select; // <-- Ye line add karein
 class TenantResource extends Resource
 {
     // Tenant model use ho raha hai
@@ -35,11 +37,12 @@ class TenantResource extends Resource
     {
         return $form
             ->schema([
-                // Aap yahan manual editing ke liye fields add kar sakte hain
+                // Yahan hum Forms\Components\TextInput hi rakhenge
                 Forms\Components\TextInput::make('id')
                     ->label('Tenant ID')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->disabled(), // ID ko edit hone se rok dein
 
                 Forms\Components\DatePicker::make('trial_ends_at')
                     ->label('Trial End Date'),
