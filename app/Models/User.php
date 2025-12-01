@@ -45,6 +45,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -52,5 +53,10 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return true; // Sabko allow kar rahe hain (Future me logic laga sakte hain)
+    }
+    public function isSuperAdmin(): bool
+    {
+        // Ab ye direct database column check karega
+        return $this->is_admin;
     }
 }

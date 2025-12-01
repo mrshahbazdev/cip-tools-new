@@ -69,7 +69,7 @@ class AppPanelProvider extends PanelProvider
                 // Tenancy Middleware ko sabse upar rakhein
                 InitializeTenancyByDomain::class,
                 PreventAccessFromCentralDomains::class,
-
+                \App\Http\Middleware\PreventSuperAdminAccess::class,
                 // Phir Standard Middleware aayenge
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
