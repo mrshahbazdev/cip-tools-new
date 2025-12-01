@@ -52,6 +52,8 @@ class TenantUserRegistration extends Component
 
     public function render()
     {
-        return view('livewire.tenant-user-registration');
+        // Sirf view ko render karein, koi layout use na karein
+        return view('livewire.tenant-user-registration')
+            ->layout(null);
     }
 }
