@@ -22,6 +22,8 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use Illuminate\Support\Facades\Blade;
 use Filament\View\PanelsRenderHook;
 use App\Filament\Pages\Auth\TenantLogin;
+use App\Http\Middleware\PreventSuperAdminAccess;
+use App\Filament\Pages\TenantUserHomePage; // Naya Safe Landing Page
 
 class AppPanelProvider extends PanelProvider
 {
@@ -37,31 +39,26 @@ class AppPanelProvider extends PanelProvider
 
         // 2. Path Logic Set Karein
         if ($isCentral) {
-            $panel->path('app'); // Central domain par ye /app par khulega
+            $path = 'app'; // Central domain par ye /app par khulega
         } else {
-            $panel->path('app-dashboard'); // Tenant par ye /admin par khulega (Safer for loops)
-
-            // Domain parameter error fix karne ke liye hardcode domain
-            if (!app()->runningInConsole()) {
-                $panel->domain(request()->getHost());
-            }
+            $path = ''; // Tenant domain par ye / (root) par khulega (Final stable path)
         }
 
         return $panel
             ->default()
             ->id('app')
+            ->path($path) // Path yahan set hoga
             ->login(TenantLogin::class)
-            ->path('')
-            ->homeUrl(fn () => \App\Filament\Pages\TenantUserHomePage::getUrl())
+            // CRITICAL FIX: homeUrl ko Lazy Load karna (fn () => ...)
+            ->homeUrl(fn () => TenantUserHomePage::getUrl())
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
-                \App\Filament\Pages\TenantUserHomePage::class,
-                \App\Filament\Pages\TenantDashboard::class,
+                \App\Filament\Pages\TenantUserHomePage::class, // Safe Landing Page (Sabse Pehle)
+                \App\Filament\Pages\TenantDashboard::class, // Restricted Admin Page
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -70,10 +67,10 @@ class AppPanelProvider extends PanelProvider
             ])
             ->middleware([
                 // --- MOST IMPORTANT FIX FOR REDIRECT LOOP ---
-                // Tenancy Middleware ko sabse upar rakhein
                 InitializeTenancyByDomain::class,
                 PreventAccessFromCentralDomains::class,
-                \App\Http\Middleware\PreventSuperAdminAccess::class,
+                \App\Http\Middleware\PreventSuperAdminAccess::class, // Super Admin Block
+
                 // Phir Standard Middleware aayenge
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
