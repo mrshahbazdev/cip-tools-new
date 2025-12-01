@@ -36,7 +36,16 @@ class TenantResource extends Resource
 
     // Resource ki group navigation
     protected static ?string $navigationGroup = 'Tenant Management';
+    public static function canViewAny(): bool
+    {
+        // 1. User logged in hona chahiye
+        if (! auth()->check()) {
+            return false;
+        }
 
+        // 2. User ka isSuperAdmin() method TRUE hona chahiye (jo hamare naye column ko check karta hai)
+        return auth()->user()->isSuperAdmin();
+    }
     // Form ka istemal zaroori nahi hai kyunki creation Livewire se ho raha hai
     public static function form(Form $form): Form
     {
