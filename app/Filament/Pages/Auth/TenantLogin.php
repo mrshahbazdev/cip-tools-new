@@ -5,29 +5,29 @@ namespace App\Filament\Pages\Auth;
 use Closure;
 use Filament\Forms\Form;
 use Filament\Pages\Auth\Login as BaseLogin;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log; // Added for debugging
+use Illuminate\Support\Facades\DB;  // Added for debugging
 
 class TenantLogin extends BaseLogin
 {
-    // Override the form method to get inputs and call the parent
+    // Override the form method to add the debug check
     public function form(Form $form): Form
     {
         return $form
             ->schema([
+                // Filament components are now accessed directly via the trait/class
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
-                $this->getRememberMeFormComponent(),
+                $this->getRememberMeFormComponent(), // Ye method ab sahi se inherit hoga
             ])
             ->statePath('data');
     }
 
-    // Override the credential fetching method to inject the debugger
+    // Override the credential fetching method to inject the debugger (Existing logic)
     protected function getCredentialsFromFormData(array $data): array
     {
         // --- DEBUG INJECTION START ---
-        // Yahan hum dekhenge ki Auth attempt se pehle DB connection kya hai
+        // Final check: Agar ye Central DB aaya, to Login fail hoga
         Log::warning('FINAL_AUTH_DEBUG: Active DB Connection: ' . DB::connection()->getDatabaseName());
         // --- DEBUG INJECTION END ---
 
