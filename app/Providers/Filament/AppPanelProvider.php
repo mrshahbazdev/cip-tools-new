@@ -21,7 +21,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use Illuminate\Support\Facades\Blade;
 use Filament\View\PanelsRenderHook;
-
+use App\Filament\Pages\Auth\TenantLogin;
 
 class AppPanelProvider extends PanelProvider
 {
@@ -50,7 +50,7 @@ class AppPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('app')
-            ->login()
+            ->login(TenantLogin::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
