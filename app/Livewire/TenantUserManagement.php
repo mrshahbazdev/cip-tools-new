@@ -3,54 +3,72 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Livewire\WithPagination; // Pagination ke liye
-use App\Models\TenantUser; // TenantUser model use karein
+use Livewire\WithPagination;
+use App\Models\TenantUser;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 
 class TenantUserManagement extends Component
 {
-    use WithPagination; // Pagination ke liye is trait ko use karein
+    use WithPagination;
     
-    // Form properties (Edit/Add ke liye)
-    public $name, $email, $password, $is_tenant_admin;
+    // --- PROPERTIES ---
+    public $name, $email, $password;
     public $userId;
     public $isModalOpen = false;
+    public $currentTenantId; // Tenant ID ko state mein save karne ke liye
 
-    // Rules for adding/editing users
+    // --- LIFECYCLE HOOKS ---
+
+    // Component mount hone par tenant ID aur access check karein
+    public function mount()
+    {
+        // CRITICAL FIX: Tenant ID ko state mein save karein
+        $this->currentTenantId = tenant('id'); 
+        $this->authorizeAccess(); 
+    }
+
+    // --- VALIDATION RULES ---
+
     protected function rules()
     {
-        // CRITICAL FIX: Login successful hai, toh Auth user se tenant_id uthao
-        $tenantId = auth()->user()->tenant_id; 
+        // Tenant ID ko state se uthayein
+        $tenantId = $this->currentTenantId; 
 
         return [
             'name' => 'required|min:3',
             'email' => [
                 'required',
                 'email',
-                // Rule::unique('tenant_users') check karein
-                \Illuminate\Validation\Rule::unique('tenant_users')->where(function ($query) use ($tenantId) {
-                    // Email ki uniqueness sirf current tenant ID ke saath check hogi.
+                // Scoped Unique Check: Email sirf current tenant ID ke saath unique hona chahiye
+                Rule::unique('tenant_users')->where(function ($query) use ($tenantId) {
                     return $query->where('tenant_id', $tenantId);
-                })->ignore($this->userId), // Edit karte waqt current user ko ignore karein
+                })->ignore($this->userId), // Edit mode mein current user ko ignore karein
             ],
-            'password' => 'nullable|min:6',
+            // Password sirf naye user ke liye zaroori hai
+            'password' => $this->userId ? 'nullable|min:6' : 'required|min:6',
         ];
     }
     
+    // --- AUTHORIZATION ---
+
     // CRITICAL: Sirf Tenant Admin ko hi is page ka access ho
     public function authorizeAccess()
     {
+        // Ye check karta hai ki user logged in hai aur isTenantAdmin hai
         if (! auth()->check() || ! auth()->user()->isTenantAdmin()) {
             abort(403, 'You are not authorized to manage users in this workspace.');
         }
     }
 
-   public function render()
+    // --- CRUD ACTIONS ---
+
+    public function render()
     {
         $this->authorizeAccess();
 
-        $tenantId = tenant('id');
+        $tenantId = $this->currentTenantId;
         
         $users = TenantUser::where('tenant_id', $tenantId)
                             ->orderBy('is_tenant_admin', 'desc')
@@ -58,30 +76,26 @@ class TenantUserManagement extends Component
 
         return view('livewire.tenant-user-management', [
             'users' => $users,
-            'currentTenantId' => $tenantId,
-        ])->layout('components.layouts.guest'); // <--- CRITICAL FIX: Explicitly set the existing guest layout
+        ])->layout('components.layouts.guest');
     }
 
-    // New User Add/Edit Modal Open karna
     public function create()
     {
-        $this->authorizeAccess(); // <-- ADDED
+        $this->authorizeAccess();
         $this->resetInput();
         $this->isModalOpen = true;
     }
-
-    // User Delete karna
+    
     public function delete($id)
     {
-        $this->authorizeAccess(); // <-- ADDED
+        $this->authorizeAccess();
         TenantUser::find($id)->delete();
         session()->flash('message', 'User deleted successfully.');
     }
-
-    // Edit ke liye data load karna
+    
     public function edit($id)
     {
-        $this->authorizeAccess(); // <-- ADDED
+        $this->authorizeAccess();
         $user = TenantUser::findOrFail($id);
         $this->userId = $id;
         $this->name = $user->name;
@@ -89,40 +103,37 @@ class TenantUserManagement extends Component
         $this->isModalOpen = true;
     }
 
-    // Save/Update logic
-    // app/Livewire/TenantUserManagement.php
-
+    // FINAL SAVE/UPDATE LOGIC
     public function store()
     {
         $this->authorizeAccess();
-
-        // Naya user banane ke liye, validation rules ko dynamicly adjust karna hoga
-        $rules = $this->rules(); // Correct validation rules fetch karein
-
-        $data = $this->validate($rules); // Validation run karein
-
-        // --- CRITICAL FIX START ---
-        // 1. Tenant ID ko data array mein inject karein
-        $data['tenant_id'] = tenant('id');
         
-        // 2. is_tenant_admin flag set karein (Naya user = false)
-        // Hum sirf original project owner ko admin rakhhenge.
-        $data['is_tenant_admin'] = false; 
-        // --- CRITICAL FIX END ---
+        // Validation run karein
+        $validatedData = $this->validate(); 
+        
+        // --- DATA INJECTION & CLEANUP ---
+        
+        // 1. Tenant ID ko data array mein inject karein
+        $validatedData['tenant_id'] = $this->currentTenantId; 
+        
+        // 2. is_tenant_admin flag set karein (Naya user default false)
+        // Note: Owner ka flag alag se set hota hai, yahan hum naye users bana rahe hain
+        $validatedData['is_tenant_admin'] = false; 
         
         // Password handling
-        if (empty($data['password'])) {
-            unset($data['password']);
+        if (empty($validatedData['password'])) {
+            // Edit mode mein password na hone par usay array se hata dein
+            unset($validatedData['password']); 
         } else {
-            $data['password'] = Hash::make($data['password']);
+            $validatedData['password'] = Hash::make($validatedData['password']);
         }
 
         if ($this->userId) {
-            // Edit mode (password field ko ignore karein agar khali ho)
-            TenantUser::find($this->userId)->update($data);
+            // Edit mode
+            TenantUser::find($this->userId)->update($validatedData);
         } else {
             // Create mode
-            TenantUser::create($data);
+            TenantUser::create($validatedData);
         }
 
         session()->flash('message', 'User saved successfully.');
