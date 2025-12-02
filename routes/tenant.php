@@ -17,17 +17,15 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
 
     // 2. LOGIN FORM (GET)
     Route::get('/login', [TenantAuthController::class, 'showLoginForm'])
-        ->name('login')
-        ->middleware('guest'); // Only guests can access login page
+        ->name('login');
 
     // 3. LOGIN PROCESS (POST)
     Route::post('/login', [TenantAuthController::class, 'login'])
         ->name('login.post');
 
-    // 4. REGISTRATION FORM (GET)
+    // 4. REGISTRATION FORM (GET) - Make this public if users can register
     Route::get('/register', TenantUserRegistration::class)
-        ->name('register')
-        ->middleware('guest'); // Only guests can access registration
+        ->name('register');
 
     // --- PROTECTED ROUTES (Require Authentication) ---
     Route::middleware('auth')->group(function () {

@@ -4,18 +4,13 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; // Authentication ke liye
 
 class TenantAuthController extends Controller
 {
     // 1. LOGIN FORM DIKHANA
     public function showLoginForm()
     {
-        // Agar user already authenticated hai to dashboard par redirect karein
-        if (Auth::check()) {
-            return redirect()->route('dashboard'); // Changed from tenant.dashboard
-        }
-
         // Login view ko load karein
         return view('tenant.login');
     }
@@ -35,8 +30,7 @@ class TenantAuthController extends Controller
             $request->session()->regenerate();
 
             // Login successful hone par dashboard par redirect karein
-            // FIX: 'dashboard' route use karein, 'tenant.dashboard' nahi
-            return redirect()->route('dashboard');
+            return redirect()->route('tenant.dashboard');
         }
 
         // Login fail hone par error ke saath wapas bhejein
@@ -54,7 +48,6 @@ class TenantAuthController extends Controller
         $request->session()->regenerateToken();
 
         // Logout ke baad wapas landing page par bhej dein
-        // FIX: 'tenant.landing' route use karein
         return redirect()->route('tenant.landing');
     }
 }
