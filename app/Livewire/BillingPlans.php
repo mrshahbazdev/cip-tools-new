@@ -9,10 +9,12 @@ class BillingPlans extends Component
 {
     public $plans;
     public $selectedPlanId = null;
+    public $currentTenantId;
     // Component mount hone par plans ko fetch karein
     public function mount()
     {
         $this->plans = MembershipPlan::orderBy('price')->get();
+        $this->currentTenantId = tenant('id');
     }
     
     // Upgrade action (Abhi ye sirf placeholder hai)
