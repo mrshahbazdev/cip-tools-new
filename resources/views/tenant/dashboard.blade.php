@@ -17,7 +17,7 @@
             This is your workspace, served from the main database with tenant ID: <span class="font-mono text-xs">{{ tenant('id') }}</span>
         </p>
 
-        <form method="POST" action="{{ route('tenant.logout') }}" class="mt-6">
+        <form method="POST" action="{{ url('/logout') }}" class="mt-6">
             @csrf
             <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition">
                 Logout
