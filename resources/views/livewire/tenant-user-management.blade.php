@@ -172,8 +172,8 @@
                                 </button>
                                 
                                 @if(!$user->is_tenant_admin)
-                                    <button wire:click="delete({{ $user->id }})" 
-                                        onclick="return confirm('Are you sure you want to remove {{ $user->name }} from the workspace?')"
+                                    <!-- Delete Button - Show Confirmation Modal -->
+                                    <button wire:click="confirmDelete({{ $user->id }})" 
                                         class="text-gray-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all duration-200 group"
                                         title="Remove User">
                                         <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +198,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Add/Edit Modal -->
 @if($isModalOpen)
     <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200">
@@ -311,6 +311,76 @@
     </div>
 @endif
 
+<!-- Delete Confirmation Modal -->
+@if($showDeleteModal)
+    <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Remove Team Member</h3>
+                        <p class="text-sm text-gray-500 mt-1">Confirm this action</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6">
+                <div class="flex items-center gap-4 mb-6 p-4 bg-red-50 rounded-xl border border-red-100">
+                    <div class="h-12 w-12 rounded-full bg-gradient-to-r from-red-100 to-pink-100 flex items-center justify-center flex-shrink-0">
+                        <span class="font-semibold text-red-700 text-lg">
+                            {{ substr($deleteUserName ?? '', 0, 1) }}
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900">{{ $deleteUserName ?? '' }}</h4>
+                        <p class="text-sm text-gray-600">{{ $deleteUserEmail ?? '' }}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <p class="text-gray-700">
+                        Are you sure you want to remove <span class="font-semibold">{{ $deleteUserName ?? '' }}</span> from the workspace?
+                    </p>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <p class="text-sm text-yellow-800 font-medium">Warning</p>
+                                <p class="text-sm text-yellow-700 mt-1">
+                                    This action cannot be undone. The user will lose access to this workspace.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-gray-200 bg-gray-50">
+                <div class="flex justify-end gap-3">
+                    <button wire:click="$set('showDeleteModal', false)" 
+                        class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium">
+                        Cancel
+                    </button>
+                    <button wire:click="deleteConfirmed" 
+                        class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md">
+                        Remove User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 <style>
     .animate-fade-in {
         animation: fadeIn 0.3s ease-in-out;
@@ -328,13 +398,27 @@
         const passwordInput = document.querySelector('[wire\\:model="password"]');
         const eyeIcon = document.getElementById('eye-icon');
         
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
-        } else {
-            passwordInput.type = 'password';
-            eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+        if (passwordInput && eyeIcon) {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+            }
         }
     }
+
+    // Prevent modal from closing when clicking inside modal content
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteModal = document.querySelector('[x-show="$showDeleteModal"]');
+        if (deleteModal) {
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    Livewire.emit('cancelDelete');
+                }
+            });
+        }
+    });
 </script>
 </div>
