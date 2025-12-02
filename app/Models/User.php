@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail; // Ye optional hai
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant; // <-- New Import
-// 3. 'implements FilamentUser' add karein
-class User extends Authenticatable
+use Filament\Models\Contracts\FilamentUser; // <-- Filament Interface
+use Filament\Panel; // <-- Filament Panel class
+
+// NOTE: BelongsToTenant trait yahan nahi chahiye, kyunki ye Central User hai.
+
+class User extends Authenticatable implements FilamentUser // Implement Filament Access
 {
-    use HasFactory, Notifiable, BelongsToTenant; // <-- BelongsToTenant trait use karein
+    use HasFactory, Notifiable; // BelongsToTenant trait removed
 
     /**
      * The attributes that are mass assignable.
@@ -21,44 +23,48 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin', // For Super Admin
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * The attributes that should be cast.
      *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * @var array<string, string>
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean',
-            'is_tenant_admin' => 'boolean',
+            'is_admin' => 'boolean', // Super Admin Flag
+            // 'is_tenant_admin' cast yahan nahi chahiye
         ];
     }
-    public function isTenantAdmin()
-    {
-        return (bool) $this->is_tenant_admin;
-    }
-    // 4. Ye Method Add Karein (Sabse Important)
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true; // Sabko allow kar rahe hain (Future me logic laga sakte hain)
-    }
+
+    // ----------------------------------------------------
+    // FINAL AUTHORIZATION METHODS
+    // ----------------------------------------------------
+
+    /**
+     * Checks if the user is the Super Admin.
+     */
     public function isSuperAdmin(): bool
     {
-        // Ab ye direct database column check karega
+        // Central Admin user is identified by this column
         return $this->is_admin;
+    }
+    
+    /**
+     * Filament access check.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // CRITICAL FIX: Sirf Admin panel ko access do agar is_admin TRUE hai.
+        if ($panel->getId() === 'admin') {
+            return $this->isSuperAdmin(); 
+        }
+        
+        // Central users ko kisi aur panel ka access nahi hai (Tenant Panel se rok diya hai)
+        return false; 
     }
 }
