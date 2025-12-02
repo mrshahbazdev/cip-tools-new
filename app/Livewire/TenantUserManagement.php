@@ -20,19 +20,21 @@ class TenantUserManagement extends Component
     // Rules for adding/editing users
     protected function rules()
     {
-        $tenantId = tenant('id');
-        
+        // CRITICAL FIX: Login successful hai, toh Auth user se tenant_id uthao
+        $tenantId = auth()->user()->tenant_id; 
+
         return [
             'name' => 'required|min:3',
             'email' => [
                 'required',
                 'email',
-                // Unique check (current user ko ignore karein agar edit ho raha hai)
-                Rule::unique('tenant_users')->where(function ($query) use ($tenantId) {
+                // Rule::unique('tenant_users') check karein
+                \Illuminate\Validation\Rule::unique('tenant_users')->where(function ($query) use ($tenantId) {
+                    // Email ki uniqueness sirf current tenant ID ke saath check hogi.
                     return $query->where('tenant_id', $tenantId);
-                })->ignore($this->userId),
+                })->ignore($this->userId), // Edit karte waqt current user ko ignore karein
             ],
-            'password' => 'nullable|min:6', // Password optional hai agar edit kar rahe hon
+            'password' => 'nullable|min:6',
         ];
     }
     
