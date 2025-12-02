@@ -36,6 +36,9 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
         return view('tenant.user-dashboard'); 
     })->name('tenant.dashboard');
     Route::get('/users', \App\Livewire\TenantUserManagement::class)->name('tenant.users.manage');
+    Route::get('/billing', function () {
+        return view('tenant.billing');
+    })->name('tenant.billing');
     // 3. LOGOUT ROUTE (No Auth Middleware, just POST)
     Route::post('/logout', [TenantAuthController::class, 'logout'])->name('logout'); 
 });

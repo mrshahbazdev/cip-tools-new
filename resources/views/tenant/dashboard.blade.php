@@ -48,13 +48,40 @@
                     </p>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
-                    <p class="text-sm font-medium text-gray-500">Subscription Status</p>
-                    <p class="text-xl font-bold text-green-500 mt-2">
-                        @php $status = \App\Models\Tenant::find(tenant('id'))->plan_status ?? 'N/A'; @endphp
-                        <span class="text-2xl uppercase {{ $status === 'trial' ? 'text-orange-500' : 'text-green-600' }}">{{ $status }}</span>
-                    </p>
-                </div>
+                @php
+                        // Tenant record ko fresh load karein
+                        $currentTenant = \App\Models\Tenant::find(tenant('id'));
+                        $trialEndDate = $currentTenant->trial_ends_at;
+                        $daysRemaining = $trialEndDate ? now()->diffInDays($trialEndDate, false) : 0;
+                        
+                        // Status determine karein
+                        if ($currentTenant->plan_status === 'active') {
+                            $statusText = 'Active Plan';
+                            $statusColor = 'text-green-600';
+                            $remainingText = 'Unlimited Access';
+                        } elseif ($daysRemaining > 0) {
+                            $statusText = 'Trial Period';
+                            $statusColor = 'text-orange-500';
+                            $remainingText = $daysRemaining . ' days remaining';
+                        } else {
+                            $statusText = 'Trial Expired';
+                            $statusColor = 'text-red-600';
+                            $remainingText = 'Access Blocked';
+                        }
+                    @endphp
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+                            <p class="text-sm font-medium text-gray-500">Subscription Status</p>
+                            <p class="text-xl font-bold {{ $statusColor }} mt-1">{{ $statusText }}</p>
+                            <p class="text-md text-gray-700 mt-2">{{ $remainingText }}</p>
+                            @if ($currentTenant->plan_status !== 'active')
+                                <a href="{{ route('tenant.billing') }}" class="mt-3 inline-flex text-indigo-600 hover:text-indigo-800 text-sm font-medium transition">
+                                    Upgrade Now &rarr;
+                                </a>
+                            @endif
+                        </div>
+                    </div>
 
                 <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
                     <p class="text-sm font-medium text-gray-500">Storage Used</p>
@@ -72,7 +99,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     
                     <a href="/users" class="flex items-center justify-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition duration-150">
-                        <span class="text-indigo-700 font-medium">Manage Users (Pending)</span>
+                        <span class="text-indigo-700 font-medium">Manage Users <span>
                     </a>
                     
                     <a href="/settings" class="flex items-center justify-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition duration-150">
