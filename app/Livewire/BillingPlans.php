@@ -1,5 +1,3 @@
-// app/Livewire/BillingPlans.php
-
 <?php
 
 namespace App\Livewire;
