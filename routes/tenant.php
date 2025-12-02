@@ -26,11 +26,13 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
 
     // 2. DASHBOARD ROUTE (Protected by Auth Check)
     Route::get('/dashboard', function () {
-        // CRITICAL FIX: Agar user authenticated nahi hai, toh seedha login par bhej do.
-        if (!auth()->check()) {
-            return redirect()->route('login');
+        // CRITICAL FIX: Agar user Tenant Admin nahi hai, toh use simple page par bhej do
+        if (! auth()->user()->isTenantAdmin()) {
+            // Assume /landing route is safe for all logged-in users
+            return redirect()->route('tenant.landing'); 
         }
-        return view('tenant.dashboard');
+        
+        return view('tenant.dashboard'); // Tenant Admin ko full dashboard dikhao
     })->name('tenant.dashboard');
     
     // 3. LOGOUT ROUTE (No Auth Middleware, just POST)
