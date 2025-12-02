@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 class RedirectIfAuthenticated
 {
     // CRITICAL FIX: Global Redirect path ko /dashboard par set karein
-    protected string $redirectTo = '/dashboard'; 
+    protected string $redirectTo = '/dashboard';
     // Agar aapka route /home par hai, to yahan /home likhein. /dashboard is the right path here.
 
     /**
@@ -27,7 +27,7 @@ class RedirectIfAuthenticated
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
                 // Yahan woh user ko seedha dashboard par bhej dega
-                return redirect($this->redirectTo); 
+                return redirect($this->redirectTo);
             }
         }
 
