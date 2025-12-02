@@ -46,7 +46,8 @@ class SubscriptionCheckout extends Component
 
         // 2. Activation Logic (Manual Activation required for Invoice)
         if ($this->payment_method_id === 'invoice') {
-            session()->flash('message', 'Invoice generated. Your account will be activated manually upon payment receipt.');
+            // CRITICAL FIX: 'message' ko 'success' karein
+            session()->flash('success', 'Invoice generated. Your account will be activated manually upon payment receipt. Invoice ID: ' . $invoice->id); 
             return redirect()->route('tenant.billing');
         }
 
