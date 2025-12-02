@@ -24,11 +24,11 @@ class SubscriptionCheckout extends Component
         'billing_email' => 'required|email',
     ];
 
-    public function mount(MembershipPlan $plan)
+    public function mount(MembershipPlan $plan, string $tenantId)
     {
         // Yahan plan ki details load hongi jab component render hoga
         $this->plan = $plan;
-        $this->currentTenantId = tenant('id');
+        $this->currentTenantId = $tenantId;
         // Logged-in user ka email pre-fill karein
         $this->billing_email = Auth::user()->email; 
         $this->billing_name = Auth::user()->name;

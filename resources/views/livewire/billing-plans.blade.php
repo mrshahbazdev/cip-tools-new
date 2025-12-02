@@ -145,7 +145,7 @@
         </button>
         
         <div class="w-full max-w-4xl mx-auto">
-            @livewire('subscription-checkout', ['plan' => $selectedPlan], key($selectedPlanId))
+            @livewire('subscription-checkout', ['plan' => $selectedPlan, 'tenantId' => $currentTenantId], key($selectedPlanId))
         </div>
         
     @endif
