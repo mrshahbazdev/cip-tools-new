@@ -44,9 +44,9 @@ class TenantUserManagement extends Component
         }
     }
 
-    public function render()
+   public function render()
     {
-        $this->authorizeAccess(); // Access check har baar run hoga
+        $this->authorizeAccess();
 
         $tenantId = tenant('id');
         
@@ -57,7 +57,7 @@ class TenantUserManagement extends Component
         return view('livewire.tenant-user-management', [
             'users' => $users,
             'currentTenantId' => $tenantId,
-        ]);
+        ])->layout('components.layouts.guest'); // <--- CRITICAL FIX: Explicitly set the existing guest layout
     }
 
     // New User Add/Edit Modal Open karna
