@@ -63,20 +63,23 @@ class TenantUserManagement extends Component
     // New User Add/Edit Modal Open karna
     public function create()
     {
+        $this->authorizeAccess(); // <-- ADDED
         $this->resetInput();
         $this->isModalOpen = true;
     }
-    
+
     // User Delete karna
     public function delete($id)
     {
+        $this->authorizeAccess(); // <-- ADDED
         TenantUser::find($id)->delete();
         session()->flash('message', 'User deleted successfully.');
     }
-    
+
     // Edit ke liye data load karna
     public function edit($id)
     {
+        $this->authorizeAccess(); // <-- ADDED
         $user = TenantUser::findOrFail($id);
         $this->userId = $id;
         $this->name = $user->name;
@@ -87,6 +90,7 @@ class TenantUserManagement extends Component
     // Save/Update logic
     public function store()
     {
+        $this->authorizeAccess();
         $data = $this->validate();
         
         if ($this->password === '') {
