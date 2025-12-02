@@ -64,7 +64,12 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
-
+        // NAYA PROVIDER ADD KAREIN: Super Admin ke liye
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class, // Central User Model
+            'connection' => 'mysql', // CRITICAL FIX: Central DB connection use karein
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

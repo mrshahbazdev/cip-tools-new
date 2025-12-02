@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->domain('cip-tools.de') // <-- 1. Central Domain Restriction
             ->login()
+            ->authGuard('admin')
             ->colors([
                 'primary' => Color::Blue,
             ])
