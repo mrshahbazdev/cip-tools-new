@@ -18,6 +18,12 @@ class TenantUserManagement extends Component
     public $userId;
     public $isModalOpen = false;
     public $currentTenantId; // Tenant ID ko state mein save karne ke liye
+    
+    // Delete Confirmation Modal Properties
+    public $showDeleteModal = false;
+    public $deleteUserId;
+    public $deleteUserName;
+    public $deleteUserEmail;
 
     // --- LIFECYCLE HOOKS ---
 
@@ -86,11 +92,64 @@ class TenantUserManagement extends Component
         $this->isModalOpen = true;
     }
     
-    public function delete($id)
+    // Delete confirmation show karein
+    public function confirmDelete($id)
     {
         $this->authorizeAccess();
-        TenantUser::find($id)->delete();
-        session()->flash('message', 'User deleted successfully.');
+        
+        $user = TenantUser::findOrFail($id);
+        
+        // Check karein ke user admin to nahi hai
+        if ($user->is_tenant_admin) {
+            session()->flash('error', 'Admin users cannot be deleted.');
+            return;
+        }
+        
+        $this->deleteUserId = $user->id;
+        $this->deleteUserName = $user->name;
+        $this->deleteUserEmail = $user->email;
+        
+        $this->showDeleteModal = true;
+    }
+    
+    // Actual delete karne ka method
+    public function deleteConfirmed()
+    {
+        $this->authorizeAccess();
+        
+        try {
+            $user = TenantUser::findOrFail($this->deleteUserId);
+            
+            // Double-check: Admin user delete na ho sake
+            if ($user->is_tenant_admin) {
+                session()->flash('error', 'Admin users cannot be deleted.');
+                $this->cancelDelete();
+                return;
+            }
+            
+            $user->delete();
+            
+            session()->flash('message', 'User removed successfully.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error deleting user: ' . $e->getMessage());
+        }
+        
+        $this->cancelDelete();
+    }
+    
+    // Delete cancel karne ka method
+    public function cancelDelete()
+    {
+        $this->showDeleteModal = false;
+        $this->resetDeleteProperties();
+    }
+    
+    // Delete properties reset karne ka method
+    private function resetDeleteProperties()
+    {
+        $this->deleteUserId = null;
+        $this->deleteUserName = null;
+        $this->deleteUserEmail = null;
     }
     
     public function edit($id)
@@ -129,8 +188,10 @@ class TenantUserManagement extends Component
         }
 
         if ($this->userId) {
-            // Edit mode
-            TenantUser::find($this->userId)->update($validatedData);
+            // Edit mode - ensure is_tenant_admin is preserved
+            $user = TenantUser::find($this->userId);
+            $validatedData['is_tenant_admin'] = $user->is_tenant_admin;
+            $user->update($validatedData);
         } else {
             // Create mode
             TenantUser::create($validatedData);
