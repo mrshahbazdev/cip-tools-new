@@ -36,9 +36,11 @@ return [
     */
 
     'guards' => [
-        'web' => [
+        'web' => [ /* ... existing web guard ... */ ],
+        // NAYA GUARD ADD KAREIN: Super Admin ke liye
+        'admin' => [ 
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'admins', // Naya provider use karein
         ],
     ],
 
@@ -75,6 +77,7 @@ return [
         //     'table' => 'users',
         // ],
     ],
+    // 2. New Guard (Use the new provider)
 
     /*
     |--------------------------------------------------------------------------
