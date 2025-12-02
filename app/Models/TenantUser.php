@@ -6,7 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable; // Authenticatable class use karein
-
+use Laravel\Cashier\Billable;
 class TenantUser extends Authenticatable
 {
     use HasFactory;
@@ -22,6 +22,9 @@ class TenantUser extends Authenticatable
         'password',
         'tenant_id',
         'is_tenant_admin',
+        'stripe_id', // Add new fields to fillable
+        'pm_type',
+        'pm_last_four',
     ];
 
     protected $hidden = [
@@ -33,6 +36,7 @@ class TenantUser extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed', // Hashing automatic ho jayegi
         'is_tenant_admin' => 'boolean',
+        'trial_ends_at' => 'timestamp',
     ];
     public function isTenantAdmin(): bool
     {

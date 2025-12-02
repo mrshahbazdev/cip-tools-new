@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('tenant_users', function (Blueprint $table) {
+            // Cashier required columns
+            $table->string('stripe_id')->nullable()->index();
+            $table->string('pm_type')->nullable(); // Payment method type
+            $table->string('pm_last_four', 4)->nullable(); // Last 4 digits of card
+            
+            // Cashier subscription tracking (optional, but good practice)
+            $table->timestamp('trial_ends_at')->nullable(); 
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('tenant_users', function (Blueprint $table) {
+            $table->dropColumn([
+                'stripe_id',
+                'pm_type',
+                'pm_last_four',
+                'trial_ends_at',
+            ]);
+        });
+    }
+};
