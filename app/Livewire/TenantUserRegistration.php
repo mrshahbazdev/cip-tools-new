@@ -18,21 +18,19 @@ class TenantUserRegistration extends Component
 
     protected function rules()
     {
-        // Ensure Rule class is imported: use Illuminate\Validation\Rule;
-        $tenantId = tenant('id');
+        // Hostname se tenant ID nikalna
+        $hostname = request()->getHost(); 
+        $domainRecord = \Stancl\Tenancy\Database\Models\Domain::where('domain', $hostname)->first();
+        $tenantId = $domainRecord ? $domainRecord->tenant_id : null; // Current Tenant ID
 
         return [
             'name' => 'required|min:3',
-
-            // Subdomain is validated on the primary (central) RegisterTenant component,
-            // but not strictly necessary here, as this runs only on an existing subdomain.
-            // Ise hata diya gaya hai kyunki ye sirf TenantUserRegistration hai.
-
             'email' => [
                 'required',
                 'email',
                 // CRITICAL FIX: tenant_users table mein email ki uniqueness check karein, scoped by tenant_id.
                 Rule::unique('tenant_users')->where(function ($query) use ($tenantId) {
+                    // Ye check sirf usi tenant_id ke liye chalta hai
                     return $query->where('tenant_id', $tenantId);
                 }),
             ],
