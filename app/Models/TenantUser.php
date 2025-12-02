@@ -32,5 +32,12 @@ class TenantUser extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed', // Hashing automatic ho jayegi
+        'is_tenant_admin' => 'boolean',
     ];
+    public function isTenantAdmin(): bool
+    {
+        // Ye method tenant_users table ka boolean column check karega
+        // is_tenant_admin ko casts mein define karna zaroori hai.
+        return (bool) $this->is_tenant_admin; 
+    }
 }
