@@ -16,7 +16,7 @@ class SubscriptionCheckout extends Component
     public $billing_email; // Redundant, but good practice
     public $plan;
     public $payment_method_id = 'card'; // Default to card
-
+    public $currentTenantId;
     // Billing validation rules (Mandatory for Invoice)
     protected $rules = [
         'billing_name' => 'required|min:3',
@@ -28,7 +28,7 @@ class SubscriptionCheckout extends Component
     {
         // Yahan plan ki details load hongi jab component render hoga
         $this->plan = $plan;
-        
+        $this->currentTenantId = tenant('id');
         // Logged-in user ka email pre-fill karein
         $this->billing_email = Auth::user()->email; 
         $this->billing_name = Auth::user()->name;
@@ -60,7 +60,7 @@ class SubscriptionCheckout extends Component
     {
         // Hum abhi simple logic use kar rahe hain
         return Invoice::create([
-            'tenant_id' => tenant('id'),
+            'tenant_id' => $this->currentTenantId,
             'membership_plan_id' => $this->plan->id,
             'billing_name' => $this->billing_name,
             'billing_email' => $this->billing_email,
