@@ -7,9 +7,16 @@
     <form wire:submit.prevent="register" class="space-y-4">
 
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Your Full Name (Proposer)</label>
+            <input type="text" wire:model="proposer_full_name" placeholder="John Doe"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition bg-gray-50 @error('proposer_full_name') border-red-500 @enderror">
+            @error('proposer_full_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Project Name / Company</label>
             <input type="text" wire:model="company_name" placeholder="e.g. Acme Corp"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-gray-50 @error('company_name') border-red-500 @enderror">
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition bg-gray-50 @error('company_name') border-red-500 @enderror">
             @error('company_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
 
@@ -17,7 +24,7 @@
             <label class="block text-sm font-medium text-slate-700 mb-1">Desired Subdomain</label>
             <div class="flex">
                 <input type="text" wire:model.live="subdomain" placeholder="acme"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-gray-50 @error('subdomain') border-red-500 @enderror">
+                    class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition bg-gray-50 @error('subdomain') border-red-500 @enderror">
                 <span class="inline-flex items-center px-3 border border-l-0 border-gray-300 bg-gray-100 text-gray-500 text-sm rounded-r-lg">
                     .cip-tools.de
                 </span>
@@ -35,15 +42,32 @@
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Owner Email</label>
             <input type="email" wire:model="email" placeholder="you@company.com"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-gray-50 @error('email') border-red-500 @enderror">
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition bg-gray-50 @error('email') border-red-500 @enderror">
             @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
 
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
             <input type="password" wire:model="password" placeholder="********"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-gray-50 @error('password') border-red-500 @enderror">
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition bg-gray-50 @error('password') border-red-500 @enderror">
             @error('password') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        </div>
+        
+        <hr class="border-gray-200 mt-6 pt-2"/>
+
+        <div class="flex items-start">
+            <input type="checkbox" wire:model="has_bonus_scheme" id="has_bonus" class="h-4 w-4 text-indigo-600 border-gray-300 rounded mt-1 shadow-sm">
+            <label for="has_bonus" class="ml-2 text-sm text-slate-700 select-none">
+                Yes, I want to display a bonus payment option for implemented innovations.
+            </label>
+        </div>
+        
+        <div class="flex items-start">
+            <input type="checkbox" wire:model="privacy_confirmed" id="privacy_policy" class="h-4 w-4 text-indigo-600 border-gray-300 rounded mt-1 shadow-sm">
+            <label for="privacy_policy" class="ml-2 text-sm text-slate-700 select-none">
+                I confirm the Privacy Policy and validate my email address.
+            </label>
+            @error('privacy_confirmed') <span class="text-red-500 text-xs block mt-1">You must confirm the policy.</span> @enderror
         </div>
 
         <button type="submit"
@@ -60,6 +84,6 @@
     </form>
 
     <p class="text-center text-xs text-slate-400 mt-4">
-        By creating an account, you agree to our Terms & Conditions.
+        We will now create your account for 30 days of free testing.
     </p>
 </div>

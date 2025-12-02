@@ -16,12 +16,19 @@ class RegisterTenant extends Component
     public $subdomain = '';
     public $email = '';
     public $password = '';
-
+    
+    // --- NEW FIELDS ---
+    public $has_bonus_scheme = false; // Checkbox for bonus
+    public $privacy_confirmed = false; // Checkbox for policy
+    public $proposer_full_name = '';   // Proposer/Admin ka full naam
     protected $rules = [
         'company_name' => 'required|min:3',
         'subdomain' => 'required|alpha_dash|min:3|unique:domains,domain|unique:tenants,id',
         'email' => 'required|email',
         'password' => 'required|min:8',
+        'proposer_full_name' => 'required|min:3',
+        'has_bonus_scheme' => 'boolean', 
+        'privacy_confirmed' => 'accepted', // Must be true/checked
     ];
 
     public function updatedSubdomain()
@@ -31,53 +38,35 @@ class RegisterTenant extends Component
 
     public function register()
     {
-        // Yahan double validate ho raha hai, lekin hum isay rehne denge kyunki ye chalta hai.
-        $this->validate([
-            'email' => [
-                'required',
-                'email',
-                // CRITICAL FIX: Validation abhi bhi 'users' (Central) table check karega.
-                // Lekin hum isay simple rakhenge kyunki 'tenant_users' table par validation complex ho jayega.
-                Rule::unique('users')->where(function ($query) {
-                    return $query->where('tenant_id', $this->subdomain);
-                }),
-            ],
-        ]);
-        $this->validate();
+        $this->validate(); // Validation chalaein
 
-        // 1. Create Tenant (Central DB mein record)
+        // 1. Create Tenant (DB update)
         $tenant = Tenant::create([
             'id' => $this->subdomain,
-            'trial_ends_at' => now()->addDays(30),
+            'trial_ends_at' => now()->addDays(30), // 30-day trial set ho gaya
             'plan_status' => 'trial',
+            // --- NEW FIELDS SAVING ---
+            'has_bonus_scheme' => $this->has_bonus_scheme, // Save bonus decision
         ]);
 
-        // 2. Create Domain (Central DB mein record)
+        // 2. Create Domain... (baaki logic same)
         $tenant->domains()->create([
             'domain' => $this->subdomain . '.cip-tools.de'
         ]);
 
-        // 3. Create Admin User (tenant_users table mein record)
-        // Yahan tenancy initialize karna zaroori nahi kyunki hum Central DB mein hi save kar rahe hain.
-        // Initialization sirf DB switch ke liye tha.
-
-        // Final Fix: TenantUser model use karein aur tenant_id field add karein
+        // 3. Create Admin User (TenantUser table)
         $user = TenantUser::create([
-            'name' => $this->company_name,
+            'name' => $this->proposer_full_name, // Full name use karein
             'email' => $this->email,
-            'password' => Hash::make($this->password), // Password encrypt karein
-
-            'tenant_id' => $tenant->id, // <-- FINAL FIX: Tenant ID ko explicit save karein
-            'is_tenant_admin' => true, // <-- Tenant Admin set karein
+            'password' => Hash::make($this->password),
+            'tenant_id' => $tenant->id, 
+            'is_tenant_admin' => true, // Pehla user admin hi rahega
         ]);
-
-        // Optional: Yahan se tenancy end karna zaroori nahi kyunki hum switch nahi kar rahe.
-        // tenancy()->end();
-
-        // 4. Redirect
+        
+        // 4. Redirect... (baaki logic same)
         $protocol = request()->secure() ? 'https://' : 'http://';
         $domain = $this->subdomain . '.cip-tools.de';
-
+        
         return redirect()->to($protocol . $domain . '/login');
     }
 
