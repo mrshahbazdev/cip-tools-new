@@ -4,13 +4,19 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Authentication ke liye
+use Illuminate\Support\Facades\Auth; 
+use Stancl\Tenancy\Resolvers\DomainTenantResolver; // Context check ke liye
 
 class TenantAuthController extends Controller
 {
     // 1. LOGIN FORM DIKHANA
     public function showLoginForm()
     {
+        // Agar user already logged in hai, toh unhe seedha dashboard par bhej do
+        if (Auth::check()) {
+            return redirect()->route('tenant.dashboard');
+        }
+        
         // Login view ko load karein
         return view('tenant.login');
     }
@@ -24,8 +30,23 @@ class TenantAuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // --- CRITICAL SECURITY FIX START (User Isolation) ---
+        
+        // 1. Current Tenant ID ko fetch karein (Jo InitializeTenancyByDomain middleware se set hua hai)
+        $tenantId = tenant('id');
+
+        // Agar tenant ID nahi mila, toh authentication possible nahi hai
+        if (!$tenantId) {
+            return back()->withErrors(['email' => 'Could not identify the project domain.'])->onlyInput('email');
+        }
+
+        // 2. Credentials mein tenant_id inject karein
+        // Ab Auth::attempt email, password AUR tenant_id check karega (Single DB isolation).
+        $credentials['tenant_id'] = $tenantId;
+        
+        // --- CRITICAL SECURITY FIX END ---
+
         // Authentication attempt
-        // Tenancy middleware ki wajah se ye sirf current tenant ki DB mein dhoondega
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
