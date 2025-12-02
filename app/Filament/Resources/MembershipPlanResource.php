@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Hidden;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Column; // Naya import (optional for better layout)
 class MembershipPlanResource extends Resource
 {
     protected static ?string $model = MembershipPlan::class;
@@ -30,6 +31,15 @@ class MembershipPlanResource extends Resource
                     ->required()
                     ->maxLength(255),
 
+                // Naya Field: Subscription Duration
+                TextInput::make('duration_months')
+                    ->label('Subscription Duration (Months)')
+                    ->numeric()
+                    ->required()
+                    ->minValue(1) // Kam se kam 1 month
+                    ->default(12)
+                    ->columnSpanFull(), // Ye field poori width legi
+
                 TextInput::make('price')
                     ->numeric()
                     ->required()
@@ -40,10 +50,8 @@ class MembershipPlanResource extends Resource
                     ->label('Features (One per line)')
                     ->placeholder('e.g. Unlimited Users, 10GB Storage')
                     ->helperText('Each feature should be on a new line.'),
-
-                // Duration is fixed at 12 months as per specification
-                Hidden::make('duration_months')->default(12),
-            ]);
+            ])
+            ->columns(2); // Form ko 2 columns mein split kar dete hain
     }
 
     public static function table(Table $table): Table
