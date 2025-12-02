@@ -24,6 +24,8 @@ class BillingPlans extends Component
 
     public function render()
     {
-        return view('livewire.billing-plans');
+        return view('livewire.billing-plans')
+            // CRITICAL FIX: Explicitly set the existing guest layout
+            ->layout('components.layouts.guest'); 
     }
 }
