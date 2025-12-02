@@ -8,7 +8,7 @@ use App\Models\MembershipPlan; // Model import karein
 class BillingPlans extends Component
 {
     public $plans;
-    
+    public $selectedPlanId = null;
     // Component mount hone par plans ko fetch karein
     public function mount()
     {
