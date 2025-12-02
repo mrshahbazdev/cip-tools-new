@@ -89,7 +89,7 @@
                                 <span class="text-gray-600">/{{ $plan->duration_months }} months</span>
                             </div>
                             <p class="text-sm text-gray-500">
-                                Billed annually • ${{\App\Helpers\NumberHelper::format($plan->price / 12, 2)}} per month
+                                Billed annually • ${{ number_format($plan->price / 12, 2) }} per month
                             </p>
                         </div>
                         
@@ -205,10 +205,9 @@
     }
 </style>
 
-@push('scripts')
 <script>
     // Plan selection animation
-    document.addEventListener('livewire:load', function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const planCards = document.querySelectorAll('.hover-lift');
         
         planCards.forEach(card => {
@@ -220,7 +219,7 @@
         // Success message auto-dismiss
         @if(session()->has('success'))
             setTimeout(() => {
-                const successMessage = document.querySelector('[wire\\:key="success-message"]');
+                const successMessage = document.querySelector('.animate-fade-in');
                 if (successMessage) {
                     successMessage.style.opacity = '0';
                     successMessage.style.transform = 'translateY(-10px)';
@@ -234,5 +233,4 @@
         @endif
     });
 </script>
-@endpush
 </div>
