@@ -36,11 +36,14 @@ return [
     */
 
     'guards' => [
-        'web' => [ /* ... existing web guard ... */ ],
-        // NAYA GUARD ADD KAREIN: Super Admin ke liye
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        // Dhyan dein: Koi extra comma ya missing array entry na ho
         'admin' => [ 
             'driver' => 'session',
-            'provider' => 'admins', // Naya provider use karein
+            'provider' => 'admins', 
         ],
     ],
 
@@ -66,16 +69,12 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
-        // NAYA PROVIDER ADD KAREIN: Super Admin ke liye
+        // NAYA PROVIDER: Super Admin ke liye
         'admins' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class, // Central User Model
-            'connection' => 'mysql', // CRITICAL FIX: Central DB connection use karein
+            'model' => App\Models\User::class, 
+            'connection' => 'mysql', // Central DB connection use karein
         ],
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
     // 2. New Guard (Use the new provider)
 
