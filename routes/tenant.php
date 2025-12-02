@@ -8,40 +8,36 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 Route::middleware(['web', InitializeTenancyByDomain::class])
     ->group(function () {
 
-    // --- PUBLIC ROUTES (Unauthenticated) ---
+    // --- PUBLIC AUTH ROUTES ---
+    // 1. LOGIN FORM (GET)
+    Route::get('/login', [TenantAuthController::class, 'showLoginForm'])->name('login'); 
+    
+    // 2. LOGIN PROCESS (POST)
+    Route::post('/login', [TenantAuthController::class, 'login'])->name('tenant.login'); 
 
-    // 1. LANDING PAGE (Public)
+    // 3. REGISTRATION ROUTE
+    Route::get('/register', TenantUserRegistration::class)->name('tenant.register');
+
+    // 4. ROOT URL (Landing Page)
     Route::get('/', function () {
-        return view('tenant.landing');
+        // Fix: Agar user logged in hai toh seedha /dashboard par bhej do
+        if (auth()->check()) {
+            return redirect()->route('tenant.dashboard'); 
+        }
+        return view('tenant.landing'); 
     })->name('tenant.landing');
 
-    // 2. LOGIN FORM (GET)
-    Route::get('/login', [TenantAuthController::class, 'showLoginForm'])
-        ->name('login');
 
-    // 3. LOGIN PROCESS (POST)
-    Route::post('/login', [TenantAuthController::class, 'login'])
-        ->name('login.post');
-
-    // 4. REGISTRATION FORM (GET) - Make this public if users can register
-    Route::get('/register', TenantUserRegistration::class)
-        ->name('register');
-
-    // --- PROTECTED ROUTES (Require Authentication) ---
+    // --- LOGGED IN ROUTES (Private) ---
     Route::middleware('auth')->group(function () {
-
-        // 5. DASHBOARD
+        
+        // 5. DASHBOARD ROUTE (The final target)
+        // Ye route /dashboard ko 'tenant.dashboard' naam dega.
         Route::get('/dashboard', function () {
             return view('tenant.dashboard');
-        })->name('dashboard');
+        })->name('tenant.dashboard'); // <--- CRITICAL: Yahan naam define hua
 
-        // 6. LOGOUT
-        Route::post('/logout', [TenantAuthController::class, 'logout'])
-            ->name('logout');
-
-        // 7. Redirect root to dashboard when logged in
-        Route::get('/', function () {
-            return redirect()->route('dashboard');
-        });
+        // 6. LOGOUT ROUTE
+        Route::post('/logout', [TenantAuthController::class, 'logout'])->name('logout'); 
     });
 });
