@@ -88,23 +88,38 @@ class TenantUserManagement extends Component
     }
 
     // Save/Update logic
+    // app/Livewire/TenantUserManagement.php
+
     public function store()
     {
         $this->authorizeAccess();
-        $data = $this->validate();
+
+        // Naya user banane ke liye, validation rules ko dynamicly adjust karna hoga
+        $rules = $this->rules(); // Correct validation rules fetch karein
+
+        $data = $this->validate($rules); // Validation run karein
+
+        // --- CRITICAL FIX START ---
+        // 1. Tenant ID ko data array mein inject karein
+        $data['tenant_id'] = tenant('id');
         
-        if ($this->password === '') {
-            unset($data['password']); // Agar password khali hai toh update na karein
+        // 2. is_tenant_admin flag set karein (Naya user = false)
+        // Hum sirf original project owner ko admin rakhhenge.
+        $data['is_tenant_admin'] = false; 
+        // --- CRITICAL FIX END ---
+        
+        // Password handling
+        if (empty($data['password'])) {
+            unset($data['password']);
         } else {
-            $data['password'] = Hash::make($this->password);
+            $data['password'] = Hash::make($data['password']);
         }
 
-        $data['tenant_id'] = tenant('id');
-        $data['is_tenant_admin'] = ($this->userId === null); // Pehla user admin tha, naya user regular hoga
-
         if ($this->userId) {
+            // Edit mode (password field ko ignore karein agar khali ho)
             TenantUser::find($this->userId)->update($data);
         } else {
+            // Create mode
             TenantUser::create($data);
         }
 
