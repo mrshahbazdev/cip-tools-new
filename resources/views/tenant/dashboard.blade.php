@@ -75,8 +75,15 @@
         $totalUsers = \App\Models\TenantUser::where('tenant_id', tenant('id'))->count();
         
         // 4. Branding & Incentive Text (New Fields)
-        $slogan = $currentTenant->slogan ?? 'Thought together and made together.';
-        $incentive = $currentTenant->incentive_text ?? 'Please specify the type of proposer remuneration.';
+        if ($currentTenant->plan_status === 'active') {
+            // Agar Active hai, toh custom user-defined values load karein
+            $slogan = $currentTenant->slogan ?? 'Thought together and made together.';
+            $incentive = $currentTenant->incentive_text ?? 'The incentive has not been specified yet.';
+        } else {
+            // Agar Trial ya Expired hai, toh Locked Message show karein
+            $slogan = 'Upgrade required to customize your branding.';
+            $incentive = 'Configuration is currently locked. Upgrade required.';
+        }
     @endphp
 
     <button onclick="document.querySelector('aside').classList.toggle('hidden');" class="sidebar-toggle fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md lg:hidden">
