@@ -139,7 +139,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-gray-600">Total Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->total() }}</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $totalUsers }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center">
                                         <i class="fas fa-users text-indigo-600"></i>
@@ -151,7 +151,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-gray-600">Admin Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', true)->count() }}</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $adminUsers }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center">
                                         <i class="fas fa-lock text-purple-600"></i>
@@ -163,7 +163,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-gray-600">Standard Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', false)->count() }}</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $standardUsers }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
                                         <i class="fas fa-user-alt text-blue-600"></i>

@@ -4,7 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Team; // Team model
+use App\Models\Team; 
+use App\Models\TenantUser; // User stats ke liye
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +17,11 @@ class TeamManagement extends Component
     public $name;
     public $teamId;
     public $isModalOpen = false;
-    public $loggedInUser;
+    public $loggedInUser; // Layout user info ke liye
+    public $totalUsers;   // Stats ke liye
+    public $adminUsers;   // Stats ke liye
+    public $standardUsers; // Stats ke liye
+
     // --- Authorization Check ---
     public function authorizeAccess()
     {
@@ -43,7 +48,13 @@ class TeamManagement extends Component
         ];
     }
 
-    // --- CRUD Actions ---
+    // --- CRUD Actions & Lifecycle ---
+
+    public function mount()
+    {
+        // Layout aur Stats ke liye user ko load karein
+        $this->loggedInUser = Auth::user(); 
+    }
 
     public function create()
     {
@@ -96,11 +107,17 @@ class TeamManagement extends Component
     {
         $this->authorizeAccess();
         
-        // CRITICAL FIX: User ko component state mein load karein
-        $this->loggedInUser = Auth::user(); 
+        $tenantId = tenant('id');
         
-        $teams = Team::where('tenant_id', tenant('id'))
-                    ->paginate(10);
+        // Data for the main table (Teams)
+        $teams = Team::where('tenant_id', $tenantId)
+                     ->paginate(10);
+        
+        // --- STATS CALCULATION ---
+        $allTenantUsers = TenantUser::where('tenant_id', $tenantId)->get();
+        $this->totalUsers = $allTenantUsers->count();
+        $this->adminUsers = $allTenantUsers->where('is_tenant_admin', true)->count();
+        $this->standardUsers = $allTenantUsers->where('is_tenant_admin', false)->count();
 
         return view('livewire.team-management', [
             'teams' => $teams,
