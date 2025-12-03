@@ -103,6 +103,6 @@ class PipelineTable extends Component
 
         return view('livewire.pipeline-table', [
             'ideas' => $ideas,
-        ]);
+        ])->layout('components.layouts.guest');
     }
 }
