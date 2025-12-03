@@ -2,17 +2,20 @@
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\Tenant; // Make sure this is imported
 
 class CheckTrialExpiry
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // 1. Agar request central domain se nahi hai, aur tenant identified hai
-        if (tenancy()->tenant && ! in_array(request()->getHost(), config('tenancy.central_domains'))) {
-            $tenant = tenancy()->tenant;
+        // 1. Agar request central domain se nahi hai aur tenant identified hai
+        if (tenancy()->tenant) {
             
-            // Critical Check: Check if trial date has passed AND plan is still on trial status
-            $isExpired = $tenant->trial_ends_at && $tenant->trial_ends_at->lessThan(now());
+            // CRITICAL FIX: Tenant object ko database se fresh load karein
+            $tenant = Tenant::find(tenancy()->tenant->id);
+            
+            // Critical Check: Check Expiry Conditions
+            $isTrialExpired = $tenant->trial_ends_at && $tenant->trial_ends_at->lessThan(now());
             $isNotActive = $tenant->plan_status !== 'active';
 
             // Agar trial khatam ho gaya hai aur plan active nahi hai, ya is_active flag off hai
