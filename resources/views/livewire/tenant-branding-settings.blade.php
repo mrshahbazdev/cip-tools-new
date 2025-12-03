@@ -90,10 +90,20 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
-                            <h1 class="text-lg font-semibold text-gray-800">Project Settings</h1>
+                            <h1 class="text-lg font-semibold text-gray-800">Project Setting</h1>
                         </div>
                         
                         <div class="flex items-center space-x-4">
+                            <div class="hidden md:flex items-center space-x-2 text-sm">
+                                <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center">
+                                     <i class="fas fa-user text-indigo-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700">{{ $loggedInUser->name ?? 'Admin' }}</p>
+                                    <p class="text-gray-500">{{ $loggedInUser->email }}</p>
+                                </div>
+                            </div>
+                            
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="h-9 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition duration-150 flex items-center space-x-2">
