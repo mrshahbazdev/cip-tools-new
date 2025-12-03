@@ -11,19 +11,21 @@ class ProjectIdea extends Model
     use HasFactory, BelongsToTenant; // Add BelongsToTenant trait
 
     protected $fillable = [
-        'tenant_id', 
-        'name', 
-        'description', 
-        'status', 
-        'pain_score', 
-        'priority',
-        'developer_notes',
-        'cost',
-        'time_duration_hours',
-        'team_id',
-        'prio_1', // NEW
-        'prio_2', // NEW
-    ];
+    'tenant_id', 
+    'team_id',
+    'description', 
+    'status', 
+    'pain_score', 
+    'priority',
+    'developer_notes',
+    'cost',
+    'time_duration_hours',
+    
+    // CRITICAL MISSING FIELDS (for new submission flow)
+    'problem_short', 
+    'goal',
+    'contact_info',
+];
 
     protected $casts = [
         'cost' => 'decimal:2',
