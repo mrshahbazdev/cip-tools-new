@@ -69,7 +69,13 @@
             <div class="mt-auto p-4">
                 <div class="p-4 bg-blue-50 rounded-lg">
                     <p class="text-sm font-medium text-blue-800">Admin: {{ $loggedInUser->name ?? 'Project Admin' }}</p>
-                    <p class="text-xs text-blue-600 mt-1">{{ $loggedInUser->email }}</p>
+                    <p class="text-xs text-blue-600 mt-1">{{ $loggedInUser->email ?? 'N/A' }}</p> 
+                    <div class="hidden md:flex items-center space-x-2 text-sm">
+                        <div>
+                            <p class="font-medium text-gray-700">{{ $loggedInUser->name ?? 'Admin' }}</p>
+                            <p class="text-gray-500">{{ $loggedInUser->email ?? 'N/A' }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </aside>

@@ -94,17 +94,17 @@ class TeamManagement extends Component
 
     public function render()
     {
-        $this->authorizeAccess(); // Check access before rendering view
-
-        // Teams data retrieval (Assuming necessary imports are present)
-        $teams = \App\Models\Team::where('tenant_id', tenant('id'))
-                                ->paginate(10);
+        $this->authorizeAccess();
+        
+        // CRITICAL FIX: User ko component state mein load karein
+        $this->loggedInUser = Auth::user(); 
+        
+        $teams = Team::where('tenant_id', tenant('id'))
+                    ->paginate(10);
 
         return view('livewire.team-management', [
             'teams' => $teams,
-            // Yahan 'loggedInUser' ko bhi pass kiya ja sakta hai agar view mein use ho raha ho,
-            // lekin hum seedha auth()->user() use karte hain.
-        ])->layout('components.layouts.guest'); // <-- FINAL FIX: Layout added
+        ]);
     }
 
     private function resetInput()
