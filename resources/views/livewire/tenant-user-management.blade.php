@@ -1,4 +1,4 @@
-<div class="bg-gray-100 min-h-screen antialiased">
+<div class="antialiased min-h-screen">
     
     <style>
         body { 
@@ -25,22 +25,163 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 
+    @php
+        // Tenant record retrieval
+        $currentTenant = \App\Models\Tenant::find(tenant('id'));
+        $loggedInUser = auth()->user();
+        
+        // These stats are used in the header for consistency
+        $totalUsers = $users->total(); 
+    @endphp
+
+    <button onclick="document.querySelector('aside').classList.toggle('hidden');" class="sidebar-toggle fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md lg:hidden">
+        <i class="fas fa-bars text-gray-700"></i>
+    </button>
+
     <div class="flex min-h-screen">
-        <div class="flex-1 flex flex-col">
-            <header class="bg-white shadow-sm h-16 border-b border-gray-200 flex items-center">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between w-full">
-                    <h1 class="text-xl font-semibold text-gray-800">Team Management</h1>
-                    <a href="/dashboard" class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center">
-                        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        <aside class="hidden lg:flex w-64 flex-col glass-card border-r border-gray-200 z-40">
+            <div class="p-6">
+                <h2 class="text-xl font-extrabold text-gray-800">{{ strtoupper(tenant('id')) }}</h2>
+                <p class="text-sm text-gray-500 mt-1">Workspace</p>
+            </div>
+            
+            <nav class="flex-1 px-4">
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase font-semibold text-gray-500 mb-3">Main</h3>
+                    <a href="/dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 mb-2 font-medium">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
                     </a>
+                    <a href="{{ route('tenant.users.manage') }}" class="flex items-center space-x-3 p-3 rounded-lg bg-indigo-50 text-indigo-700 mb-2 font-medium">
+                        <i class="fas fa-users"></i>
+                        <span>Team Management</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 mb-2 font-medium">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Project Ideas</span>
+                    </a>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase font-semibold text-gray-500 mb-3">Settings</h3>
+                    <a href="/settings" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 mb-2 font-medium">
+                        <i class="fas fa-cog"></i>
+                        <span>Project Settings</span>
+                    </a>
+                    <a href="{{ route('tenant.billing') }}" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 mb-2 font-medium">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Billing & Plan</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="mt-auto p-4">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm font-medium text-blue-800">Admin: {{ $loggedInUser->name ?? 'Project Admin' }}</p>
+                    <p class="text-xs text-blue-600 mt-1">{{ $loggedInUser->email }}</p>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col">
+            <header class="glass-card border-b border-gray-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center">
+                            <h1 class="text-lg font-semibold text-gray-800">Team Management</h1>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <div class="hidden md:flex items-center space-x-2 text-sm">
+                                <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center">
+                                     <i class="fas fa-user text-indigo-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700">{{ $loggedInUser->name ?? 'Admin' }}</p>
+                                    <p class="text-gray-500">{{ $loggedInUser->email }}</p>
+                                </div>
+                            </div>
+                            
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="h-9 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition duration-150 flex items-center space-x-2">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span class="mobile-hidden">Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </header>
 
             <main class="flex-1 py-8">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     
+                    <div class="mb-10">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                                    Team Management
+                                </h1>
+                                <p class="text-gray-600 mt-1">
+                                    Manage users in <span class="font-semibold text-indigo-600">{{ strtoupper(tenant('id')) }}</span> workspace
+                                </p>
+                            </div>
+                            <button wire:click="create()" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-300 flex items-center gap-2 group">
+                                <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Add Team Member
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600">Total Users</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->total() }}</p>
+                                    </div>
+                                    <div class="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13 0h-6"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600">Admin Users</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', true)->count() }}</p>
+                                    </div>
+                                    <div class="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600">Standard Users</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', false)->count() }}</p>
+                                    </div>
+                                    <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13 0h-6"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     @if (session()->has('message'))
-                        <div class="mb-8 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 animate-fade-in">
+                        <div class="mb-4 mt-6 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 animate-fade-in">
                             <div class="flex items-center">
                                 <div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center mr-4 flex-shrink-0">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -54,94 +195,120 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="glass-card p-5 rounded-2xl border border-gray-200 shadow-sm">
-                            <p class="text-sm font-medium text-gray-600">Total Team Members</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->total() }}</p>
-                        </div>
-                        <div class="glass-card p-5 rounded-2xl border border-gray-200 shadow-sm">
-                            <p class="text-sm font-medium text-gray-600">Admin Users</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', true)->count() }}</p>
-                        </div>
-                        <div class="glass-card p-5 rounded-2xl border border-gray-200 shadow-sm">
-                            <p class="text-sm font-medium text-gray-600">Standard Users</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', false)->count() }}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-gray-900">Workspace User List</h3>
-                        <button wire:click="create()" class="px-5 py-2 bg-indigo-600 text-white font-semibold rounded-xl shadow-md hover:bg-indigo-700 transition duration-150">
-                            + Add Team Member
-                        </button>
-                    </div>
-
-                    <div class="glass-card rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr class="bg-gray-50/80">
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
-                                    <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($users as $user)
-                                <tr class="hover:bg-gray-50/80 transition-colors duration-150">
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 flex items-center justify-center mr-3">
-                                                <span class="font-semibold text-indigo-700 text-sm">
-                                                    {{ substr($user->name, 0, 1) }}
-                                                </span>
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden mt-8">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-50/80">
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
+                                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($users as $user)
+                                    <tr class="hover:bg-gray-50/80 transition-colors duration-150">
+                                        <td class="px-6 py-5 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 flex items-center justify-center mr-3">
+                                                    <span class="font-semibold text-indigo-700 text-sm">
+                                                        {{ substr($user->name, 0, 1) }}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div class="font-medium text-gray-900">{{ $user->name }}</div>
+                                                    <div class="text-xs text-gray-500">Member since {{ $user->created_at->format('M d, Y') }}</div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div class="font-medium text-gray-900">{{ $user->name }}</div>
-                                                <div class="text-xs text-gray-500">Member since {{ $user->created_at->format('M d, Y') }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $user->email }}</td>
-                                    <td class="px-6 py-5 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $user->is_tenant_admin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
-                                            @if($user->is_tenant_admin)
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                                                Admin
-                                            @else
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                                Standard
-                                            @endif
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button wire:click="edit({{ $user->id }})" class="text-gray-600 hover:text-indigo-700 p-2 rounded-lg hover:bg-indigo-50 transition-all duration-200 group" title="Edit User">
-                                                <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                            </button>
-                                            
-                                            @if(!$user->is_tenant_admin)
-                                                <button wire:click="delete({{ $user->id }})" onclick="confirm('Are you sure you want to delete this user?') || event.stopImmediatePropagation()" class="text-gray-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all duration-200 group" title="Remove User">
-                                                    <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </td>
+                                        <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
+                                            {{ $user->email }}
+                                        </td>
+                                        <td class="px-6 py-5 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $user->is_tenant_admin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
+                                                @if($user->is_tenant_admin)
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                                                    Admin
+                                                @else
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                                    Standard
+                                                @endif
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <button wire:click="edit({{ $user->id }})" class="text-gray-600 hover:text-indigo-700 p-2 rounded-lg hover:bg-indigo-50 transition-all duration-200 group" title="Edit User">
+                                                    <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                                 </button>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                                
+                                                @if(!$user->is_tenant_admin)
+                                                    <button wire:click="delete({{ $user->id }})" onclick="confirm('Are you sure you want to delete this user?') || event.stopImmediatePropagation()" class="text-gray-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all duration-200 group" title="Remove User">
+                                                        <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        @if($users->hasPages())
+                            <div class="px-6 py-4 border-t border-gray-200 glass-card rounded-b-2xl mt-0">
+                                {{ $users->links() }}
+                            </div>
+                        @endif
                     </div>
                     
-                    @if($users->hasPages())
-                        <div class="px-6 py-4 border-t border-gray-200 glass-card rounded-2xl mt-4">
-                            {{ $users->links() }}
-                        </div>
-                    @endif
                 </div>
             </main>
         </div>
     </div>
+
+<script>
+    // Helper function to toggle password visibility
+    function togglePasswordVisibility(fieldId) {
+        const input = document.getElementById(fieldId);
+        if (input) {
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+    }
+    
+    // JS for sidebar toggle and hover effects (kept outside Livewire methods)
+    document.querySelector('.sidebar-toggle')?.addEventListener('click', function() {
+         document.querySelector('aside').classList.toggle('hidden');
+         document.querySelector('aside').classList.toggle('flex');
+         document.querySelector('aside').classList.toggle('fixed');
+         document.querySelector('aside').classList.toggle('inset-0');
+         document.querySelector('aside').classList.toggle('z-40');
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+         const sidebar = document.querySelector('aside');
+         const toggleBtn = document.querySelector('.sidebar-toggle');
+         
+         if (window.innerWidth < 1024 && 
+             sidebar && sidebar.classList.contains('fixed') && 
+             !sidebar.contains(event.target) && 
+             toggleBtn && !toggleBtn.contains(event.target)) {
+             sidebar.classList.add('hidden');
+             sidebar.classList.remove('flex');
+         }
+    });
+    
+    // Add hover effects to cards
+    document.addEventListener('DOMContentLoaded', function() {
+         const cards = document.querySelectorAll('.hover-lift');
+         cards.forEach(card => {
+             card.addEventListener('mouseenter', function() {
+                 this.style.transition = 'all 0.3s ease';
+             });
+         });
+    });
+</script>
 
 @if($isModalOpen)
     <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
@@ -224,7 +391,7 @@
                                 </svg>
                             </div>
                             <button type="button" onclick="togglePasswordVisibility('modal-password')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="eye-icon-modal">
+                                <svg id="eye-icon-modal" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
@@ -257,24 +424,48 @@
 @endif
 
 <script>
-    // JS for sidebar toggle and hover effects (kept outside Livewire methods)
-    document.querySelector('.sidebar-toggle')?.addEventListener('click', function() {
-        document.querySelector('aside').classList.toggle('hidden');
-        document.querySelector('aside').classList.toggle('flex');
-        document.querySelector('aside').classList.toggle('fixed');
-        document.querySelector('aside').classList.toggle('inset-0');
-        document.querySelector('aside').classList.toggle('z-40');
-    });
-
     // Helper function to toggle password visibility
     function togglePasswordVisibility(fieldId) {
         const input = document.getElementById(fieldId);
-        if (input) {
-            input.type = input.type === 'password' ? 'text' : 'password';
+        const eyeIcon = document.getElementById('eye-icon-modal'); // Assuming the eye icon has this ID
+        
+        if (input && eyeIcon) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                // Change icon to show 'open eye'
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+            } else {
+                input.type = 'password';
+                // Change icon back to show 'closed eye'
+                 eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+            }
         }
     }
     
-    // Attach event listeners for hover effects (optional but good for UX)
+    // JS for sidebar toggle and hover effects (kept outside Livewire methods)
+    document.querySelector('.sidebar-toggle')?.addEventListener('click', function() {
+         document.querySelector('aside').classList.toggle('hidden');
+         document.querySelector('aside').classList.toggle('flex');
+         document.querySelector('aside').classList.toggle('fixed');
+         document.querySelector('aside').classList.toggle('inset-0');
+         document.querySelector('aside').classList.toggle('z-40');
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+         const sidebar = document.querySelector('aside');
+         const toggleBtn = document.querySelector('.sidebar-toggle');
+         
+         if (window.innerWidth < 1024 && 
+             sidebar && sidebar.classList.contains('fixed') && 
+             !sidebar.contains(event.target) && 
+             toggleBtn && !toggleBtn.contains(event.target)) {
+             sidebar.classList.add('hidden');
+             sidebar.classList.remove('flex');
+         }
+    });
+    
+    // Add hover effects to cards
     document.addEventListener('DOMContentLoaded', function() {
          const cards = document.querySelectorAll('.hover-lift');
          cards.forEach(card => {
@@ -284,3 +475,4 @@
          });
     });
 </script>
+</div>
