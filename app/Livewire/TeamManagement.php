@@ -163,7 +163,7 @@ class TeamManagement extends Component
         $this->standardUsers = $allTenantUsers->where('is_tenant_admin', false)->count();
 
         return view('livewire.team-management', [
-            'users' => $teams,
+            'teams' => $teams,
             'totalUsers' => $this->totalUsers,
             'adminUsers' => $this->adminUsers,
             'standardUsers' => $this->standardUsers,
