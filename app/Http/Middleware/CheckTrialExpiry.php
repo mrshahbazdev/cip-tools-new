@@ -18,22 +18,31 @@ class CheckTrialExpiry
             // Note: Ye check already logged-in user context mein chalta hai
             $tenant = Tenant::find(tenancy()->tenant->id);
             
-            // 2. Define Expiry Conditions
             $isTrialExpired = $tenant->trial_ends_at && $tenant->trial_ends_at->lessThan(now());
             $isNotActive = $tenant->plan_status !== 'active';
 
-            // --- CRITICAL FIX: Variable name correction applied (Use $isTrialExpired) ---
+            // Agar trial khatam ho gaya hai aur plan active nahi hai
             if ($isTrialExpired && $isNotActive) {
                 
-                // 3. Agar user expired page par nahi hai, toh redirect karo
-                if (! $request->routeIs('tenant.expired')) { 
-                    auth()->logout(); 
-                    // redirect()->route() use karein kyunki humne isko stable kiya tha
-                    return redirect()->route('tenant.expired'); 
+                $user = auth()->user(); // Logged-in user
+                
+                // 1. Determine Target Route based on role
+                if ($user && $user->isTenantAdmin()) {
+                    // Admin ko seedha Billing page par bhej do
+                    $targetRoute = 'tenant.billing'; 
+                } else {
+                    // Normal user ya logged-out user ko generic expiry page par bhej do
+                    $targetRoute = 'tenant.expired'; 
+                }
+
+                // 2. Check agar user already target page par nahi hai
+                if (! $request->routeIs($targetRoute)) {
+                    // CRITICAL FIX: Logout nahi karna hai
+                    return redirect()->route($targetRoute);
                 }
             }
-        }
         
         return $next($request);
+        }
     }
 }
