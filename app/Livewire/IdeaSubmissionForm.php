@@ -1,5 +1,3 @@
-// app/Livewire/IdeaSubmissionForm.php
-
 <?php
 
 namespace App\Livewire;
