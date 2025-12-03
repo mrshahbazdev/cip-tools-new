@@ -8,6 +8,7 @@ use App\Models\Team;
 use App\Models\TenantUser;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class TeamManagement extends Component
 {
@@ -22,18 +23,18 @@ class TeamManagement extends Component
     public $manageMembersModalOpen = false;
     public $currentTeam;
     public $availableUsers;
-    public $selectedMembers = []; // Array to hold IDs of selected members
+    public $selectedMembers = []; 
     
     // --- User Info for Layout/Stats ---
     public $loggedInUser;
     public $totalUsers;
     public $adminUsers;
     public $standardUsers;
+    public $currentTenantId; // CRITICAL: Tenant ID State property
 
     // --- Authorization Check ---
     public function authorizeAccess()
     {
-        // Only Tenant Admin (project owner) can manage teams
         if (! Auth::check() || ! Auth::user()->isTenantAdmin()) {
             abort(403, 'You must be the Tenant Administrator to manage teams.');
         }
@@ -48,7 +49,6 @@ class TeamManagement extends Component
             'name' => [
                 'required',
                 'min:3',
-                // Team name must be unique within this tenant
                 Rule::unique('teams', 'name')
                     ->where(fn ($query) => $query->where('tenant_id', $tenantId))
                     ->ignore($this->teamId),
@@ -60,7 +60,9 @@ class TeamManagement extends Component
 
     public function mount()
     {
-        $this->loggedInUser = Auth::user(); 
+        $this->loggedInUser = Auth::user();
+        // CRITICAL FIX: Tenant ID ko component state mein CACHE karein
+        $this->currentTenantId = tenant('id'); 
     }
 
     public function create()
@@ -77,7 +79,7 @@ class TeamManagement extends Component
 
         $data = [
             'name' => $this->name,
-            'tenant_id' => tenant('id'),
+            'tenant_id' => $this->currentTenantId, // Cached state use ho raha hai
         ];
 
         if ($this->teamId) {
@@ -117,7 +119,7 @@ class TeamManagement extends Component
         $this->currentTeam = Team::findOrFail($teamId);
         
         // Fetch all users for the current tenant
-        $this->availableUsers = TenantUser::where('tenant_id', tenant('id'))
+        $this->availableUsers = TenantUser::where('tenant_id', $this->currentTenantId)
                                         ->get(['id', 'name', 'email', 'role', 'is_tenant_admin']);
         
         // Pre-select members already assigned to this team
@@ -147,10 +149,9 @@ class TeamManagement extends Component
     {
         $this->authorizeAccess();
         
-        $tenantId = tenant('id');
+        $tenantId = $this->currentTenantId;
         
         // Data for the main table (Teams)
-        // Eager load counts for display efficiency
         $teams = Team::where('tenant_id', $tenantId)
                      ->withCount(['members', 'developers', 'workBees'])
                      ->paginate(10);
