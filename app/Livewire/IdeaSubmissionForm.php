@@ -104,8 +104,7 @@ class IdeaSubmissionForm extends Component
         // Idea Creation Logic (Saving data)
         ProjectIdea::create([
             'tenant_id' => $this->tenantId, // Cached ID use ho raha hai
-            'team_id' => $this->activeTeamId, 
-            'name' => $this->problem_short, 
+            'team_id' => $this->activeTeamId,
             'problem_short' => $this->problem_short, 
             'goal' => $this->goal, 
             'description' => $this->problem_detail, 
