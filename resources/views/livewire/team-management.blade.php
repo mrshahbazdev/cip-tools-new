@@ -251,7 +251,7 @@
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xl font-bold text-gray-900">
-                        {{ $userId ? 'Edit Team Member' : 'Add Team Member' }}
+                        {{ $teamId ? 'Edit Team Member' : 'Add Team Member' }}
                     </h3>
                     <button wire:click="$set('isModalOpen', false)" 
                         class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
