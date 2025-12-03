@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Team; 
-use App\Models\TenantUser; // User stats ke liye
+use App\Models\Team;
+use App\Models\TenantUser;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,25 +13,21 @@ class TeamManagement extends Component
 {
     use WithPagination;
 
-    // --- Properties ---
     public $name;
     public $teamId;
     public $isModalOpen = false;
-    public $loggedInUser; // Layout user info ke liye
-    public $totalUsers;   // Stats ke liye
-    public $adminUsers;   // Stats ke liye
-    public $standardUsers; // Stats ke liye
+    public $loggedInUser;
+    public $totalUsers;
+    public $adminUsers;
+    public $standardUsers;
 
-    // --- Authorization Check ---
     public function authorizeAccess()
     {
-        // Only Tenant Admin (project owner) can manage teams
         if (! Auth::check() || ! Auth::user()->isTenantAdmin()) {
             abort(403, 'You must be the Tenant Administrator to manage teams.');
         }
     }
 
-    // --- Validation Rules ---
     protected function rules()
     {
         $tenantId = tenant('id');
@@ -40,7 +36,6 @@ class TeamManagement extends Component
             'name' => [
                 'required',
                 'min:3',
-                // Team name must be unique within this tenant
                 Rule::unique('teams', 'name')
                     ->where(fn ($query) => $query->where('tenant_id', $tenantId))
                     ->ignore($this->teamId),
@@ -48,11 +43,8 @@ class TeamManagement extends Component
         ];
     }
 
-    // --- CRUD Actions & Lifecycle ---
-
     public function mount()
     {
-        // Layout aur Stats ke liye user ko load karein
         $this->loggedInUser = Auth::user(); 
     }
 
@@ -70,7 +62,7 @@ class TeamManagement extends Component
 
         $data = [
             'name' => $this->name,
-            'tenant_id' => tenant('id'), // Scope the new team to the current tenant
+            'tenant_id' => tenant('id'),
         ];
 
         if ($this->teamId) {
@@ -101,19 +93,16 @@ class TeamManagement extends Component
         $this->isModalOpen = true;
     }
 
-    // --- Render and Helpers ---
-
     public function render()
     {
         $this->authorizeAccess();
         
         $tenantId = tenant('id');
         
-        // Data for the main table (Teams)
         $teams = Team::where('tenant_id', $tenantId)
                      ->paginate(10);
         
-        // --- STATS CALCULATION ---
+        // Stats Calculation
         $allTenantUsers = TenantUser::where('tenant_id', $tenantId)->get();
         $this->totalUsers = $allTenantUsers->count();
         $this->adminUsers = $allTenantUsers->where('is_tenant_admin', true)->count();
@@ -121,6 +110,9 @@ class TeamManagement extends Component
 
         return view('livewire.team-management', [
             'teams' => $teams,
+            'totalUsers' => $this->totalUsers,
+            'adminUsers' => $this->adminUsers,
+            'standardUsers' => $this->standardUsers,
         ]);
     }
 
