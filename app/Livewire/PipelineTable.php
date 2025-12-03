@@ -55,11 +55,23 @@ class PipelineTable extends Component
     public function saveIdeaField($ideaId, $fieldName, $newValue)
     {
         // Livewire state se user ko load karein (jo TenantUser model hoga)
-        $user = Auth::user(); 
+        $user = Auth::user();
+
+        // --- CRITICAL DATA TYPE FIX (CONVERT EMPTY STRING TO NULL) ---
+        // MySQL Integer/Decimal columns mein empty string nahi jaa sakti.
+        if ($newValue === '') {
+            $newValue = null;
+        }
+        // --- END DATA TYPE FIX ---
+
 
         // Field Identification: Yellow (Work-Bee) vs Red (Developer)
-        $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status', 'prio_1', 'prio_2']); // PRIO 1 & 2 are Work-Bee fields
-        $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours', 'loesung']); // Assuming 'loesung' is mapped to developer_notes
+        // 'prio_1', 'prio_2', 'status', 'pain_score' (Yellow fields)
+        $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status', 'prio_1', 'prio_2']); 
+        
+        // 'developer_notes' (Lösung), 'cost', 'time_duration_hours' (Red fields)
+        // Note: Database mein 'developer_notes' field hai.
+        $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours']);
         
         $isAuthorized = false;
 
@@ -74,16 +86,20 @@ class PipelineTable extends Component
 
         if (!$isAuthorized) {
             session()->flash('error', "Access Denied: You do not have permission to edit the $fieldName.");
-            // This forces the component to reload the original data, discarding unauthorized changes
-            $this->dispatch('refreshComponent'); 
+            $this->dispatch('refreshComponent'); // Discard unauthorized changes
             return; 
         }
         
         // Proceed with save if authorized
         $idea = ProjectIdea::find($ideaId);
         if ($idea) {
-            $idea->update([$fieldName => $newValue]);
-            session()->flash('message', "{$idea->name} ($fieldName) updated successfully!");
+            
+            // --- FINAL UPDATE LOGIC ---
+            // 'loesung' ko 'developer_notes' se map karein (Jaisa ki UI mein hai)
+            $actualFieldName = ($fieldName === 'loesung') ? 'developer_notes' : $fieldName;
+            
+            $idea->update([$actualFieldName => $newValue]);
+            session()->flash('message', "{$idea->name}: {$actualFieldName} updated successfully!");
         }
     }
     // Sort function called when a column header is clicked
