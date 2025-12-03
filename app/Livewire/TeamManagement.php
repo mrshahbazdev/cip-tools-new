@@ -113,7 +113,7 @@ class TeamManagement extends Component
             'totalUsers' => $this->totalUsers,
             'adminUsers' => $this->adminUsers,
             'standardUsers' => $this->standardUsers,
-        ]);
+        ])->layout('components.layouts.guest');
     }
 
     private function resetInput()
