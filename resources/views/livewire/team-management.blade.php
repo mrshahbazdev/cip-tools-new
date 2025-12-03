@@ -251,7 +251,7 @@
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xl font-bold text-gray-900">
-                        {{ $teamId ? 'Edit Team Member' : 'Add Team Member' }}
+                        {{ $teamId ? 'Edit Team: ' . $name : 'Create New Team' }}
                     </h3>
                     <button wire:click="$set('isModalOpen', false)" 
                         class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
@@ -267,18 +267,13 @@
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
-                            <span>Full Name</span>
+                            <span>Team Name</span>
                             <span class="text-xs text-gray-400">Required</span>
                         </label>
                         <div class="relative">
                             <input type="text" wire:model="name" 
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all duration-200 bg-white @error('name') border-red-400 focus:ring-red-500/30 @enderror"
-                                placeholder="John Doe">
-                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                            </div>
+                                class="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all duration-200 bg-white @error('name') border-red-400 focus:ring-red-500/30 @enderror"
+                                placeholder="e.g., Development Group A">
                         </div>
                         @error('name') 
                             <div class="flex items-center gap-1 mt-2 text-red-500 text-sm">
@@ -290,57 +285,11 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                        <div class="relative">
-                            <input type="email" wire:model="email" {{ $teamId ? 'readonly' : '' }}
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all duration-200 bg-white @error('email') border-red-400 focus:ring-red-500/30 @enderror {{ $teamId ? 'bg-gray-50' : '' }}"
-                                placeholder="user@company.com">
-                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        @error('email') 
-                            <div class="flex items-center gap-1 mt-2 text-red-500 text-sm">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Password <span class="text-xs font-normal text-gray-400">({{ $teamId ? 'Leave blank to keep current' : 'Required' }})</span>
-                        </label>
-                        <div class="relative">
-                            <input type="password" wire:model="password" id="modal-password" 
-                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all duration-200 bg-white @error('password') border-red-400 focus:ring-red-500/30 @enderror"
-                                placeholder="••••••••">
-                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                            </div>
-                            <button type="button" onclick="togglePasswordVisibility('modal-password')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <svg id="eye-icon-modal" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        @error('password') 
-                            <div class="flex items-center gap-1 mt-2 text-red-500 text-sm">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
-                    </div>
+                    @if ($teamId)
+                        <p class="text-xs text-gray-500">
+                            Editing this name will not affect existing team members.
+                        </p>
+                    @endif
                 </div>
 
                 <div class="pt-4 flex justify-end gap-3">
@@ -350,7 +299,7 @@
                     </button>
                     <button type="submit" 
                         class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-600 transition-all duration-300 shadow-md">
-                        {{ $teamId ? 'Update Member' : 'Add Member' }}
+                        Save Team
                     </button>
                 </div>
             </form>
