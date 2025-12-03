@@ -54,6 +54,9 @@ class IdeaSubmissionForm extends Component
 
     public function render()
     {
-        return view('livewire.idea-submission-form');
+        // CRITICAL FIX: Explicitly set the existing guest layout
+        // Ye layout main header/footer ko handle karega
+        return view('livewire.idea-submission-form')
+            ->layout('components.layouts.guest'); 
     }
 }
