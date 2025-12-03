@@ -97,32 +97,39 @@ class InvoiceResource extends Resource
                     ])
             ])
             ->actions([
-                // --- MANUAL ACTIVATION ACTION (CRITICAL LOGIC) ---
+                // Action to manually activate tenant
                 Action::make('activate_tenant')
                     ->label('Mark Paid & Activate')
                     ->icon('heroicon-o-check-circle')
-                    // Ye button sirf 'Invoice' method aur 'pending' status par dikhega
+                    // Ye button sirf tab dikhega jab status 'pending' ho
                     ->visible(fn (Invoice $record): bool => $record->status === 'pending' && $record->payment_method === 'Invoice')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Invoice $record) {
-                        // 1. Invoice status update karein
-                        $record->update(['status' => 'paid']);
+                        // 1. Plan duration aur naya date calculate karein
+                        $duration = $record->plan->duration_months;
+                        $startDate = now();
+                        $endDate = $startDate->copy()->addMonths($duration);
 
-                        // 2. Tenant ko activate karein (is_active = TRUE)
+                        // 2. Invoice record update karein (Period tracking)
+                        $record->update([
+                            'status' => 'paid',
+                            'period_starts_at' => $startDate,
+                            'period_ends_at' => $endDate,
+                        ]);
+
+                        // 3. Tenant ko activate karein (Subscription period start karein)
                         $tenant = Tenant::find($record->tenant_id);
                         if ($tenant) {
-                            $record->update([
-                                'period_starts_at' => now(), // Start date record karein
-                                'period_ends_at' => now()->addMonths($record->plan->duration_months),
+                            $tenant->update([
+                                'plan_status' => 'active', 
+                                'is_active' => true,
+                                // CRITICAL FIX: Tenant ki expiry date ko naye subscription end date se replace karein
+                                'trial_ends_at' => $endDate, 
                             ]);
-                            
-                            $tenant->update(['plan_status' => 'active', 'is_active' => true]);
                         }
-                        
-                        // User ko notification bhej sakte hain yahan
-                        
-                        session()->flash('success', 'Tenant activated manually and invoice marked as paid!');
+
+                        session()->flash('success', 'Tenant successfully activated for ' . $duration . ' months!');
                     }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\DeleteAction::make(),
