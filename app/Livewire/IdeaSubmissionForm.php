@@ -1,3 +1,5 @@
+// app/Livewire/IdeaSubmissionForm.php
+
 <?php
 
 namespace App\Livewire;
@@ -8,45 +10,87 @@ use Illuminate\Support\Facades\Auth;
 
 class IdeaSubmissionForm extends Component
 {
-    // Form Inputs (Simplified fields)
-    public $title = '';
-    public $problem_detail = '';
-    public $pain_score = 0; // Assuming initial score is 0
+    // --- STEP 1: Problem ---
+    public $problem_short = ''; // Previously 'title'
+    public $pain_score = 5;
+
+    // --- STEP 2: Goal ---
+    public $goal = '';
+
+    // --- STEP 3: Details ---
+    public $problem_detail = ''; // Previously 'description'
+
+    // --- STEP 4: Review ---
+    public $contact_info = ''; // User's email
     
-    protected $rules = [
-        'title' => 'required|min:5',
-        'problem_detail' => 'required|min:10',
-        'pain_score' => 'required|integer|min:1|max:10',
-    ];
+    // --- UI/STATE ---
+    public $currentStep = 1;
+    public $maxSteps = 4;
+
+    // Validation Rules per Step
+    protected function rules()
+    {
+        return [
+            1 => [
+                'problem_short' => 'required|min:4|max:50',
+                'pain_score' => 'required|integer|min:1|max:10',
+            ],
+            2 => [
+                'goal' => 'required|min:10|max:255',
+            ],
+            3 => [
+                'problem_detail' => 'required|min:20',
+            ],
+            4 => [
+                'contact_info' => 'required|email',
+            ],
+        ][$this->currentStep] ?? [];
+    }
+    
+    // Custom Validation for multi-step
+    public function nextStep()
+    {
+        $this->validate();
+
+        if ($this->currentStep < $this->maxSteps) {
+            $this->currentStep++;
+        }
+    }
+    
+    public function previousStep()
+    {
+        if ($this->currentStep > 1) {
+            $this->currentStep--;
+        }
+    }
 
     public function submitIdea()
     {
-        $this->validate();
-        
+        // Final Validation of Step 4 (Review)
+        $this->validate(); 
+
         $activeTeamId = session('active_team_id');
         $tenantId = tenant('id');
-        $userId = Auth::id();
-
-        // CRITICAL SECURITY CHECK: Check if active team session is set
+        
         if (!$activeTeamId) {
-            session()->flash('error', 'Submission Failed: Please select an active team in the dashboard to submit an idea.');
+            session()->flash('error', 'Submission Failed: Please select an active team.');
             return; 
         }
 
-        // Idea Creation Logic (Saving data to ProjectIdea table)
+        // Idea Creation Logic (Saving data)
         ProjectIdea::create([
             'tenant_id' => $tenantId,
-            'team_id' => $activeTeamId, // Links the idea to the active team
-            'name' => $this->title,
-            'description' => $this->problem_detail,
-            'status' => 'New', // Default starting status
+            'team_id' => $activeTeamId, 
+            'name' => $this->problem_short, // Mapping short problem to 'name' for pipeline display
+            'problem_short' => $this->problem_short, // New Field
+            'goal' => $this->goal, // New Field
+            'description' => $this->problem_detail, // Using detail for description
+            'contact_info' => $this->contact_info, // New Field
+            'status' => 'New',
             'pain_score' => $this->pain_score,
-            // user_id is the submitter (implicit in ProjectIdea model if relationships are set up, 
-            // but we use the authenticated user's ID for clarity)
         ]);
 
-        session()->flash('message', 'Thank you! Your innovation idea has been submitted for review.');
-        $this->reset(['title', 'problem_detail', 'pain_score']); // Form reset
+        session()->flash('message', 'Your innovation idea has been submitted for review.');
         
         // Redirect user back to the pipeline table after submission
         return redirect()->route('tenant.pipeline'); 
@@ -54,9 +98,11 @@ class IdeaSubmissionForm extends Component
 
     public function render()
     {
-        // CRITICAL FIX: Explicitly set the existing guest layout
-        // Ye layout main header/footer ko handle karega
-        return view('livewire.idea-submission-form')
-            ->layout('components.layouts.guest'); 
+        // Active team display logic
+        $activeTeam = \App\Models\Team::find(session('active_team_id'));
+        
+        return view('livewire.idea-submission-form', [
+            'activeTeam' => $activeTeam
+        ])->layout('components.layouts.guest');
     }
 }
