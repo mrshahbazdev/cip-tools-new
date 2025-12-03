@@ -24,7 +24,7 @@
             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <span class="text-sm font-medium text-blue-800">All memberships are {{ $plans->count() ? $plans->first()->duration_months : 12 }}-month subscriptions</span>
+            <span class="text-sm font-medium text-blue-800">All memberships are for a set duration or Lifetime.</span>
         </div>
     </div>
 
@@ -47,7 +47,6 @@
         {{-- SECTION 1: Plans List --}}
         
         @if($plans->isEmpty())
-            {{-- No Plans Available View (Existing Logic) --}}
             <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 p-12 text-center">
                  <div class="h-20 w-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
                     <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,30 +69,42 @@
             <div class="grid md:grid-cols-{{ min(count($plans), 3) }} gap-8">
                 @foreach($plans as $index => $plan)
                     <div class="relative">
-                        {{-- Recommended Badge Logic --}}
-                        @if($index === 1 && count($plans) >= 2)
+                        {{-- Recommended Badge Logic (Simplified) --}}
+                        @if($plan->duration_months == 12)
                             <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
                                 <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-semibold shadow-lg">
-                                    Most Popular
+                                    Annual
                                 </span>
                             </div>
                         @endif
                         
-                        <div class="bg-gradient-to-br {{ $index === 1 && count($plans) >= 2 ? 'from-white to-indigo-50 border-2 border-indigo-500 shadow-xl shadow-indigo-500/20' : 'from-white to-gray-50 border border-gray-200' }} rounded-2xl p-8 h-full hover-lift flex flex-col justify-between">
+                        <div class="bg-gradient-to-br {{ $plan->duration_months == 12 ? 'from-white to-indigo-50 border-2 border-indigo-500 shadow-xl shadow-indigo-500/20' : 'from-white to-gray-50 border border-gray-200' }} rounded-2xl p-8 h-full hover-lift flex flex-col justify-between">
                             
                             <div class="mb-auto">
                                 <div class="text-center mb-6">
-                                    <h3 class="text-2xl font-bold {{ $index === 1 && count($plans) >= 2 ? 'text-indigo-700' : 'text-gray-900' }} mb-2">
+                                    <h3 class="text-2xl font-bold {{ $plan->duration_months == 12 ? 'text-indigo-700' : 'text-gray-900' }} mb-2">
                                         {{ $plan->name }}
                                     </h3>
                                     <div class="flex items-center justify-center gap-1 mb-4">
-                                        <span class="text-4xl font-bold {{ $index === 1 && count($plans) >= 2 ? 'text-indigo-600' : 'text-gray-900' }}">
-                                            ${{ number_format($plan->price, 0) }}
+                                        <span class="text-4xl font-bold {{ $plan->duration_months == 12 ? 'text-indigo-600' : 'text-gray-900' }}">
+                                            @if($plan->duration_months === 0)
+                                                Lifetime
+                                            @else
+                                                ${{ number_format($plan->price, 0) }}
+                                            @endif
                                         </span>
-                                        <span class="text-gray-600">/{{ $plan->duration_months }} months</span>
+                                        <span class="text-gray-600">
+                                            @if($plan->duration_months !== 0)
+                                                /{{ $plan->duration_months }} mo
+                                            @endif
+                                        </span>
                                     </div>
                                     <p class="text-sm text-gray-500">
-                                        Billed in full • ${{ number_format($plan->price / $plan->duration_months, 2) }} per month
+                                        @if($plan->duration_months !== 0)
+                                            Billed in full • ${{ number_format($plan->price / $plan->duration_months, 2) }} per month
+                                        @else
+                                            One-time payment for perpetual access.
+                                        @endif
                                     </p>
                                 </div>
 
@@ -115,7 +126,7 @@
                             
                             <div class="mt-auto">
                                 <button wire:click.prevent="$set('selectedPlanId', {{ $plan->id }})" 
-                                        class="w-full py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg {{ $index === 1 && count($plans) >= 2 ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white hover:from-indigo-700 hover:to-indigo-600' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 hover:from-gray-200 hover:to-gray-300 hover:text-gray-900' }} group">
+                                        class="w-full py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg {{ $plan->duration_months == 12 ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white hover:from-indigo-700 hover:to-indigo-600' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 hover:from-gray-200 hover:to-gray-300 hover:text-gray-900' }} group">
                                     <span class="flex items-center justify-center gap-2">
                                         Select {{ $plan->name }}
                                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +156,10 @@
         </button>
         
         <div class="w-full max-w-4xl mx-auto">
-            @livewire('subscription-checkout', ['plan' => $selectedPlan, 'tenantId' => $currentTenantId], key($selectedPlanId))
+            @livewire('subscription-checkout', [
+                'plan' => $selectedPlan, 
+                'tenantId' => $currentTenantId
+            ], key($selectedPlanId))
         </div>
         
     @endif
