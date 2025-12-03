@@ -1,8 +1,11 @@
 <?php
+
+namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\Tenant; // Make sure this is imported
+use App\Models\Tenant; 
 
 class CheckTrialExpiry
 {
@@ -12,19 +15,21 @@ class CheckTrialExpiry
         if (tenancy()->tenant) {
             
             // CRITICAL FIX: Tenant object ko database se fresh load karein
+            // Note: Ye check already logged-in user context mein chalta hai
             $tenant = Tenant::find(tenancy()->tenant->id);
             
-            // Critical Check: Check Expiry Conditions
+            // 2. Define Expiry Conditions
             $isTrialExpired = $tenant->trial_ends_at && $tenant->trial_ends_at->lessThan(now());
             $isNotActive = $tenant->plan_status !== 'active';
 
-            // Agar trial khatam ho gaya hai aur plan active nahi hai, ya is_active flag off hai
-            if ($isExpired && $isNotActive) {
+            // --- CRITICAL FIX: Variable name correction applied (Use $isTrialExpired) ---
+            if ($isTrialExpired && $isNotActive) {
                 
-                // 2. Agar user expired page par nahi hai, toh redirect karo
+                // 3. Agar user expired page par nahi hai, toh redirect karo
                 if (! $request->routeIs('tenant.expired')) { 
-                    auth()->logout(); // Logout the user for security
-                    return redirect()->route('tenant.expired');
+                    auth()->logout(); 
+                    // redirect()->route() use karein kyunki humne isko stable kiya tha
+                    return redirect()->route('tenant.expired'); 
                 }
             }
         }
