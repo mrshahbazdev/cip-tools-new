@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ProjectIdea;
 use App\Models\TenantUser;
+use App\Models\Team; // Import Team model
 use Illuminate\Support\Facades\Auth;
 class PipelineTable extends Component
 {
@@ -25,7 +26,21 @@ class PipelineTable extends Component
         'Implementation',
         'Done'
     ];
+    public function mount()
+    {
+        // Agar session mein active_team_id nahi hai, toh user ki pehli joined team ko set karein
+        if (!session('active_team_id') && Auth::check()) {
+            $user = Auth::user();
+            
+            // Ensure user is loaded as TenantUser to access teams() relation
+            $tenantUser = TenantUser::find(Auth::id()); 
 
+            if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
+                // User ki pehli team ko default active team set karein
+                session(['active_team_id' => $tenantUser->teams->first()->id]);
+            }
+        }
+    }
     // --- LIFECYCLE HOOKS ---
     
     // Reset pagination when search/filters change
