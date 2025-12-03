@@ -36,9 +36,9 @@ class MembershipPlanResource extends Resource
                     ->label('Subscription Duration (Months)')
                     ->numeric()
                     ->required()
-                    ->minValue(1) // Kam se kam 1 month
+                    ->minValue(0) // <-- 0 months allowed for Lifetime
                     ->default(12)
-                    ->columnSpanFull(), // Ye field poori width legi
+                    ->helperText('Enter duration in months. Use 0 for Lifetime membership.'),
 
                 TextInput::make('price')
                     ->numeric()

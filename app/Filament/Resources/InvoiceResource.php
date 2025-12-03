@@ -101,21 +101,30 @@ class InvoiceResource extends Resource
                 Action::make('activate_tenant')
                     ->label('Mark Paid & Activate')
                     ->icon('heroicon-o-check-circle')
-                    // Ye button sirf tab dikhega jab status 'pending' ho
                     ->visible(fn (Invoice $record): bool => $record->status === 'pending' && $record->payment_method === 'Invoice')
                     ->color('success')
                     ->requiresConfirmation()
                     ->action(function (Invoice $record) {
-                        // 1. Plan duration aur naya date calculate karein
+                        
                         $duration = $record->plan->duration_months;
                         $startDate = now();
-                        $endDate = $startDate->copy()->addMonths($duration);
+                        $endDate = null; // Default to NULL for safety
+
+                        // 1. LIFETIME CHECK & DATE CALCULATION (CRITICAL FIX)
+                        if ($duration === 0) {
+                            // Lifetime Plan: Subscription kabhi khatam nahi hoga (NULL)
+                            $durationString = 'Lifetime';
+                        } else {
+                            // Monthly/Yearly Plan: Date calculate karein
+                            $endDate = $startDate->copy()->addMonths($duration);
+                            $durationString = $duration . ' months';
+                        }
 
                         // 2. Invoice record update karein (Period tracking)
                         $record->update([
                             'status' => 'paid',
                             'period_starts_at' => $startDate,
-                            'period_ends_at' => $endDate,
+                            'period_ends_at' => $endDate, // Naya calculated end date (ya NULL)
                         ]);
 
                         // 3. Tenant ko activate karein (Subscription period start karein)
@@ -124,12 +133,12 @@ class InvoiceResource extends Resource
                             $tenant->update([
                                 'plan_status' => 'active', 
                                 'is_active' => true,
-                                // CRITICAL FIX: Tenant ki expiry date ko naye subscription end date se replace karein
+                                // CRITICAL FIX: Tenant ki expiry date ko naye subscription end date se replace karein (ya NULL)
                                 'trial_ends_at' => $endDate, 
                             ]);
                         }
 
-                        session()->flash('success', 'Tenant successfully activated for ' . $duration . ' months!');
+                        session()->flash('success', 'Tenant successfully activated for ' . $durationString . '!');
                     }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\DeleteAction::make(),
