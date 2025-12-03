@@ -18,16 +18,14 @@ class TeamSwitcher extends Component
             // User ki joined teams fetch karein
             $this->teams = $user->teams; 
 
-            // Session se active team ID load karein ya default set karein
-            $this->activeTeamId = session('active_team_id', $this->teams->first()->id ?? null);
-            
-            // Critical: Agar session mein team ID nahi hai, toh set karein
-            if (!session()->has('active_team_id') && $this->activeTeamId) {
-                session(['active_team_id' => $this->activeTeamId]);
+            // CRITICAL FIX: ActiveTeamId ko hamesha set karein, agar teams majood hain
+            if ($this->teams->isNotEmpty()) {
+                $defaultTeamId = session('active_team_id', $this->teams->first()->id);
+                $this->activeTeamId = $defaultTeamId;
+                session(['active_team_id' => $defaultTeamId]);
             }
         }
     }
-
     // Team switch karne ka action
     public function switchTeam($teamId)
     {
