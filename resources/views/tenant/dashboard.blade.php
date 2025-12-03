@@ -149,6 +149,9 @@
                                      <i class="fas fa-user text-indigo-600"></i>
                                 </div>
                                 <div>
+                                    <div class="hidden md:block">
+                                        @livewire('team-switcher') 
+                                    </div>
                                     <p class="font-medium text-gray-700">{{ $loggedInUser->name ?? 'Admin' }}</p>
                                     <p class="text-gray-500">{{ $loggedInUser->email }}</p>
                                 </div>

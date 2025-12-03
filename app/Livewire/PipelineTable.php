@@ -86,13 +86,22 @@ class PipelineTable extends Component
     public function render()
     {
         $tenantId = tenant('id');
-        
+        $activeTeamId = session('active_team_id'); // <-- Get active team ID from session
+
         $ideas = ProjectIdea::query()
             ->where('tenant_id', $tenantId) // Scope to current tenant
+            
+            // --- CRITICAL FIX: Scope ideas by the active team ID ---
+            ->when($activeTeamId, function ($query, $activeTeamId) {
+                // Filter ideas by the currently selected team
+                $query->where('team_id', $activeTeamId); 
+            })
+            // -------------------------------------------------------
+
             ->when($this->search, function ($query) {
                 // Dynamic Live Search (Name or Description)
                 $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('description', 'like', '%' . $this->search . '%');
+                    ->orWhere('description', 'like', '%' . $this->search . '%');
             })
             ->when($this->statusFilter, function ($query) {
                 // Filter by Status
