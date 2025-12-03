@@ -28,7 +28,8 @@ class IdeaSubmissionForm extends Component
     // Validation Rules per Step
     protected function rules()
     {
-        return [
+        // Yahan saare steps ki rules hain, lekin hum sirf current step return karenge.
+        $allRules = [
             1 => [
                 'problem_short' => 'required|min:4|max:50',
                 'pain_score' => 'required|integer|min:1|max:10',
@@ -42,13 +43,17 @@ class IdeaSubmissionForm extends Component
             4 => [
                 'contact_info' => 'required|email',
             ],
-        ][$this->currentStep] ?? [];
+        ];
+
+        // Sirf current step ke rules return karein
+        return $allRules[$this->currentStep] ?? [];
     }
     
     // Custom Validation for multi-step
     public function nextStep()
     {
-        $this->validate();
+        // CRITICAL FIX: Explicitly call validate() with the rules() method.
+        $this->validate($this->rules()); 
 
         if ($this->currentStep < $this->maxSteps) {
             $this->currentStep++;
