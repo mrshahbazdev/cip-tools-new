@@ -182,7 +182,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($users as $user)
+                                    @foreach($teams as $user)
                                     <tr class="hover:bg-gray-50/80 transition-colors duration-150">
                                         <td class="px-6 py-5 whitespace-nowrap">
                                             <div class="flex items-center">
