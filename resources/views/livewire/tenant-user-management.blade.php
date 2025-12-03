@@ -1,4 +1,13 @@
-<div class="antialiased min-h-screen">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | {{ tenant('id') }}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body { 
@@ -24,14 +33,13 @@
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+</head>
+<body class="antialiased min-h-screen">
 
     @php
-        // Tenant record retrieval
         $currentTenant = \App\Models\Tenant::find(tenant('id'));
         $loggedInUser = auth()->user();
-        
-        // These stats are used in the header for consistency
-        $totalUsers = $users->total(); 
+        $totalUsers = $users->total();
     @endphp
 
     <button onclick="document.querySelector('aside').classList.toggle('hidden');" class="sidebar-toggle fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md lg:hidden">
@@ -117,6 +125,21 @@
             <main class="flex-1 py-8">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     
+                    @if (session()->has('message'))
+                        <div class="mb-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 animate-fade-in">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center mr-4 flex-shrink-0">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-green-800 text-lg">{{ session('message') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="mb-10">
                         <div class="flex items-center justify-between mb-6">
                             <div>
@@ -143,9 +166,7 @@
                                         <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->total() }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13 0h-6"></path>
-                                        </svg>
+                                        <i class="fas fa-users text-indigo-600"></i>
                                     </div>
                                 </div>
                             </div>
@@ -157,9 +178,7 @@
                                         <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', true)->count() }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                        </svg>
+                                        <i class="fas fa-lock text-purple-600"></i>
                                     </div>
                                 </div>
                             </div>
@@ -171,29 +190,12 @@
                                         <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', false)->count() }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13 0h-6"></path>
-                                        </svg>
+                                        <i class="fas fa-user-alt text-blue-600"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    @if (session()->has('message'))
-                        <div class="mb-4 mt-6 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 animate-fade-in">
-                            <div class="flex items-center">
-                                <div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center mr-4 flex-shrink-0">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-green-800 text-lg">{{ session('message') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
 
                     <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden mt-8">
                         <div class="overflow-x-auto">
@@ -266,49 +268,6 @@
             </main>
         </div>
     </div>
-
-<script>
-    // Helper function to toggle password visibility
-    function togglePasswordVisibility(fieldId) {
-        const input = document.getElementById(fieldId);
-        if (input) {
-            input.type = input.type === 'password' ? 'text' : 'password';
-        }
-    }
-    
-    // JS for sidebar toggle and hover effects (kept outside Livewire methods)
-    document.querySelector('.sidebar-toggle')?.addEventListener('click', function() {
-         document.querySelector('aside').classList.toggle('hidden');
-         document.querySelector('aside').classList.toggle('flex');
-         document.querySelector('aside').classList.toggle('fixed');
-         document.querySelector('aside').classList.toggle('inset-0');
-         document.querySelector('aside').classList.toggle('z-40');
-    });
-    
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(event) {
-         const sidebar = document.querySelector('aside');
-         const toggleBtn = document.querySelector('.sidebar-toggle');
-         
-         if (window.innerWidth < 1024 && 
-             sidebar && sidebar.classList.contains('fixed') && 
-             !sidebar.contains(event.target) && 
-             toggleBtn && !toggleBtn.contains(event.target)) {
-             sidebar.classList.add('hidden');
-             sidebar.classList.remove('flex');
-         }
-    });
-    
-    // Add hover effects to cards
-    document.addEventListener('DOMContentLoaded', function() {
-         const cards = document.querySelectorAll('.hover-lift');
-         cards.forEach(card => {
-             card.addEventListener('mouseenter', function() {
-                 this.style.transition = 'all 0.3s ease';
-             });
-         });
-    });
-</script>
 
 @if($isModalOpen)
     <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
@@ -432,11 +391,11 @@
         if (input && eyeIcon) {
             if (input.type === 'password') {
                 input.type = 'text';
-                // Change icon to show 'open eye'
+                // Change icon to show 'open eye' (Simple representation)
                 eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
             } else {
                 input.type = 'password';
-                // Change icon back to show 'closed eye'
+                // Change icon back to show 'closed eye' (Simple representation)
                  eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
             }
         }
