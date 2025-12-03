@@ -13,36 +13,38 @@ class CheckTrialExpiry
     {
         // 1. Agar request central domain se nahi hai aur tenant identified hai
         if (tenancy()->tenant) {
-            
-            // CRITICAL FIX: Tenant object ko database se fresh load karein
-            // Note: Ye check already logged-in user context mein chalta hai
+    
             $tenant = Tenant::find(tenancy()->tenant->id);
             
             $isTrialExpired = $tenant->trial_ends_at && $tenant->trial_ends_at->lessThan(now());
             $isNotActive = $tenant->plan_status !== 'active';
 
-            // Agar trial khatam ho gaya hai aur plan active nahi hai
+            // 1. Agar trial date guzar chuki hai AUR plan active nahi hai, toh action lo
             if ($isTrialExpired && $isNotActive) {
                 
-                $user = auth()->user(); // Logged-in user
-                
-                // 1. Determine Target Route based on role
-                if ($user && $user->isTenantAdmin()) {
-                    // Admin ko seedha Billing page par bhej do
-                    $targetRoute = 'tenant.billing'; 
-                } else {
-                    // Normal user ya logged-out user ko generic expiry page par bhej do
-                    $targetRoute = 'tenant.expired'; 
+                // CRITICAL FIX: Database status ko 'expired' set karein
+                if ($tenant->plan_status !== 'expired') {
+                    $tenant->plan_status = 'expired';
+                    $tenant->is_active = false; 
+                    $tenant->save(); // DB update ho gaya
                 }
-
-                // 2. Check agar user already target page par nahi hai
+                
+                $user = auth()->user();
+                
+                // 2. Determine Target Route (Final Redirect)
+                // Admin ko billing par bhejo, baki sabko generic expired page par.
+                $targetRoute = ($user && $user->isTenantAdmin()) ? 'tenant.billing' : 'tenant.expired';
+                
                 if (! $request->routeIs($targetRoute)) {
-                    // CRITICAL FIX: Logout nahi karna hai
+                    // User ko logout kar dein taaki session lock ho jaye
+                    if (auth()->check()) {
+                        auth()->logout(); 
+                    }
                     return redirect()->route($targetRoute);
                 }
             }
-        
-        return $next($request);
         }
+
+        return $next($request);
     }
 }
