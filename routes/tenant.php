@@ -48,6 +48,7 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
 
             // USER MANAGEMENT (Protected)
             Route::get('/users', \App\Livewire\TenantUserManagement::class)->name('tenant.users.manage');
+            Route::get('/settings', \App\Livewire\TenantBrandingSettings::class)->name('tenant.settings');
         });
     });
 });
