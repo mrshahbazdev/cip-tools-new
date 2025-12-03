@@ -70,8 +70,12 @@ class TenantBrandingSettings extends Component
 
     public function render()
     {
-        // CRITICAL FIX: Explicitly set the existing guest layout
+        // Ensure data is passed to the view for the full layout
         return view('livewire.tenant-branding-settings')
+            ->with([
+                'loggedInUser' => auth()->user(),
+                'currentTenant' => $this->currentTenant,
+            ])
             ->layout('components.layouts.guest'); 
     }
 }
