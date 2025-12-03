@@ -25,6 +25,7 @@ class TenantUser extends Authenticatable
         'stripe_id', // Add new fields to fillable
         'pm_type',
         'pm_last_four',
+        'role',
     ];
 
     protected $hidden = [
@@ -43,5 +44,19 @@ class TenantUser extends Authenticatable
         // Ye method tenant_users table ka boolean column check karega
         // is_tenant_admin ko casts mein define karna zaroori hai.
         return (bool) $this->is_tenant_admin; 
+    }
+    public function isDeveloper(): bool
+    {
+        return $this->role === 'developer';
+    }
+
+    public function isWorkBee(): bool
+    {
+        return $this->role === 'work-bee';
+    }
+
+    public function getRoleNameAttribute(): string
+    {
+        return ucfirst($this->role);
     }
 }
