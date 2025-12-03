@@ -230,9 +230,9 @@
                             </table>
                         </div>
                         
-                        @if($users->hasPages())
+                        @if($teams->hasPages())
                             <div class="px-6 py-4 border-t border-gray-200 glass-card rounded-b-2xl mt-0">
-                                {{ $users->links() }}
+                                {{ $teams->links() }}
                             </div>
                         @endif
                     </div>
