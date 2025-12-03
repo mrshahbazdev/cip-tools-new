@@ -29,7 +29,9 @@
                 <p class="text-lg text-gray-600 mb-6">
                     You have successfully logged in to your private workspace.
                 </p>
-                
+                <div class="mt-8">
+                    @livewire('user-team-joiner')
+                </div>
                 <div class="mt-8 border-t border-gray-200 pt-6 space-y-3">
                     <p class="text-sm text-gray-700 font-medium">
                         <span class="text-indigo-600 mr-2">Email:</span> 
