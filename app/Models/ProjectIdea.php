@@ -20,6 +20,7 @@ class ProjectIdea extends Model
         'developer_notes',
         'cost',
         'time_duration_hours',
+        'team_id',
     ];
 
     protected $casts = [
