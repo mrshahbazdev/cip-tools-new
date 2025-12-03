@@ -5,7 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ProjectIdea;
-
+use App\Models\TenantUser;
+use Illuminate\Support\Facades\Auth;
 class PipelineTable extends Component
 {
     use WithPagination;
@@ -36,7 +37,40 @@ class PipelineTable extends Component
     {
         $this->resetPage();
     }
+    public function saveIdeaField($ideaId, $fieldName, $newValue)
+    {
+        // Livewire state se user ko load karein (jo TenantUser model hoga)
+        $user = Auth::user(); 
 
+        // Field Identification: Yellow (Work-Bee) vs Red (Developer)
+        $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status']);
+        $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours']);
+        
+        $isAuthorized = false;
+
+        // --- AUTHORIZATION CHECK ---
+        if ($user->isTenantAdmin()) {
+            $isAuthorized = true; // Admin can edit everything
+        } elseif ($isWorkBeeField && $user->isWorkBee()) {
+            $isAuthorized = true; // Work-Bee can edit yellow fields
+        } elseif ($isDeveloperField && $user->isDeveloper()) {
+            $isAuthorized = true; // Developer can edit red fields
+        }
+
+        if (!$isAuthorized) {
+            session()->flash('error', "Access Denied: You do not have permission to edit the $fieldName.");
+            // This forces the component to reload the original data, discarding unauthorized changes
+            $this->dispatch('refreshComponent'); 
+            return; 
+        }
+        
+        // Proceed with save if authorized
+        $idea = ProjectIdea::find($ideaId);
+        if ($idea) {
+            $idea->update([$fieldName => $newValue]);
+            session()->flash('message', "{$idea->name} ($fieldName) updated successfully!");
+        }
+    }
     // Sort function called when a column header is clicked
     public function sortBy($field)
     {
