@@ -26,7 +26,14 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
 
     // 2. DASHBOARD ROUTE (Protected by Auth Check)
     Route::get('/dashboard', function () {
-        // CRITICAL FIX: Role check karke sahi view render karein
+        
+        // CRITICAL FIX: Sabse pehle check karein ki koi user logged in hai ya nahi
+        if (! auth()->check()) {
+            // Agar logged out hai, toh seedha login par bhej do
+            return redirect()->route('login'); 
+        }
+
+        // Ab user logged in hai. Uska role check karein.
         if (auth()->user()->isTenantAdmin()) {
             // Tenant Admin ko full management view dikhao
             return view('tenant.dashboard'); 
