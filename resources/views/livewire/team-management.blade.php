@@ -120,17 +120,17 @@
                         <div class="flex items-center justify-between mb-6">
                             <div>
                                 <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                                    Team Management
+                                    Project Teams
                                 </h1>
                                 <p class="text-gray-600 mt-1">
-                                    Manage users in <span class="font-semibold text-indigo-600">{{ strtoupper(tenant('id')) }}</span> workspace
+                                    Manage collaboration groups in <span class="font-semibold text-indigo-600">{{ strtoupper(tenant('id')) }}</span>
                                 </p>
                             </div>
                             <button wire:click="create()" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-300 flex items-center gap-2 group">
                                 <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                Add Team Member
+                                Create New Team
                             </button>
                         </div>
 
@@ -138,11 +138,23 @@
                             <div class="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-sm font-medium text-gray-600">Total Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->total() }}</p>
+                                        <p class="text-sm font-medium text-gray-600">Total Teams</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $teams->total() }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center">
-                                        <i class="fas fa-users text-indigo-600"></i>
+                                        <i class="fas fa-layer-group text-indigo-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600">Total Collaborators</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $totalUsers }}</p>
+                                    </div>
+                                    <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                                        <i class="fas fa-users text-blue-600"></i>
                                     </div>
                                 </div>
                             </div>
@@ -151,22 +163,10 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-gray-600">Admin Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', true)->count() }}</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $adminUsers }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center">
                                         <i class="fas fa-lock text-purple-600"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-gradient-to-br from-white to-gray-50 p-5 rounded-2xl border border-gray-200 shadow-sm">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-600">Standard Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', false)->count() }}</p>
-                                    </div>
-                                    <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                                        <i class="fas fa-user-alt text-blue-600"></i>
                                     </div>
                                 </div>
                             </div>
@@ -178,53 +178,40 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr class="bg-gray-50/80">
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Team Name</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Users / Roles</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date Created</th>
                                         <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($users as $user)
+                                    @foreach($teams as $team)
                                     <tr class="hover:bg-gray-50/80 transition-colors duration-150">
                                         <td class="px-6 py-5 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-100 to-blue-100 flex items-center justify-center mr-3">
-                                                    <span class="font-semibold text-indigo-700 text-sm">
-                                                        {{ substr($user->name, 0, 1) }}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <div class="font-medium text-gray-900">{{ $user->name }}</div>
-                                                    <div class="text-xs text-gray-500">Member since {{ $user->created_at->format('M d, Y') }}</div>
-                                                </div>
-                                            </div>
+                                            <div class="font-medium text-gray-900">{{ $team->name }}</div>
+                                            <div class="text-xs text-gray-500">ID: {{ $team->id }}</div>
                                         </td>
                                         <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
-                                            {{ $user->email }}
+                                            <p class="font-medium">Total Members: {{ $team->members_count }}</p>
+                                            <span class="text-xs text-blue-600 block">Dev: {{ $team->developers_count }} / Bees: {{ $team->work_bees_count }}</span>
                                         </td>
-                                        <td class="px-6 py-5 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $user->is_tenant_admin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
-                                                @if($user->is_tenant_admin)
-                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                                                    Admin
-                                                @else
-                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                                    Standard
-                                                @endif
-                                            </span>
+                                        <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
+                                            {{ $team->created_at->format('M d, Y') }}
                                         </td>
                                         <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end gap-2">
-                                                <button wire:click="edit({{ $user->id }})" class="text-gray-600 hover:text-indigo-700 p-2 rounded-lg hover:bg-indigo-50 transition-all duration-200 group" title="Edit User">
+                                                
+                                                <button wire-click="manageMembers({{ $team->id }})" class="text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-all duration-200 group" title="Manage Members">
+                                                    <i class="fas fa-user-friends"></i>
+                                                </button>
+
+                                                <button wire:click="edit({{ $team->id }})" class="text-gray-600 hover:text-indigo-700 p-2 rounded-lg hover:bg-indigo-50 transition-all duration-200 group" title="Edit Team Name">
                                                     <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                                 </button>
                                                 
-                                                @if(!$user->is_tenant_admin)
-                                                    <button wire:click="delete({{ $user->id }})" onclick="confirm('Are you sure you want to delete this user?') || event.stopImmediatePropagation()" class="text-gray-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all duration-200 group" title="Remove User">
-                                                        <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                    </button>
-                                                @endif
+                                                <button wire:click="delete({{ $team->id }})" onclick="confirm('Are you sure you want to delete this team? This action cannot be undone.') || event.stopImmediatePropagation()" class="text-gray-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all duration-200 group" title="Remove Team">
+                                                    <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -233,9 +220,9 @@
                             </table>
                         </div>
                         
-                        @if($users->hasPages())
+                        @if($teams->hasPages())
                             <div class="px-6 py-4 border-t border-gray-200 glass-card rounded-b-2xl mt-0">
-                                {{ $users->links() }}
+                                {{ $teams->links() }}
                             </div>
                         @endif
                     </div>
@@ -306,6 +293,59 @@
         </div>
     </div>
 @endif
+
+@if($manageMembersModalOpen)
+    <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-900">
+                    Manage Members for: {{ $currentTeam->name ?? 'Team' }}
+                </h3>
+                <button wire:click="$set('manageMembersModalOpen', false)" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form wire:submit.prevent="saveMembers" class="p-6 space-y-6">
+                
+                <p class="text-sm text-gray-600">Select the users you want to assign to this team:</p>
+                
+                <div class="max-h-60 overflow-y-auto border border-gray-300 p-4 rounded-lg space-y-3 bg-gray-50">
+                    @forelse($availableUsers as $user)
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       wire:model="selectedMembers" 
+                                       value="{{ $user->id }}" 
+                                       id="member-{{ $user->id }}"
+                                       class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                <label for="member-{{ $user->id }}" class="ml-3 text-sm text-gray-700 font-medium flex items-center gap-2">
+                                    {{ $user->name }} 
+                                    <span class="text-xs {{ $user->role === 'developer' ? 'text-red-500' : 'text-blue-500' }}">({{ ucfirst($user->role) }})</span>
+                                </label>
+                            </div>
+                            <span class="text-xs text-gray-500">{{ $user->email }}</span>
+                        </div>
+                    @empty
+                        <p class="text-gray-500 italic">No users found in this workspace.</p>
+                    @endforelse
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                    <button type="button" wire:click="$set('manageMembersModalOpen', false)" class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 transition">
+                        Save Membership
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif
+
 
 <script>
     // Helper function to toggle password visibility
