@@ -16,7 +16,6 @@
         }
         .hover-lift { transition: all 0.3s ease; }
         .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); }
-        .mobile-hidden { display: none; }
         @media (max-width: 1024px) {
             .sidebar-toggle { display: block !important; }
             .mobile-hidden { display: none; }
@@ -24,6 +23,10 @@
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+
+    @php
+        $loggedInUser = auth()->user();
+    @endphp
 
     <button onclick="document.querySelector('aside').classList.toggle('hidden');" class="sidebar-toggle fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md lg:hidden">
         <i class="fas fa-bars text-gray-700"></i>
@@ -69,13 +72,7 @@
             <div class="mt-auto p-4">
                 <div class="p-4 bg-blue-50 rounded-lg">
                     <p class="text-sm font-medium text-blue-800">Admin: {{ $loggedInUser->name ?? 'Project Admin' }}</p>
-                    <p class="text-xs text-blue-600 mt-1">{{ $loggedInUser->email ?? 'N/A' }}</p> 
-                    <div class="hidden md:flex items-center space-x-2 text-sm">
-                        <div>
-                            <p class="font-medium text-gray-700">{{ $loggedInUser->name ?? 'Admin' }}</p>
-                            <p class="text-gray-500">{{ $loggedInUser->email ?? 'N/A' }}</p>
-                        </div>
-                    </div>
+                    <p class="text-xs text-blue-600 mt-1">{{ $loggedInUser->email }}</p>
                 </div>
             </div>
         </aside>
