@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | {{ tenant('id') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
@@ -41,35 +41,40 @@
 <body class="antialiased min-h-screen">
 
     @php
-        // Tenant record ko fresh load karein
+        // Tenant record retrieval
         $currentTenant = \App\Models\Tenant::find(tenant('id'));
         $loggedInUser = auth()->user();
         
-        // 1. Calculate Days Remaining
+        // 1. Calculate Days Remaining (All expiry dates are in trial_ends_at)
         $trialEndDate = $currentTenant->trial_ends_at;
         $hoursRemaining = $trialEndDate ? now()->diffInHours($trialEndDate, false) : 0;
         $cleanDaysRemaining = $hoursRemaining > 0 ? ceil($hoursRemaining / 24) : 0;
         
-        // Dynamic Status Check
+        // 2. Status Determination Logic
         if ($currentTenant->plan_status === 'active') {
             $statusText = 'ACTIVE';
             $statusColor = 'bg-green-100 text-green-800';
-            $remainingText = 'Unlimited Access';
+            
+            if ($trialEndDate === null) {
+                $remainingText = 'Lifetime Access';
+            } else {
+                $remainingText = $cleanDaysRemaining . ' days remaining';
+            }
+            
         } elseif ($cleanDaysRemaining > 0) {
             $statusText = 'TRIAL';
             $statusColor = 'bg-orange-100 text-orange-800';
             $remainingText = $cleanDaysRemaining . ' days remaining';
         } else {
-            // Expired or Access Blocked
             $statusText = 'EXPIRED';
             $statusColor = 'bg-red-100 text-red-800';
             $remainingText = 'Access Blocked';
         }
 
-        // 2. Count Total Tenant Users (Scoped)
+        // 3. Count Total Tenant Users (Scoped)
         $totalUsers = \App\Models\TenantUser::where('tenant_id', tenant('id'))->count();
         
-        // 3. Branding & Incentive Text (New Fields)
+        // 4. Branding & Incentive Text (New Fields)
         $slogan = $currentTenant->slogan ?? 'Thought together and made together.';
         $incentive = $currentTenant->incentive_text ?? 'Please specify the type of proposer remuneration.';
     @endphp
