@@ -12,39 +12,31 @@ class UserTeamJoiner extends Component
     public $availableTeams;
     public $joinedTeamIds = [];
     public $isJoiningModalOpen = false;
-
-    // --- LIFECYCLE & INITIALIZATION ---
+    public $currentTenantId;
 
     public function mount()
     {
-        // Component load hone par data load karein
+        $this->currentTenantId = tenant('id');
         $this->loadTeamsAndMembership();
     }
     
     public function loadTeamsAndMembership()
     {
-        $tenantId = tenant('id');
         $user = Auth::user();
         
-        // 1. Current Tenant ke sabhi teams fetch karein (Fresh query)
-        $this->availableTeams = Team::where('tenant_id', $tenantId)->get();
+        // 1. Current Tenant ke sabhi teams fetch karein
+        $this->availableTeams = Team::where('tenant_id', $this->currentTenantId)->get();
         
-        // 2. Current user ki joined teams IDs nikalen (Pivot table se)
-        // CRITICAL FIX: Direct relationship se IDs nikalen taaki sync ho sake
+        // 2. Current user ki joined teams IDs nikalen
         $this->joinedTeamIds = $user->teams()->pluck('team_id')->toArray(); 
     }
 
-    // --- ACTIONS ---
-
-    // Modal open karna (Data refresh karein)
     public function openJoinModal()
     {
-        // Naya data load karein taaki newly created teams show hon
-        $this->loadTeamsAndMembership(); 
+        $this->loadTeamsAndMembership();
         $this->isJoiningModalOpen = true;
     }
 
-    // User ko selected teams mein save karna (Attach/Detach)
     public function saveMembership()
     {
         $user = Auth::user();
@@ -56,10 +48,9 @@ class UserTeamJoiner extends Component
         
         $this->isJoiningModalOpen = false;
         
-        // Dispatch event taaki Team Switcher component refresh ho jaye
+        // Dispatch event taaki Team Switcher component/Dashboard refresh ho jaye
         $this->dispatch('team-membership-updated'); 
         
-        // Data ko current state ke liye dubara load karein
         $this->loadTeamsAndMembership(); 
     }
 
