@@ -13,28 +13,34 @@ class UserTeamJoiner extends Component
     public $joinedTeamIds = [];
     public $isJoiningModalOpen = false;
 
+    // --- LIFECYCLE & INITIALIZATION ---
+
     public function mount()
     {
+        // Component load hone par data load karein
         $this->loadTeamsAndMembership();
     }
     
-    // Teams aur membership status ko load karein
     public function loadTeamsAndMembership()
     {
         $tenantId = tenant('id');
         $user = Auth::user();
         
-        // 1. Current Tenant ke sabhi teams fetch karein
+        // 1. Current Tenant ke sabhi teams fetch karein (Fresh query)
         $this->availableTeams = Team::where('tenant_id', $tenantId)->get();
         
-        // 2. Current user ki joined teams IDs nikalen
-        $this->joinedTeamIds = $user->teams()->pluck('team_id')->toArray();
+        // 2. Current user ki joined teams IDs nikalen (Pivot table se)
+        // CRITICAL FIX: Direct relationship se IDs nikalen taaki sync ho sake
+        $this->joinedTeamIds = $user->teams()->pluck('team_id')->toArray(); 
     }
 
-    // Modal open karna
+    // --- ACTIONS ---
+
+    // Modal open karna (Data refresh karein)
     public function openJoinModal()
     {
-        $this->loadTeamsAndMembership(); // Data refresh karein
+        // Naya data load karein taaki newly created teams show hon
+        $this->loadTeamsAndMembership(); 
         $this->isJoiningModalOpen = true;
     }
 
@@ -47,10 +53,14 @@ class UserTeamJoiner extends Component
         $user->teams()->sync($this->joinedTeamIds);
 
         session()->flash('success', 'Your team memberships have been updated successfully.');
+        
         $this->isJoiningModalOpen = false;
         
-        // Component ko refresh karein
-        $this->dispatch('team-membership-updated');
+        // Dispatch event taaki Team Switcher component refresh ho jaye
+        $this->dispatch('team-membership-updated'); 
+        
+        // Data ko current state ke liye dubara load karein
+        $this->loadTeamsAndMembership(); 
     }
 
     public function render()
