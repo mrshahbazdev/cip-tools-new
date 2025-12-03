@@ -24,6 +24,10 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 
+    @php
+        $loggedInUser = auth()->user();
+    @endphp
+
     <button onclick="document.querySelector('aside').classList.toggle('hidden');" class="sidebar-toggle fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md lg:hidden">
         <i class="fas fa-bars text-gray-700"></i>
     </button>
@@ -82,7 +86,6 @@
                         </div>
                         
                         <div class="flex items-center space-x-4">
-                            
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="h-9 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition duration-150 flex items-center space-x-2">
@@ -136,7 +139,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-gray-600">Total Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $totalUsers }}</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->total() }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center">
                                         <i class="fas fa-users text-indigo-600"></i>
@@ -148,7 +151,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-gray-600">Admin Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $adminUsers }}</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', true)->count() }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center">
                                         <i class="fas fa-lock text-purple-600"></i>
@@ -160,7 +163,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-medium text-gray-600">Standard Users</p>
-                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $standardUsers }}</p>
+                                        <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->where('is_tenant_admin', false)->count() }}</p>
                                     </div>
                                     <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
                                         <i class="fas fa-user-alt text-blue-600"></i>
@@ -182,7 +185,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($teams as $user)
+                                    @foreach($users as $user)
                                     <tr class="hover:bg-gray-50/80 transition-colors duration-150">
                                         <td class="px-6 py-5 whitespace-nowrap">
                                             <div class="flex items-center">
@@ -230,9 +233,9 @@
                             </table>
                         </div>
                         
-                        @if($teams->hasPages())
+                        @if($users->hasPages())
                             <div class="px-6 py-4 border-t border-gray-200 glass-card rounded-b-2xl mt-0">
-                                {{ $teams->links() }}
+                                {{ $users->links() }}
                             </div>
                         @endif
                     </div>

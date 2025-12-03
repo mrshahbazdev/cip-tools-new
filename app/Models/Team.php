@@ -16,4 +16,14 @@ class Team extends Model
     {
         return $this->belongsToMany(TenantUser::class, 'team_user', 'team_id', 'tenant_user_id');
     }
+    public function developers()
+    {
+        return $this->members()->where('role', 'developer');
+    }
+
+    // Scoped relationship to count Work-Bee roles in this team
+    public function workBees()
+    {
+        return $this->members()->where('role', 'work-bee');
+    }
 }

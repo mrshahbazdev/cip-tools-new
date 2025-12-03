@@ -13,21 +13,33 @@ class TeamManagement extends Component
 {
     use WithPagination;
 
+    // --- Team CRUD Properties ---
     public $name;
     public $teamId;
     public $isModalOpen = false;
+    
+    // --- Membership Management Properties ---
+    public $manageMembersModalOpen = false;
+    public $currentTeam;
+    public $availableUsers;
+    public $selectedMembers = []; // Array to hold IDs of selected members
+    
+    // --- User Info for Layout/Stats ---
     public $loggedInUser;
     public $totalUsers;
     public $adminUsers;
     public $standardUsers;
 
+    // --- Authorization Check ---
     public function authorizeAccess()
     {
+        // Only Tenant Admin (project owner) can manage teams
         if (! Auth::check() || ! Auth::user()->isTenantAdmin()) {
             abort(403, 'You must be the Tenant Administrator to manage teams.');
         }
     }
 
+    // --- Validation Rules ---
     protected function rules()
     {
         $tenantId = tenant('id');
@@ -36,12 +48,15 @@ class TeamManagement extends Component
             'name' => [
                 'required',
                 'min:3',
+                // Team name must be unique within this tenant
                 Rule::unique('teams', 'name')
                     ->where(fn ($query) => $query->where('tenant_id', $tenantId))
                     ->ignore($this->teamId),
             ],
         ];
     }
+
+    // --- CRUD & LIFECYCLE ACTIONS ---
 
     public function mount()
     {
@@ -93,23 +108,61 @@ class TeamManagement extends Component
         $this->isModalOpen = true;
     }
 
+    // --- MEMBERSHIP MANAGEMENT METHODS ---
+
+    // Load available users and selected members for assignment modal
+    public function manageMembers($teamId)
+    {
+        $this->authorizeAccess();
+        $this->currentTeam = Team::findOrFail($teamId);
+        
+        // Fetch all users for the current tenant
+        $this->availableUsers = TenantUser::where('tenant_id', tenant('id'))
+                                        ->get(['id', 'name', 'email', 'role', 'is_tenant_admin']);
+        
+        // Pre-select members already assigned to this team
+        $this->selectedMembers = $this->currentTeam->members()->pluck('tenant_user_id')->toArray();
+
+        $this->manageMembersModalOpen = true;
+    }
+
+    // Save members to the pivot table
+    public function saveMembers()
+    {
+        $this->authorizeAccess();
+        
+        // Synchronize the pivot table: detaches old, attaches new
+        $this->currentTeam->members()->sync($this->selectedMembers);
+
+        session()->flash('message', "Team '{$this->currentTeam->name}' members updated successfully.");
+        
+        $this->manageMembersModalOpen = false;
+        $this->currentTeam = null;
+    }
+
+
+    // --- RENDER AND HELPERS ---
+
     public function render()
     {
         $this->authorizeAccess();
         
         $tenantId = tenant('id');
         
+        // Data for the main table (Teams)
+        // Eager load counts for display efficiency
         $teams = Team::where('tenant_id', $tenantId)
+                     ->withCount(['members', 'developers', 'workBees'])
                      ->paginate(10);
         
-        // Stats Calculation
+        // Stats Calculation (for the header cards)
         $allTenantUsers = TenantUser::where('tenant_id', $tenantId)->get();
         $this->totalUsers = $allTenantUsers->count();
         $this->adminUsers = $allTenantUsers->where('is_tenant_admin', true)->count();
         $this->standardUsers = $allTenantUsers->where('is_tenant_admin', false)->count();
 
         return view('livewire.team-management', [
-            'teams' => $teams,
+            'users' => $teams,
             'totalUsers' => $this->totalUsers,
             'adminUsers' => $this->adminUsers,
             'standardUsers' => $this->standardUsers,
@@ -120,5 +173,6 @@ class TeamManagement extends Component
     {
         $this->teamId = null;
         $this->name = '';
+        $this->isModalOpen = false;
     }
 }
