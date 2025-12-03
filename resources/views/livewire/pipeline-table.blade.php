@@ -29,11 +29,34 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        @include('livewire.partials.pipeline-table-header', ['field' => 'name', 'label' => 'Idea / Status'])
-                        @include('livewire.partials.pipeline-table-header', ['field' => 'pain_score', 'label' => 'Pain Score'])
-                        @include('livewire.partials.pipeline-table-header', ['field' => 'cost', 'label' => 'Cost (Kosten)'])
-                        @include('livewire.partials.pipeline-table-header', ['field' => 'time_duration_hours', 'label' => 'Time (Dauer)'])
-                        @include('livewire.partials.pipeline-table-header', ['field' => 'priority', 'label' => 'Priority (Umsetzung)'])
+                        {{-- 1. IDEA / PROBLEM (Sortable) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'problem_short', 'label' => 'IDEA / PROBLEM'])
+                        
+                        {{-- 2. Status (Sortable, Yellow/Work-Bee field) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'status', 'label' => 'Status'])
+
+                        {{-- 3. Schmerz (Sortable, Yellow/Work-Bee field) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'pain_score', 'label' => 'Schmerz'])
+                        
+                        {{-- 4. LÖSUNG (Red/Developer - Text display only, not directly sortable by header) --}}
+                        <th class="bg-red-50/50 px-6 py-3 text-xs font-medium text-gray-700 uppercase tracking-wider">LÖSUNG</th>
+                        
+                        {{-- 5. Kosten (Sortable, Red/Developer field) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'cost', 'label' => 'Kosten'])
+                        
+                        {{-- 6. Dauer (Sortable, Red/Developer field) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'time_duration_hours', 'label' => 'Dauer'])
+                        
+                        {{-- 7. PRIO 1 (Sortable, Yellow/Work-Bee field) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'prio_1', 'label' => 'PRIO 1'])
+                        
+                        {{-- 8. PRIO 2 (Sortable, Yellow/Work-Bee field) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'prio_2', 'label' => 'PRIO 2'])
+                        
+                        {{-- 9. Umsetzung (Sortable, Yellow/Work-Bee field) --}}
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'priority', 'label' => 'Umsetzung'])
+
+                        {{-- Actions Column --}}
                         <th class="px-6 py-3"></th>
                     </tr>
                 </thead>
