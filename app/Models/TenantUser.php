@@ -59,4 +59,8 @@ class TenantUser extends Authenticatable
     {
         return ucfirst($this->role);
     }
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'team_user', 'tenant_user_id', 'team_id');
+    }
 }
