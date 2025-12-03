@@ -74,7 +74,7 @@ class TenantUserManagement extends Component
     {
         $this->authorizeAccess();
 
-        $tenantId = $this->currentTenantId; // State property use karein
+        $tenantId = $this->currentTenantId;
         
         $users = TenantUser::where('tenant_id', $tenantId)
                             ->orderBy('is_tenant_admin', 'desc')
@@ -82,8 +82,7 @@ class TenantUserManagement extends Component
 
         return view('livewire.tenant-user-management', [
             'users' => $users,
-            // currentTenantId ko yahan pass karne ki zarurat nahi, woh $this se mil jayega.
-        ]); // <-- FINAL FIX: ->layout(...) call hata diya
+        ])->layout('components.layouts.guest');
     }
 
     public function create()
