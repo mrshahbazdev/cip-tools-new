@@ -66,7 +66,24 @@
             {{ $idea->priority ?? 'N/A' }}
         @endif
     </td>
-
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50">
+        @if($isTenantAdmin || $isWorkBee)
+            <input type="number" min="1" max="10" wire:model="idea.prio_1"
+                wire:blur="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
+                class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
+        @else
+            {{ $idea->prio_1 ?? 'N/A' }}
+        @endif
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50">
+        @if($isTenantAdmin || $isWorkBee)
+            <input type="number" min="1" max="10" wire:model="idea.prio_2"
+                wire:blur="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
+                class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
+        @else
+            {{ $idea->prio_2 ?? 'N/A' }}
+        @endif
+    </td>
     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <a href="/pipeline/{{ $idea->id }}" class="text-indigo-600 hover:text-indigo-900">View Details &rarr;</a>
     </td>

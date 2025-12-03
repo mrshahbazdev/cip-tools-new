@@ -43,8 +43,8 @@ class PipelineTable extends Component
         $user = Auth::user(); 
 
         // Field Identification: Yellow (Work-Bee) vs Red (Developer)
-        $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status']);
-        $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours']);
+        $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status', 'prio_1', 'prio_2']); // PRIO 1 & 2 are Work-Bee fields
+        $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours', 'loesung']); // Assuming 'loesung' is mapped to developer_notes
         
         $isAuthorized = false;
 
