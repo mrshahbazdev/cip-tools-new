@@ -121,21 +121,11 @@ class PipelineTable extends Component
             // CRITICAL: Pagination ko reset mat karo
             // $this->resetPage(); // ← YEH LINE HAMESHA COMMENT OUT RAKHEIN
             
-            // Instead, manually update the idea in the current collection
-            $this->updateIdeaInCollection($ideaId, $fieldName, $newValue);
-        }
-    }
-
-    // New helper method to update idea in current collection
-    protected function updateIdeaInCollection($ideaId, $fieldName, $value)
-    {
-        if ($this->ideas && $this->ideas->isNotEmpty()) {
-            $this->ideas = $this->ideas->map(function ($idea) use ($ideaId, $fieldName, $value) {
-                if ($idea->id == $ideaId) {
-                    $idea->{$fieldName} = $value;
-                }
-                return $idea;
-            });
+            // Instead, use Livewire's $refresh to update the view without losing state
+            $this->dispatch('field-updated')->self();
+            
+            // Ya phir success message ke liye event dispatch karein
+            session()->flash('message', 'Field updated successfully!');
         }
     }
 
