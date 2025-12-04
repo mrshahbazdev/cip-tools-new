@@ -1,13 +1,11 @@
 <tr wire:key="idea-{{ $idea->id }}" class="hover:bg-gray-50">
     
     @php
-        // Role check from authenticated user
         $user = auth()->user();
         $isTenantAdmin = $user->isTenantAdmin();
         $isDeveloper = $user->isDeveloper();
         $isWorkBee = $user->isWorkBee();
         
-        // Helper to determine the status background color
         $statusBg = match ($idea->status) {
             'New' => 'bg-blue-50 text-blue-700',
             'Reviewed' => 'bg-cyan-50 text-cyan-700',
@@ -24,7 +22,6 @@
         
         @if($isTenantAdmin || $isWorkBee)
              <select 
-                wire:model.defer="status_{{ $idea->id }}"
                 wire:change="saveIdeaField({{ $idea->id }}, 'status', $event.target.value)"
                 @click.stop 
                 class="mt-1 px-2 py-1 border rounded text-xs bg-gray-100 border-gray-300 focus:ring-indigo-500">
@@ -44,7 +41,6 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->pain_score }}"
-                   wire:model.defer="pain_score_{{ $idea->id }}"
                    wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
@@ -57,7 +53,6 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="text" 
                    value="{{ $idea->developer_notes }}"
-                   wire:model.defer="developer_notes_{{ $idea->id }}"
                    wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded bg-red-50 border-red-300">
@@ -71,7 +66,6 @@
             <input type="number" 
                    step="0.01" 
                    value="{{ $idea->cost }}"
-                   wire:model.defer="cost_{{ $idea->id }}"
                    wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded text-right bg-red-50 border-red-300">
@@ -84,7 +78,6 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="number" 
                    value="{{ $idea->time_duration_hours }}"
-                   wire:model.defer="time_duration_hours_{{ $idea->id }}"
                    wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-red-50 border-red-300">
@@ -100,7 +93,6 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->prio_1 }}"
-                   wire:model.defer="prio_1_{{ $idea->id }}"
                    wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
@@ -115,7 +107,6 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->prio_2 }}"
-                   wire:model.defer="prio_2_{{ $idea->id }}"
                    wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
@@ -130,7 +121,6 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->priority }}"
-                   wire:model.defer="priority_{{ $idea->id }}"
                    wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-green-50 border-green-300">
@@ -140,6 +130,6 @@
     </td>
 
     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <a href="/pipeline/{{ $idea->id }}" class="text-indigo-600 hover:text-indigo-900">View Details &rarr;</a>
+        <a href="/pipeline/{{ $idea->id }}" class="text-indigo-600 hover:text-indigo-900">View Details →</a>
     </td>
 </tr>
