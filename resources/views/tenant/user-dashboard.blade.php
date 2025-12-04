@@ -133,9 +133,6 @@
                                 <span class="text-indigo-600 mr-2">Email:</span> 
                                 {{ $loggedInUser->email }}
                             </p>
-                            <p class="text-sm text-gray-500">
-                                *Aapko Management Dashboard (Admin Panel) access karne ki ijazat nahi hai.
-                            </p>
                         </div>
                     </div>
                 </div>
