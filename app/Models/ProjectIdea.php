@@ -25,6 +25,7 @@ class ProjectIdea extends Model
         'prio_1', // New field
         'prio_2', // New field
         'contact_info', // New field
+        'tenant_user_id',
     ];
 
     protected $casts = [

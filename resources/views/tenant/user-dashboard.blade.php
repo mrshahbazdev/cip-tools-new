@@ -42,10 +42,10 @@
         // 2. Calculate Stats (Scoped to current user)
         $teamsJoined = $tenantUser->teams->count();
         $ideasSubmitted = \App\Models\ProjectIdea::where('tenant_id', tenant('id'))
-                            ->where('user_id', $loggedInUser->id) // Assuming user_id is submitter ID
+                            ->where('tenant_user_id', $loggedInUser->id) // Assuming user_id is submitter ID
                             ->count();
         $ideasInProgress = \App\Models\ProjectIdea::where('tenant_id', tenant('id'))
-                             ->where('user_id', $loggedInUser->id)
+                             ->where('tenant_user_id', $loggedInUser->id)
                              ->whereIn('status', ['Pending Pricing', 'Implementation'])
                              ->count();
     @endphp
