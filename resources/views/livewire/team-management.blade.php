@@ -233,7 +233,66 @@
     </div>
 
 @if($isModalOpen)
-    @endif
+    <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-900">
+                        {{ $teamId ? 'Edit Team: ' . $name : 'Create New Team' }}
+                    </h3>
+                    <button wire:click="$set('isModalOpen', false)" 
+                        class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <form wire:submit.prevent="store" class="p-6 space-y-6">
+                <div class="space-y-5">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center justify-between">
+                            <span>Team Name</span>
+                            <span class="text-xs text-gray-400">Required</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" wire:model="name" 
+                                class="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 outline-none transition-all duration-200 bg-white @error('name') border-red-400 focus:ring-red-500/30 @enderror"
+                                placeholder="e.g., Development Group A">
+                        </div>
+                        @error('name') 
+                            <div class="flex items-center gap-1 mt-2 text-red-500 text-sm">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
+
+                    @if ($teamId)
+                        <p class="text-xs text-gray-500">
+                            Editing this name will not affect existing team members.
+                        </p>
+                    @endif
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" wire:click="$set('isModalOpen', false)" 
+                        class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                        class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-600 transition-all duration-300 shadow-md">
+                        Save Team
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif
 
 @if($manageMembersModalOpen)
     <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
