@@ -45,7 +45,12 @@ class PipelineTable extends Component
     {
         $this->resetPage();
     }
-
+    public function resetFilters()
+    {
+        $this->search = '';
+        $this->statusFilter = ''; // Reset the filter property to empty string
+        $this->resetPage();
+    }
     public function sortBy($field)
     {
         if ($this->sortBy === $field) {

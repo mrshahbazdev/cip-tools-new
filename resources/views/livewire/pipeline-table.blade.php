@@ -16,7 +16,7 @@
                 @endforeach
             </select>
             
-            <button wire:click="$set('search', ''); $set('statusFilter', '');" 
+            <button wire:click="resetFilters" 
                     class="w-full px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition">
                 Reset Filters
             </button>
