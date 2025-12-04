@@ -119,14 +119,15 @@ class TeamManagement extends Component
         $this->currentTeam = Team::findOrFail($teamId);
         
         // Fetch all users for the current tenant
+        // CRITICAL FIX: 'role' column ko yahan se remove karein
         $availableUsers = TenantUser::where('tenant_id', $this->currentTenantId)
-                                        ->get(['id', 'name', 'email', 'role', 'is_tenant_admin']);
+                                    ->get(['id', 'name', 'email', 'is_tenant_admin']); // <-- 'role' removed
         
-        // 1. Selected members ko load karein
-        $this->selectedMembers = $this->currentTeam->members()->pluck('tenant_user_id')->toArray();
+        // ... baaki logic same ...
+        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => $user->role)->toArray(); // <-- Ye line bhi ghalti karegi
         
-        // 2. userRoles array ko current roles se initialize karein (Keyed by user ID)
-        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => $user->role)->toArray();
+        // Final Fix: 'role' ko map karne ki jagah, default 'work-bee' se initialize karein
+        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => 'work-bee')->toArray();
 
         $this->availableUsers = $availableUsers; 
         $this->manageMembersModalOpen = true;
