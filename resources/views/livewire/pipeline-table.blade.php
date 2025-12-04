@@ -163,96 +163,130 @@
         <!-- Main Table Section -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             <!-- Desktop View -->
-            <div class="hidden lg:block overflow-x-auto">
-                <div class="min-w-full">
-                    <!-- Table Header -->
-                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                        <div class="grid grid-cols-12 gap-4 px-6 py-4">
-                            <div class="col-span-3">
+            <div class="hidden lg:block overflow-x-auto custom-scrollbar">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <tr>
+                            <!-- IDEA / PROBLEM -->
+                            <th class="px-6 py-4 text-left">
                                 @include('livewire.partials.pipeline-table-header', [
                                     'field' => 'problem_short', 
                                     'label' => 'IDEA / PROBLEM',
                                     'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
                                 ])
-                            </div>
-                            <div class="col-span-1">
+                            </th>
+                            
+                            <!-- Status -->
+                            <th class="px-6 py-4 text-left">
                                 @include('livewire.partials.pipeline-table-header', [
                                     'field' => 'status', 
                                     'label' => 'Status',
                                     'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
                                 ])
-                            </div>
-                            <div class="col-span-1">
+                            </th>
+                            
+                            <!-- Pain Score -->
+                            <th class="px-6 py-4 text-left">
                                 @include('livewire.partials.pipeline-table-header', [
                                     'field' => 'pain_score', 
                                     'label' => 'Pain',
                                     'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
                                 ])
-                            </div>
-                            <div class="col-span-2 bg-red-50/50 rounded-lg px-3 py-2">
-                                <span class="text-xs font-medium text-gray-700 uppercase tracking-wider flex items-center">
-                                    <svg class="w-4 h-4 mr-1 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            </th>
+                            
+                            <!-- LÖSUNG -->
+                            <th class="px-6 py-4 text-left bg-red-50/50">
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                     </svg>
-                                    LÖSUNG
-                                </span>
-                            </div>
-                            <div class="col-span-1">
+                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">LÖSUNG</span>
+                                </div>
+                            </th>
+                            
+                            <!-- Cost -->
+                            <th class="px-6 py-4 text-left">
                                 @include('livewire.partials.pipeline-table-header', [
                                     'field' => 'cost', 
                                     'label' => 'Cost',
                                     'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
                                 ])
-                            </div>
-                            <div class="col-span-1">
+                            </th>
+                            
+                            <!-- Duration -->
+                            <th class="px-6 py-4 text-left">
                                 @include('livewire.partials.pipeline-table-header', [
                                     'field' => 'time_duration_hours', 
                                     'label' => 'Duration',
                                     'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
                                 ])
-                            </div>
-                            <div class="col-span-1">
+                            </th>
+                            
+                            <!-- PRIO 1 -->
+                            <th class="px-6 py-4 text-left">
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                    </svg>
+                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">PRIO 1</span>
+                                </div>
+                            </th>
+                            
+                            <!-- PRIO 2 -->
+                            <th class="px-6 py-4 text-left">
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                    </svg>
+                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">PRIO 2</span>
+                                </div>
+                            </th>
+                            
+                            <!-- Priority -->
+                            <th class="px-6 py-4 text-left">
                                 @include('livewire.partials.pipeline-table-header', [
                                     'field' => 'priority', 
                                     'label' => 'Priority',
                                     'icon' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'
                                 ])
-                            </div>
-                            <div class="col-span-2">
-                                <span class="text-xs font-medium text-gray-700 uppercase tracking-wider flex items-center">
-                                    <svg class="w-4 h-4 mr-1 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            </th>
+                            
+                            <!-- Actions -->
+                            <th class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end space-x-1">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
-                                    Actions
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Table Body -->
-                    <div class="divide-y divide-gray-100">
+                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
                         @forelse($ideas as $idea)
                             @include('livewire.partials.pipeline-table-row', ['idea' => $idea])
                         @empty
-                            <div class="px-6 py-16 text-center">
-                                <div class="mx-auto w-24 h-24 text-gray-400 mb-4">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">No ideas found</h3>
-                                <p class="text-gray-500 mb-6">Try adjusting your search or filter to find what you're looking for.</p>
-                                <button 
-                                    wire:click="resetFilters" 
-                                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-                                >
-                                    Reset Filters
-                                </button>
-                            </div>
+                            <tr>
+                                <td colspan="10" class="px-6 py-16 text-center">
+                                    <div class="mx-auto w-24 h-24 text-gray-400 mb-4">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No ideas found</h3>
+                                    <p class="text-gray-500 mb-6">Try adjusting your search or filter to find what you're looking for.</p>
+                                    <button 
+                                        wire:click="resetFilters" 
+                                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+                                    >
+                                        Reset Filters
+                                    </button>
+                                </td>
+                            </tr>
                         @endforelse
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             </div>
 
             <!-- Mobile Cards View -->
@@ -298,7 +332,7 @@
         <!-- Bottom Action Bar -->
         <div class="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="text-sm text-gray-600">
-                <span class="font-medium">Tip:</span> Click on any cell to edit inline. Changes save automatically.
+                <span class="font-medium">Tip:</span> Hover over rows to see actions. Click on status badges for quick edits.
             </div>
             <div class="flex items-center space-x-3">
                 <button 
@@ -330,6 +364,67 @@
     @livewire('idea-edit-modal')
 </div>
 
+@push('styles')
+<style>
+    /* Custom scrollbar for better UX */
+    .custom-scrollbar::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+    
+    /* Smooth table row transitions */
+    tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    tbody tr:hover {
+        background: linear-gradient(90deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%);
+    }
+    
+    /* Ensure table cells have proper padding */
+    table th, table td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+    }
+    
+    /* Fixed column widths for better layout */
+    table {
+        table-layout: fixed;
+    }
+    
+    th:nth-child(1), td:nth-child(1) { width: 25%; } /* Problem */
+    th:nth-child(2), td:nth-child(2) { width: 10%; } /* Status */
+    th:nth-child(3), td:nth-child(3) { width: 7%; }  /* Pain */
+    th:nth-child(4), td:nth-child(4) { width: 15%; } /* Lösung */
+    th:nth-child(5), td:nth-child(5) { width: 10%; } /* Cost */
+    th:nth-child(6), td:nth-child(6) { width: 8%; }  /* Duration */
+    th:nth-child(7), td:nth-child(7) { width: 7%; }  /* Prio 1 */
+    th:nth-child(8), td:nth-child(8) { width: 7%; }  /* Prio 2 */
+    th:nth-child(9), td:nth-child(9) { width: 8%; }  /* Priority */
+    th:nth-child(10), td:nth-child(10) { width: 12%; } /* Actions */
+    
+    /* Responsive adjustments */
+    @media (max-width: 1536px) {
+        table {
+            table-layout: auto;
+        }
+    }
+</style>
+@endpush
+
 @push('scripts')
 <script>
     // Smooth scroll to top on pagination click
@@ -355,6 +450,11 @@
         if (e.key === 'Escape') {
             Livewire.emit('resetFilters');
         }
+    });
+    
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize any tooltip libraries if needed
     });
 </script>
 @endpush
