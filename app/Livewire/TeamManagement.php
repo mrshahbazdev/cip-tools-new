@@ -136,9 +136,14 @@ class TeamManagement extends Component
     public function saveMembers()
     {
         $this->authorizeAccess();
-
+        $syncData = [];
+        foreach ($this->selectedMembers as $userId) {
+            // Role ko $this->userRoles array se uthayein (jo modal se aata hai)
+            $role = $this->userRoles[$userId] ?? 'work-bee'; 
+            $syncData[$userId] = ['role' => $role]; // Pivot data set karein
+        }
         // 1. Synchronize the pivot table (Team membership)
-        $this->currentTeam->members()->sync($this->selectedMembers);
+        $this->currentTeam->members()->sync($syncData);
 
         // 2. Loop through role changes and update TenantUser model
         foreach ($this->userRoles as $userId => $newRole) {

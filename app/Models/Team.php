@@ -14,11 +14,13 @@ class Team extends Model
     // Relationship: Team belongs to many Tenant Users
     public function members()
     {
-        return $this->belongsToMany(TenantUser::class, 'team_user', 'team_id', 'tenant_user_id');
+        // CRITICAL FIX: Pivot table se 'role' field fetch karein
+        return $this->belongsToMany(TenantUser::class, 'team_user', 'team_user_id', 'tenant_user_id')
+                    ->withPivot('role');
     }
     public function developers()
     {
-        return $this->members()->where('role', 'developer');
+        return $this->members()->wherePivot('role', 'developer');
     }
 
     // Scoped relationship to count Work-Bee roles in this team
@@ -26,4 +28,5 @@ class Team extends Model
     {
         return $this->members()->where('role', 'work-bee');
     }
+    
 }

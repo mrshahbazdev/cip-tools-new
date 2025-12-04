@@ -25,7 +25,7 @@ class TenantUser extends Authenticatable
         'stripe_id', // Add new fields to fillable
         'pm_type',
         'pm_last_four',
-        'role',
+        //'role',
     ];
 
     protected $hidden = [
@@ -39,6 +39,14 @@ class TenantUser extends Authenticatable
         'is_tenant_admin' => 'boolean',
         'trial_ends_at' => 'timestamp',
     ];
+    public function getCurrentTeamRoleAttribute()
+    {
+        $activeTeamId = session('active_team_id');
+        if (!$activeTeamId) return null;
+
+        // Pivot table mein current team ke khilaf role dhoondein
+        return $this->teams()->where('team_id', $activeTeamId)->first()?->pivot->role;
+    }
     public function isTenantAdmin(): bool
     {
         // Ye method tenant_users table ka boolean column check karega
