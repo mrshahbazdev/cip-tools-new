@@ -113,34 +113,27 @@ class TeamManagement extends Component
     // --- MEMBERSHIP MANAGEMENT METHODS ---
 
     // Load available users and selected members for assignment modal
-    public function manageMembers($teamId)
+    public function saveMembers()
     {
         $this->authorizeAccess();
-        $this->currentTeam = Team::findOrFail($teamId);
-        
-        // Fetch all users for the current tenant (select list mein se 'role' remove ho chuka hai)
-        $availableUsers = TenantUser::where('tenant_id', $this->currentTenantId)
-                                    ->get(['id', 'name', 'email', 'is_tenant_admin']); 
 
-        // 1. Selected members IDs ko load karein
-        $this->selectedMembers = $this->currentTeam->members()->pluck('tenant_user_id')->toArray();
+        $syncData = [];
+        // Prepare data for the pivot table synchronization
+        foreach ($this->selectedMembers as $userId) {
+            // Role comes from the modal's current state ($this->userRoles)
+            $role = $this->userRoles[$userId] ?? 'work-bee'; 
+            $syncData[$userId] = ['role' => $role]; 
+        }
         
-        // 2. CRITICAL FIX: Pivot table se current roles ko fetch karein
-        // members() relationship mein withPivot('role') hai. pluck('role', 'tenant_user_id') se humein [user_id => role] array milega.
-        $currentRoles = $this->currentTeam->members()
-            ->pluck('role', 'tenant_user_id') 
-            ->toArray();
-        
-        // 3. userRoles array ko populate karein: existing role ya default 'work-bee'
-        $this->userRoles = $availableUsers->pluck('id') 
-            ->mapWithKeys(function ($userId) use ($currentRoles) {
-                // Agar user current team ka member hai, toh uska saved role use karein.
-                $role = $currentRoles[$userId] ?? 'work-bee';
-                return [$userId => $role];
-            })->toArray();
+        // 1. Synchronize the pivot table (membership and role are updated simultaneously)
+        $this->currentTeam->members()->sync($syncData); 
 
-        $this->availableUsers = $availableUsers; 
-        $this->manageMembersModalOpen = true;
+        session()->flash('message', "Team '{$this->currentTeam->name}' membership and roles updated successfully.");
+        
+        $this->manageMembersModalOpen = false;
+        $this->currentTeam = null;
+        $this->userRoles = []; 
+        $this->resetPage();
     }
 
     // Save members to the pivot table
