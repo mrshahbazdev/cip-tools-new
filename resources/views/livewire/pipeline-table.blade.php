@@ -55,6 +55,7 @@
                         
                         {{-- 9. Umsetzung (Sortable, Yellow/Work-Bee field) --}}
                         @include('livewire.partials.pipeline-table-header', ['field' => 'priority', 'label' => 'Umsetzung'])
+                        @include('livewire.partials.pipeline-table-header', ['field' => 'action', 'label' => 'Action'])
 
                         {{-- Actions Column --}}
                         <th class="px-6 py-3"></th>
