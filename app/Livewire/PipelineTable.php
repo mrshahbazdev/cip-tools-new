@@ -74,8 +74,28 @@ class PipelineTable extends Component
         $user = Auth::user();
 
         // 1. CRITICAL DATA TYPE FIX: Convert empty strings for integer/decimal fields to NULL
-        if ($newValue === '') {
+        // لیکن input سے value پہلے ہی string میں آتی ہے، اس لیے مناسب type میں convert کریں
+        if ($newValue === '' || $newValue === null) {
             $newValue = null;
+        } else {
+            // Field ke type ke mutabiq convert karein
+            switch($fieldName) {
+                case 'pain_score':
+                case 'prio_1':
+                case 'prio_2':
+                case 'priority':
+                case 'time_duration_hours':
+                    $newValue = (int)$newValue;
+                    break;
+                case 'cost':
+                    $newValue = (float)$newValue;
+                    break;
+                case 'status':
+                case 'developer_notes':
+                    // Strings ko as-is rakhain
+                    $newValue = (string)$newValue;
+                    break;
+            }
         }
 
         // 2. Field Identification: Yellow (Work-Bee) vs Red (Developer)
@@ -94,23 +114,33 @@ class PipelineTable extends Component
         }
 
         if (!$isAuthorized) {
-            session()->flash('error', "Access Denied: You do not have permission to edit the $fieldName.");
-            $this->dispatch('refreshComponent'); // Discard unauthorized changes
+            // Flash message ke liye alert component use karein
+            $this->dispatch('show-toast', [
+                'type' => 'error',
+                'message' => "Access Denied: You do not have permission to edit the $fieldName."
+            ]);
             return; 
         }
         
         // 3. Proceed with save if authorized
         $idea = ProjectIdea::find($ideaId);
         if ($idea) {
+            // Save the value
+            $idea->update([$fieldName => $newValue]);
             
-            // --- FINAL UPDATE LOGIC ---
-            $actualFieldName = ($fieldName === 'loesung') ? 'developer_notes' : $fieldName;
+            // CRITICAL FIX: Component ko refresh karne ke bajaye, sirf specific idea ko update karein
+            // Yeh page reload ya pagination reset nahi karega
+            $this->dispatch('idea-updated', [
+                'id' => $idea->id,
+                'field' => $fieldName,
+                'value' => $newValue
+            ]);
             
-            $idea->update([$actualFieldName => $newValue]);
-            session()->flash('message', "{$idea->name}: {$actualFieldName} updated successfully!");
-
-            // CRITICAL FIX: Reset pagination to force a fresh query and UI update
-            $this->resetPage(); 
+            // Optional: Success message
+            $this->dispatch('show-toast', [
+                'type' => 'success',
+                'message' => "Updated successfully!"
+            ]);
         }
     }
 

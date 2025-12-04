@@ -24,11 +24,11 @@
         
         @if($isTenantAdmin || $isWorkBee)
              <select 
+                wire:model.defer="status_{{ $idea->id }}"
                 wire:change="saveIdeaField({{ $idea->id }}, 'status', $event.target.value)"
                 @click.stop 
                 class="mt-1 px-2 py-1 border rounded text-xs bg-gray-100 border-gray-300 focus:ring-indigo-500">
                 
-                {{-- Options must be dynamic, ensuring the current status is selected --}}
                 @foreach(['New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'] as $statusOption)
                     <option value="{{ $statusOption }}" @selected($statusOption === $idea->status)>{{ $statusOption }}</option>
                 @endforeach
@@ -40,8 +40,12 @@
     
     <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" value="{{ $idea->pain_score }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
+            <input type="number" 
+                   min="1" 
+                   max="10" 
+                   value="{{ $idea->pain_score }}"
+                   wire:model.defer="pain_score_{{ $idea->id }}"
+                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -51,8 +55,10 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
-            <input type="text" value="{{ $idea->developer_notes }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
+            <input type="text" 
+                   value="{{ $idea->developer_notes }}"
+                   wire:model.defer="developer_notes_{{ $idea->id }}"
+                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded bg-red-50 border-red-300">
         @else
@@ -62,8 +68,11 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
-            <input type="number" step="0.01" value="{{ $idea->cost }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
+            <input type="number" 
+                   step="0.01" 
+                   value="{{ $idea->cost }}"
+                   wire:model.defer="cost_{{ $idea->id }}"
+                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded text-right bg-red-50 border-red-300">
         @else
@@ -73,8 +82,10 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
-            <input type="number" value="{{ $idea->time_duration_hours }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
+            <input type="number" 
+                   value="{{ $idea->time_duration_hours }}"
+                   wire:model.defer="time_duration_hours_{{ $idea->id }}"
+                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-red-50 border-red-300">
             hrs
@@ -85,8 +96,12 @@
     
     <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" value="{{ $idea->prio_1 }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
+            <input type="number" 
+                   min="1" 
+                   max="10" 
+                   value="{{ $idea->prio_1 }}"
+                   wire:model.defer="prio_1_{{ $idea->id }}"
+                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -96,8 +111,12 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" value="{{ $idea->prio_2 }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
+            <input type="number" 
+                   min="1" 
+                   max="10" 
+                   value="{{ $idea->prio_2 }}"
+                   wire:model.defer="prio_2_{{ $idea->id }}"
+                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -107,8 +126,12 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" value="{{ $idea->priority }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
+            <input type="number" 
+                   min="1" 
+                   max="10" 
+                   value="{{ $idea->priority }}"
+                   wire:model.defer="priority_{{ $idea->id }}"
+                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-green-50 border-green-300">
         @else
