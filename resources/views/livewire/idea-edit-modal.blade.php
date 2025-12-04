@@ -48,12 +48,14 @@
                                     <option value="{{ $statusOption }}">{{ $statusOption }}</option>
                                 @endforeach
                             </select>
+                            @error('status') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Pain Score (Schmerz)</label>
                             <input type="number" wire:model.defer="pain_score" min="1" max="10" 
                                    class="w-full p-3 border rounded-lg bg-yellow-50/50" 
                                    {{ $isLocked || (!$isTenantAdmin && !$isWorkBee) ? 'disabled' : '' }}>
+                            @error('pain_score') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
@@ -67,6 +69,7 @@
                                   class="w-full p-3 border rounded-lg bg-red-50/50" 
                                   placeholder="Technical solution and implementation plan."
                                   {{ $isLocked || (!$isTenantAdmin && !$isDeveloper) ? 'disabled' : '' }}></textarea>
+                        @error('developer_notes') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
@@ -75,32 +78,41 @@
                             <input type="number" step="0.01" wire:model.defer="cost" 
                                    class="w-full p-3 border rounded-lg bg-red-50/50" 
                                    {{ $isLocked || (!$isTenantAdmin && !$isDeveloper) ? 'disabled' : '' }}>
+                            @error('cost') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Time (Dauer Hrs)</label>
                             <input type="number" wire:model.defer="time_duration_hours" 
                                    class="w-full p-3 border rounded-lg bg-red-50/50" 
                                    {{ $isLocked || (!$isTenantAdmin && !$isDeveloper) ? 'disabled' : '' }}>
+                            @error('time_duration_hours') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Umsetzung (Final Priority)</label>
                             <input type="number" wire:model.defer="priority" min="1" max="10" 
                                    class="w-full p-3 border rounded-lg bg-yellow-50/50" 
                                    {{ $isLocked || (!$isTenantAdmin && !$isWorkBee) ? 'disabled' : '' }}>
+                            @error('priority') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
                 
-                <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" wire:click="$set('isModalOpen', false)" class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium">
-                        Cancel
-                    </button>
-                    
-                    @if($isTenantAdmin || $isDeveloper || $isWorkBee)
-                        <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition duration-300 shadow-md">
-                            Save Changes
-                        </button>
+                <div class="pt-4 flex justify-between items-center">
+                    @if ($errors->any() && !$errors->has('cost') && !$errors->has('status') && !$errors->has('problem_short'))
+                        <p class="text-sm text-red-600">Please correct the errors above.</p>
                     @endif
+                    
+                    <div class="flex justify-end gap-3">
+                        <button type="button" wire:click="$set('isModalOpen', false)" class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium">
+                            Cancel
+                        </button>
+                        
+                        @if($isTenantAdmin || $isDeveloper || $isWorkBee)
+                            <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition duration-300 shadow-md">
+                                Save Changes
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </form>
         </div>
