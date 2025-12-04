@@ -64,7 +64,7 @@
                     @forelse($ideas as $idea)
                         @include('livewire.partials.pipeline-table-row', ['idea' => $idea])
                     @empty
-                        <tr><td colspan="6" class="p-8 text-center text-gray-500">No ideas found matching your criteria.</td></tr>
+                        <tr><td colspan="10" class="p-8 text-center text-gray-500">No ideas found matching your criteria.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -84,5 +84,3 @@
     </div>
 
 </div>
-
-{{-- Note: You must create the partial files below! --}}
