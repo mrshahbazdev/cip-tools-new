@@ -102,7 +102,7 @@ class PipelineTable extends Component
         $tenantId = tenant('id');
         $activeTeamId = session('active_team_id'); 
         $user = Auth::user();
-        dd($user);
+        
         $ideas = ProjectIdea::query()
             ->where('tenant_id', $tenantId) 
             
