@@ -118,16 +118,26 @@ class TeamManagement extends Component
         $this->authorizeAccess();
         $this->currentTeam = Team::findOrFail($teamId);
         
-        // Fetch all users for the current tenant
-        // CRITICAL FIX: 'role' column ko yahan se remove karein
+        // Fetch all users for the current tenant (select list mein se 'role' remove ho chuka hai)
         $availableUsers = TenantUser::where('tenant_id', $this->currentTenantId)
-                                    ->get(['id', 'name', 'email', 'is_tenant_admin']); // <-- 'role' removed
+                                    ->get(['id', 'name', 'email', 'is_tenant_admin']); 
+
+        // 1. Selected members IDs ko load karein
+        $this->selectedMembers = $this->currentTeam->members()->pluck('tenant_user_id')->toArray();
         
-        // ... baaki logic same ...
-        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => $user->role)->toArray(); // <-- Ye line bhi ghalti karegi
+        // 2. CRITICAL FIX: Pivot table se current roles ko fetch karein
+        // members() relationship mein withPivot('role') hai. pluck('role', 'tenant_user_id') se humein [user_id => role] array milega.
+        $currentRoles = $this->currentTeam->members()
+            ->pluck('role', 'tenant_user_id') 
+            ->toArray();
         
-        // Final Fix: 'role' ko map karne ki jagah, default 'work-bee' se initialize karein
-        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => 'work-bee')->toArray();
+        // 3. userRoles array ko populate karein: existing role ya default 'work-bee'
+        $this->userRoles = $availableUsers->pluck('id') 
+            ->mapWithKeys(function ($userId) use ($currentRoles) {
+                // Agar user current team ka member hai, toh uska saved role use karein.
+                $role = $currentRoles[$userId] ?? 'work-bee';
+                return [$userId => $role];
+            })->toArray();
 
         $this->availableUsers = $availableUsers; 
         $this->manageMembersModalOpen = true;
