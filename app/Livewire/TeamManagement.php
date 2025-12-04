@@ -113,6 +113,25 @@ class TeamManagement extends Component
     // --- MEMBERSHIP MANAGEMENT METHODS ---
 
     // Load available users and selected members for assignment modal
+    public function manageMembers($teamId)
+    {
+        $this->authorizeAccess();
+        $this->currentTeam = Team::findOrFail($teamId);
+        
+        // Fetch all users for the current tenant
+        // CRITICAL FIX: 'role' column ko yahan se remove karein
+        $availableUsers = TenantUser::where('tenant_id', $this->currentTenantId)
+                                    ->get(['id', 'name', 'email', 'is_tenant_admin']); // <-- 'role' removed
+        
+        // ... baaki logic same ...
+        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => $user->role)->toArray(); // <-- Ye line bhi ghalti karegi
+        
+        // Final Fix: 'role' ko map karne ki jagah, default 'work-bee' se initialize karein
+        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => 'work-bee')->toArray();
+
+        $this->availableUsers = $availableUsers; 
+        $this->manageMembersModalOpen = true;
+    }
     public function saveMembers()
     {
         $this->authorizeAccess();
@@ -135,8 +154,38 @@ class TeamManagement extends Component
         $this->userRoles = []; 
         $this->resetPage();
     }
-
     // Save members to the pivot table
+    public function saveMembers()
+    {
+        $this->authorizeAccess();
+        $syncData = [];
+        foreach ($this->selectedMembers as $userId) {
+            // Role ko $this->userRoles array se uthayein (jo modal se aata hai)
+            $role = $this->userRoles[$userId] ?? 'work-bee'; 
+            $syncData[$userId] = ['role' => $role]; // Pivot data set karein
+        }
+        // 1. Synchronize the pivot table (Team membership)
+        $this->currentTeam->members()->sync($syncData);
+
+        // 2. Loop through role changes and update TenantUser model
+        foreach ($this->userRoles as $userId => $newRole) {
+            // Hum role ko tabhi update karenge jab woh user abhi bhi selected members mein ho
+            if (in_array($userId, $this->selectedMembers)) {
+                $member = TenantUser::find($userId);
+                if ($member && $member->role !== $newRole) {
+                    $member->role = $newRole;
+                    $member->save();
+                }
+            }
+        }
+
+        session()->flash('message', "Team '{$this->currentTeam->name}' membership and roles updated successfully.");
+        
+        $this->manageMembersModalOpen = false;
+        $this->currentTeam = null;
+        $this->userRoles = []; // Reset state
+        $this->resetPage();
+    }
 
 
     // --- RENDER AND HELPERS ---
