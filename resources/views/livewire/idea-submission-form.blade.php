@@ -45,11 +45,11 @@
                     @error('problem_short') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 
-                <div>
+                {{-- <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Pain Score (1-10) - How badly does this hurt?</label>
                     <input type="number" wire:model="pain_score" min="1" max="10" placeholder="e.g. 8" class="w-24 p-3 border rounded-lg">
                     @error('pain_score') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
+                </div> --}}
             </div>
         </div>
 

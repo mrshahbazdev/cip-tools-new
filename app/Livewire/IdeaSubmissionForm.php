@@ -112,7 +112,7 @@ class IdeaSubmissionForm extends Component
             'description' => $this->problem_detail, 
             'contact_info' => $this->contact_info, 
             'status' => 'New',
-            'pain_score' => $this->pain_score,
+            //'pain_score' => $this->pain_score,
             'time_duration_hours' => null, 
             'cost' => null, 
         ]);
