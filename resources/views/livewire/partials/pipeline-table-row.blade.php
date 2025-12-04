@@ -14,6 +14,7 @@
              <select 
                 wire:model.live="idea.status" 
                 wire:change="saveIdeaField({{ $idea->id }}, 'status', $event.target.value)"
+                @click.stop 
                 class="mt-1 px-2 py-1 border rounded text-xs bg-gray-100 border-gray-300 focus:ring-indigo-500">
                 <option value="{{ $idea->status }}">{{ $idea->status }}</option>
                 <option value="New">New</option>
@@ -32,6 +33,7 @@
         @if($isTenantAdmin || $isWorkBee)
             <input type="number" min="1" max="10" wire:model.live="idea.pain_score"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
+                   @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
             {{ $idea->pain_score ?? 'N/A' }}
@@ -42,6 +44,7 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="text" wire:model.live="idea.developer_notes"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
+                   @click.stop 
                    class="w-24 border rounded bg-red-50 border-red-300">
         @else
             {{ $idea->developer_notes ?? 'N/A' }}
@@ -52,6 +55,7 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="number" step="0.01" wire:model.live="idea.cost"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
+                   @click.stop 
                    class="w-24 border rounded text-right bg-red-50 border-red-300">
         @else
             ${{ number_format($idea->cost, 2) ?? 'N/A' }}
@@ -62,6 +66,7 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="number" wire:model.live="idea.time_duration_hours"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
+                   @click.stop 
                    class="w-16 border rounded text-center bg-red-50 border-red-300">
             hrs
         @else
@@ -73,6 +78,7 @@
         @if($isTenantAdmin || $isWorkBee)
             <input type="number" min="1" max="10" wire:model.live="idea.prio_1"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
+                   @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
             {{ $idea->prio_1 ?? 'N/A' }}
@@ -83,6 +89,7 @@
         @if($isTenantAdmin || $isWorkBee)
             <input type="number" min="1" max="10" wire:model.live="idea.prio_2"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
+                   @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
             {{ $idea->prio_2 ?? 'N/A' }}
@@ -93,6 +100,7 @@
         @if($isTenantAdmin || $isWorkBee)
             <input type="number" min="1" max="10" wire:model.live="idea.priority"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
+                   @click.stop 
                    class="w-16 border rounded text-center bg-green-50 border-green-300">
         @else
             {{ $idea->priority ?? 'N/A' }}
