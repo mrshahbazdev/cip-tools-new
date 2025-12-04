@@ -14,9 +14,13 @@ class Team extends Model
     // Relationship: Team belongs to many Tenant Users
     public function members()
     {
-        // CRITICAL FIX: Pivot table se 'role' field fetch karein
-        return $this->belongsToMany(TenantUser::class, 'team_user', 'team_user_id', 'tenant_user_id')
-                    ->withPivot('role');
+        return $this->belongsToMany(
+            TenantUser::class, 
+            'team_user',           // Pivot Table Name
+            'team_id',             // Foreign Key on Pivot Table (This team's ID)
+            'tenant_user_id'       // Related Pivot Key (The user's ID)
+        )
+        ->withPivot('role');
     }
     public function developers()
     {
