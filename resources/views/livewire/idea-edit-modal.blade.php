@@ -1,3 +1,4 @@
+<div>
 @if($isModalOpen)
     <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 overflow-hidden">
@@ -105,3 +106,4 @@
         </div>
     </div>
 @endif
+</div>
