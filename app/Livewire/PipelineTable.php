@@ -118,14 +118,20 @@ class PipelineTable extends Component
         if ($idea) {
             $idea->update([$fieldName => $newValue]);
             
-            // CRITICAL: Pagination ko reset mat karo
-            // $this->resetPage(); // ← YEH LINE HAMESHA COMMENT OUT RAKHEIN
+            // CRITICAL: Koi bhi pagination reset ya state change nahi karna
+            // Sirf success message show karein
+            $this->dispatch('show-toast', [
+                'type' => 'success',
+                'message' => 'Updated successfully!'
+            ]);
             
-            // Instead, use Livewire's $refresh to update the view without losing state
-            $this->dispatch('field-updated')->self();
-            
-            // Ya phir success message ke liye event dispatch karein
-            session()->flash('message', 'Field updated successfully!');
+            // OPTIONAL: Agar aap ko real-time update chahiye bina page reload ke
+            // to aap Livewire ke emit system use kar sakte hain
+            $this->dispatch('idea-field-updated', [
+                'ideaId' => $ideaId,
+                'field' => $fieldName,
+                'value' => $newValue
+            ]);
         }
     }
 
