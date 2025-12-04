@@ -5,16 +5,6 @@
         $isTenantAdmin = $user->isTenantAdmin();
         $isDeveloper = $user->isDeveloper();
         $isWorkBee = $user->isWorkBee();
-        
-        $statusBg = match ($idea->status) {
-            'New' => 'bg-blue-50 text-blue-700',
-            'Reviewed' => 'bg-cyan-50 text-cyan-700',
-            'Pending Pricing' => 'bg-yellow-50 text-yellow-700',
-            'Approved Budget' => 'bg-green-50 text-green-700',
-            'Implementation' => 'bg-indigo-50 text-indigo-700',
-            'Done' => 'bg-gray-100 text-gray-700',
-            default => 'bg-gray-100 text-gray-700',
-        };
     @endphp
 
     <td class="px-6 py-4 whitespace-nowrap">
@@ -31,6 +21,17 @@
                 @endforeach
             </select>
         @else
+            @php
+                $statusBg = match ($idea->status) {
+                    'New' => 'bg-blue-50 text-blue-700',
+                    'Reviewed' => 'bg-cyan-50 text-cyan-700',
+                    'Pending Pricing' => 'bg-yellow-50 text-yellow-700',
+                    'Approved Budget' => 'bg-green-50 text-green-700',
+                    'Implementation' => 'bg-indigo-50 text-indigo-700',
+                    'Done' => 'bg-gray-100 text-gray-700',
+                    default => 'bg-gray-100 text-gray-700',
+                };
+            @endphp
             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusBg }} mt-1">{{ $idea->status }}</span>
         @endif
     </td>
@@ -41,7 +42,7 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->pain_score }}"
-                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
+                   wire:blur="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -53,7 +54,7 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="text" 
                    value="{{ $idea->developer_notes }}"
-                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
+                   wire:blur="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded bg-red-50 border-red-300">
         @else
@@ -66,7 +67,7 @@
             <input type="number" 
                    step="0.01" 
                    value="{{ $idea->cost }}"
-                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
+                   wire:blur="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded text-right bg-red-50 border-red-300">
         @else
@@ -78,7 +79,7 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="number" 
                    value="{{ $idea->time_duration_hours }}"
-                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
+                   wire:blur="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-red-50 border-red-300">
             hrs
@@ -93,7 +94,7 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->prio_1 }}"
-                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
+                   wire:blur="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -107,7 +108,7 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->prio_2 }}"
-                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
+                   wire:blur="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -121,7 +122,7 @@
                    min="1" 
                    max="10" 
                    value="{{ $idea->priority }}"
-                   wire:change.debounce.500ms="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
+                   wire:blur="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-green-50 border-green-300">
         @else
