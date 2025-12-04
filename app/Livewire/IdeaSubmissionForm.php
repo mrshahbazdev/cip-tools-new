@@ -94,7 +94,8 @@ class IdeaSubmissionForm extends Component
     {
         // Final Validation of Step 4
         $this->validate($this->rules()); 
-
+        $activeTeamId = session('active_team_id');
+        $tenantId = $this->tenantId;
         // CRITICAL SECURITY CHECK: Final check on cached state
         if (!$this->activeTeamId) {
             session()->flash('error', 'Submission Failed: Please select an active team.');
@@ -105,6 +106,7 @@ class IdeaSubmissionForm extends Component
         ProjectIdea::create([
             'tenant_id' => $this->tenantId, // Cached ID use ho raha hai
             'team_id' => $this->activeTeamId,
+            'tenant_user_id' => Auth::id(),
             'problem_short' => $this->problem_short, 
             'goal' => $this->goal, 
             'description' => $this->problem_detail, 
