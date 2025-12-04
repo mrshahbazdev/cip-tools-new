@@ -102,9 +102,15 @@ class PipelineTable extends Component
         // 3. Proceed with save if authorized
         $idea = ProjectIdea::find($ideaId);
         if ($idea) {
-            // Final update logic
-            $idea->update([$fieldName => $newValue]);
-            session()->flash('message', "{$idea->problem_short} ($fieldName) updated successfully!");
+            
+            // --- FINAL UPDATE LOGIC ---
+            $actualFieldName = ($fieldName === 'loesung') ? 'developer_notes' : $fieldName;
+            
+            $idea->update([$actualFieldName => $newValue]);
+            session()->flash('message', "{$idea->name}: {$actualFieldName} updated successfully!");
+
+            // CRITICAL FIX: Reset pagination to force a fresh query and UI update
+            $this->resetPage(); 
         }
     }
 
