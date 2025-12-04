@@ -1,6 +1,7 @@
 <tr wire:key="idea-{{ $idea->id }}" class="hover:bg-gray-50">
     
     @php
+        // Role check from authenticated user
         $user = auth()->user();
         $isTenantAdmin = $user->isTenantAdmin();
         $isDeveloper = $user->isDeveloper();
@@ -9,8 +10,11 @@
         // Helper to determine the status background color
         $statusBg = match ($idea->status) {
             'New' => 'bg-blue-50 text-blue-700',
+            'Reviewed' => 'bg-cyan-50 text-cyan-700',
             'Pending Pricing' => 'bg-yellow-50 text-yellow-700',
             'Approved Budget' => 'bg-green-50 text-green-700',
+            'Implementation' => 'bg-indigo-50 text-indigo-700',
+            'Done' => 'bg-gray-100 text-gray-700',
             default => 'bg-gray-100 text-gray-700',
         };
     @endphp
@@ -24,11 +28,9 @@
                 @click.stop 
                 class="mt-1 px-2 py-1 border rounded text-xs bg-gray-100 border-gray-300 focus:ring-indigo-500">
                 
-                <option value="{{ $idea->status }}" selected>{{ $idea->status }}</option>
+                {{-- Options must be dynamic, ensuring the current status is selected --}}
                 @foreach(['New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'] as $statusOption)
-                    @if($statusOption !== $idea->status)
-                        <option value="{{ $statusOption }}">{{ $statusOption }}</option>
-                    @endif
+                    <option value="{{ $statusOption }}" @selected($statusOption === $idea->status)>{{ $statusOption }}</option>
                 @endforeach
             </select>
         @else
