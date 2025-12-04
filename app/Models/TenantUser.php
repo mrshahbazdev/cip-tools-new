@@ -1,20 +1,18 @@
 <?php
 
-// app/Models/TenantUser.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // Authenticatable class use karein
+use Illuminate\Foundation\Auth\User as Authenticatable; 
 use Laravel\Cashier\Billable;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Team; // Import the Team model
+
 class TenantUser extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Billable;
 
-    protected $table = 'tenant_users'; // CRITICAL: Naya table name
-
-    // Yahan hum Stancl ki tenanct scope use nahi karenge, kyunki ye table tenant ka hissa nahi hai
-    // Har record mein khud tenant_id majood hai.
+    protected $table = 'tenant_users'; 
 
     protected $fillable = [
         'name',
@@ -22,10 +20,10 @@ class TenantUser extends Authenticatable
         'password',
         'tenant_id',
         'is_tenant_admin',
-        'stripe_id', // Add new fields to fillable
+        // 'role' field is removed from fillable as it's now in pivot
+        'stripe_id', 
         'pm_type',
         'pm_last_four',
-        'role',
     ];
 
     protected $hidden = [
@@ -35,40 +33,57 @@ class TenantUser extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed', // Hashing automatic ho jayegi
+        'password' => 'hashed', 
         'is_tenant_admin' => 'boolean',
         'trial_ends_at' => 'timestamp',
     ];
+    
+    // --- RELATIONSHIPS ---
+    
+    public function teams()
+    {
+        // CRITICAL FIX: Relationship must pull the 'role' from the pivot table
+        return $this->belongsToMany(Team::class, 'team_user', 'tenant_user_id', 'team_id')
+                    ->withPivot('role'); 
+    }
+
+    // ----------------------------------------------------
+    // ROLE CHECK METHODS (Updated to use Active Team Context)
+    // ----------------------------------------------------
+    
+    // Helper to get the user's role in the currently active team context (from session)
     public function getCurrentTeamRoleAttribute()
     {
         $activeTeamId = session('active_team_id');
         if (!$activeTeamId) return null;
 
         // Pivot table mein current team ke khilaf role dhoondein
-        return $this->teams()->where('team_id', $activeTeamId)->first()?->pivot->role;
+        // Note: The teams() relationship is used as a base query here
+        $role = $this->teams()->where('team_id', $activeTeamId)->first()?->pivot->role;
+        return $role;
     }
+    
     public function isTenantAdmin(): bool
     {
-        // Ye method tenant_users table ka boolean column check karega
-        // is_tenant_admin ko casts mein define karna zaroori hai.
+        // This check is against the tenant_users table (Owner flag)
         return (bool) $this->is_tenant_admin; 
     }
+
     public function isDeveloper(): bool
     {
-        return $this->role === 'developer';
+        // CRITICAL FIX: Active team context ka role check karein
+        return $this->getCurrentTeamRoleAttribute() === 'developer';
     }
 
     public function isWorkBee(): bool
     {
-        return $this->role === 'work-bee';
+        // CRITICAL FIX: Active team context ka role check karein
+        return $this->getCurrentTeamRoleAttribute() === 'work-bee';
     }
 
     public function getRoleNameAttribute(): string
     {
-        return ucfirst($this->role);
-    }
-    public function teams()
-    {
-        return $this->belongsToMany(Team::class, 'team_user', 'tenant_user_id', 'team_id');
+        // Role name from the active context, ya default 'Standard'
+        return ucfirst($this->getCurrentTeamRoleAttribute() ?? 'Standard');
     }
 }
