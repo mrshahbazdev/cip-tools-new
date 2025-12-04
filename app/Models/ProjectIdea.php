@@ -35,4 +35,8 @@ class ProjectIdea extends Model
         'prio_1' => 'integer', // NEW
         'prio_2' => 'integer', // NEW
     ];
+    public function comments()
+    {
+        return $this->hasMany(IdeaComment::class, 'project_idea_id');
+    }
 }
