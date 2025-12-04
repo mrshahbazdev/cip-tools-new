@@ -16,7 +16,7 @@ class IdeaEditModal extends Component
     
     // State properties (for authorization display)
     public $isTenantAdmin, $isDeveloper, $isWorkBee;
-    
+    public $listeners = ['editIdea' => 'openModal'];
     protected $rules = [
         // Basic validation for the form fields
         'problem_short' => 'required|max:50',
@@ -32,20 +32,20 @@ class IdeaEditModal extends Component
     ];
 
     // Opens the modal and loads data
-    public function openModal(ProjectIdea $idea)
+    public function openModal(int $ideaId)
     {
-        $this->idea = $idea;
+        $this->idea = ProjectIdea::findOrFail($ideaId);
         
         // Load properties from the model
-        $this->problem_short = $idea->problem_short;
-        $this->pain_score = $idea->pain_score;
-        $this->cost = $idea->cost;
-        $this->time_duration_hours = $idea->time_duration_hours;
-        $this->developer_notes = $idea->developer_notes;
-        $this->priority = $idea->priority;
-        $this->prio_1 = $idea->prio_1;
-        $this->prio_2 = $idea->prio_2;
-        $this->status = $idea->status;
+        $this->problem_short = $this->idea->problem_short;
+        $this->pain_score = $this->idea->pain_score;
+        $this->cost = $this->idea->cost;
+        $this->time_duration_hours = $this->idea->time_duration_hours;
+        $this->developer_notes = $this->idea->developer_notes;
+        $this->priority = $this->idea->priority;
+        $this->prio_1 = $this->idea->prio_1;
+        $this->prio_2 = $this->idea->prio_2;
+        $this->status = $this->idea->status;
         
         // Authorization check for disabling fields in the modal
         $user = Auth::user();

@@ -53,8 +53,7 @@
     </td>
 
     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <button onclick="Livewire.dispatch('open-edit-modal', { idea: {{ $idea->id }} })" 
-                class="text-indigo-600 hover:text-indigo-900">Edit Details &rarr;</button>
-        {{-- Note: The Dispatch logic needs to be simplified or handled by the parent --}}
+        <button onclick="Livewire.dispatch('editIdea', { ideaId: {{ $idea->id }} })" 
+        class="text-indigo-600 hover:text-indigo-900">Edit Details &rarr;</button>
     </td>
 </tr>
