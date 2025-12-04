@@ -44,6 +44,6 @@ class IdeaDetail extends Component
 
     public function render()
     {
-        return view('livewire.idea-detail');
+        return view('livewire.idea-detail')->layout('components.layouts.guest');
     }
 }
