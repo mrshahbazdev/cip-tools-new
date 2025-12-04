@@ -112,23 +112,23 @@ class PipelineTable extends Component
             ->where('tenant_id', $tenantId) 
             
             // 1. Scope ideas by the active team ID (CRITICAL)
-            ->when($activeTeamId, function ($query, $activeTeamId) {
-                $query->where('team_id', $activeTeamId); 
-            })
+            // ->when($activeTeamId, function ($query, $activeTeamId) {
+            //     $query->where('team_id', $activeTeamId); 
+            // })
 
-            // 2. Dynamic Search Filter
-            ->when($this->search, function ($query) {
-                // Use sub-grouping for correct OR logic
-                $query->where(function ($subQuery) {
-                    $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
-                             ->orWhere('description', 'like', '%' . $this->search . '%');
-                });
-            })
+            // // 2. Dynamic Search Filter
+            // ->when($this->search, function ($query) {
+            //     // Use sub-grouping for correct OR logic
+            //     $query->where(function ($subQuery) {
+            //         $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
+            //                  ->orWhere('description', 'like', '%' . $this->search . '%');
+            //     });
+            // })
             
-            // 3. Status Filter
-            ->when($this->statusFilter, function ($query) {
-                $query->where('status', $this->statusFilter);
-            })
+            // // 3. Status Filter
+            // ->when($this->statusFilter, function ($query) {
+            //     $query->where('status', $this->statusFilter);
+            // })
             
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(15); 
