@@ -12,7 +12,7 @@
         
         @if($isTenantAdmin || $isWorkBee)
              <select 
-                wire:change="saveIdeaField({{ $idea->id }}, 'status', $event.target.value)"
+                wire:model.live.debounce.1000ms="statuses.{{ $idea->id }}"
                 @click.stop 
                 class="mt-1 px-2 py-1 border rounded text-xs bg-gray-100 border-gray-300 focus:ring-indigo-500">
                 
@@ -41,8 +41,7 @@
             <input type="number" 
                    min="1" 
                    max="10" 
-                   value="{{ $idea->pain_score }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
+                   wire:model.live.debounce.1000ms="painScores.{{ $idea->id }}"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -53,8 +52,7 @@
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
             <input type="text" 
-                   value="{{ $idea->developer_notes }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
+                   wire:model.live.debounce.1000ms="developerNotes.{{ $idea->id }}"
                    @click.stop 
                    class="w-24 border rounded bg-red-50 border-red-300">
         @else
@@ -66,8 +64,7 @@
         @if($isTenantAdmin || $isDeveloper)
             <input type="number" 
                    step="0.01" 
-                   value="{{ $idea->cost }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
+                   wire:model.live.debounce.1000ms="costs.{{ $idea->id }}"
                    @click.stop 
                    class="w-24 border rounded text-right bg-red-50 border-red-300">
         @else
@@ -78,8 +75,7 @@
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
             <input type="number" 
-                   value="{{ $idea->time_duration_hours }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
+                   wire:model.live.debounce.1000ms="timeDurations.{{ $idea->id }}"
                    @click.stop 
                    class="w-16 border rounded text-center bg-red-50 border-red-300">
             hrs
@@ -93,8 +89,7 @@
             <input type="number" 
                    min="1" 
                    max="10" 
-                   value="{{ $idea->prio_1 }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
+                   wire:model.live.debounce.1000ms="prio1.{{ $idea->id }}"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -107,8 +102,7 @@
             <input type="number" 
                    min="1" 
                    max="10" 
-                   value="{{ $idea->prio_2 }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
+                   wire:model.live.debounce.1000ms="prio2.{{ $idea->id }}"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
         @else
@@ -121,8 +115,7 @@
             <input type="number" 
                    min="1" 
                    max="10" 
-                   value="{{ $idea->priority }}"
-                   wire:blur="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
+                   wire:model.live.debounce.1000ms="priorities.{{ $idea->id }}"
                    @click.stop 
                    class="w-16 border rounded text-center bg-green-50 border-green-300">
         @else

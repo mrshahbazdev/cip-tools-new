@@ -19,8 +19,18 @@ class PipelineTable extends Component
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
 
+    // --- New properties for inline editing ---
+    public $statuses = [];
+    public $painScores = [];
+    public $developerNotes = [];
+    public $costs = [];
+    public $timeDurations = [];
+    public $prio1 = [];
+    public $prio2 = [];
+    public $priorities = [];
+
     // --- Role-based status options ---
-    public $statuses = [
+    public $statusOptions = [
         'New', 
         'Reviewed',
         'Pending Pricing', 
@@ -31,15 +41,11 @@ class PipelineTable extends Component
 
     // --- LIFECYCLE HOOKS ---
     
-    // Set default active team if not already set in session
     public function mount()
     {
-        // Agar session mein active_team_id nahi hai, toh user ki pehli joined team ko set karein
         if (!session('active_team_id') && Auth::check()) {
             $tenantUser = TenantUser::find(Auth::id()); 
-
             if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
-                // User ki pehli team ko default active team set karein
                 session(['active_team_id' => $tenantUser->teams->first()->id]);
             }
         }
@@ -50,6 +56,7 @@ class PipelineTable extends Component
     {
         $this->resetPage();
     }
+    
     public function updatingStatusFilter()
     {
         $this->resetPage();
@@ -66,9 +73,37 @@ class PipelineTable extends Component
         $this->sortBy = $field;
     }
 
-    // --- SECURITY & IN-GRID SAVE LOGIC ---
-
-    public function saveIdeaField($ideaId, $fieldName, $newValue)
+    // --- AUTOSAVE LOGIC FOR INLINE EDITING ---
+    
+    public function updated($property, $value)
+    {
+        // Check which property was updated and save accordingly
+        $parts = explode('.', $property);
+        
+        if (count($parts) === 2) {
+            $fieldType = $parts[0]; // e.g., 'statuses', 'painScores'
+            $ideaId = $parts[1]; // e.g., '4'
+            
+            // Map field type to database field name
+            $fieldMap = [
+                'statuses' => 'status',
+                'painScores' => 'pain_score',
+                'developerNotes' => 'developer_notes',
+                'costs' => 'cost',
+                'timeDurations' => 'time_duration_hours',
+                'prio1' => 'prio_1',
+                'prio2' => 'prio_2',
+                'priorities' => 'priority',
+            ];
+            
+            if (isset($fieldMap[$fieldType])) {
+                $dbField = $fieldMap[$fieldType];
+                $this->saveField($ideaId, $dbField, $value);
+            }
+        }
+    }
+    
+    protected function saveField($ideaId, $fieldName, $newValue)
     {
         // User authentication
         $user = Auth::user();
@@ -110,6 +145,8 @@ class PipelineTable extends Component
         }
 
         if (!$isAuthorized) {
+            // Reset the value if not authorized
+            $this->resetField($ideaId, $fieldName);
             return;
         }
         
@@ -118,20 +155,34 @@ class PipelineTable extends Component
         if ($idea) {
             $idea->update([$fieldName => $newValue]);
             
-            // CRITICAL: Koi bhi pagination reset ya state change nahi karna
-            // Sirf success message show karein
+            // Optional: Show success message
             $this->dispatch('show-toast', [
                 'type' => 'success',
                 'message' => 'Updated successfully!'
             ]);
+        }
+    }
+    
+    protected function resetField($ideaId, $fieldName)
+    {
+        // Reset the field value from database
+        $idea = ProjectIdea::find($ideaId);
+        if ($idea) {
+            $fieldMap = [
+                'status' => 'statuses',
+                'pain_score' => 'painScores',
+                'developer_notes' => 'developerNotes',
+                'cost' => 'costs',
+                'time_duration_hours' => 'timeDurations',
+                'prio_1' => 'prio1',
+                'prio_2' => 'prio2',
+                'priority' => 'priorities',
+            ];
             
-            // OPTIONAL: Agar aap ko real-time update chahiye bina page reload ke
-            // to aap Livewire ke emit system use kar sakte hain
-            $this->dispatch('idea-field-updated', [
-                'ideaId' => $ideaId,
-                'field' => $fieldName,
-                'value' => $newValue
-            ]);
+            if (isset($fieldMap[$fieldName])) {
+                $property = $fieldMap[$fieldName];
+                $this->{$property}[$ideaId] = $idea->{$fieldName};
+            }
         }
     }
 
@@ -140,37 +191,40 @@ class PipelineTable extends Component
     public function render()
     {
         $tenantId = tenant('id');
-        $activeTeamId = session('active_team_id'); // Get active team ID from session
+        $activeTeamId = session('active_team_id');
 
         $ideas = ProjectIdea::query()
             ->where('tenant_id', $tenantId) 
-            
-            // 1. Scope ideas by the active team ID (CRITICAL)
             ->when($activeTeamId, function ($query, $activeTeamId) {
                 $query->where('team_id', $activeTeamId); 
             })
-
-            // 2. Dynamic Search Filter
             ->when($this->search, function ($query) {
-                // Use sub-grouping for correct OR logic
                 $query->where(function ($subQuery) {
-                    // FIX: Use 'problem_short' instead of 'name'
                     $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
                              ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
             })
-            
-            // 3. Status Filter
             ->when($this->statusFilter, function ($query) {
                 $query->where('status', $this->statusFilter);
             })
-            
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15); 
+            ->paginate(15);
+            
+        // Initialize the edit arrays with current values
+        foreach ($ideas as $idea) {
+            $this->statuses[$idea->id] = $idea->status ?? '';
+            $this->painScores[$idea->id] = $idea->pain_score ?? '';
+            $this->developerNotes[$idea->id] = $idea->developer_notes ?? '';
+            $this->costs[$idea->id] = $idea->cost ?? '';
+            $this->timeDurations[$idea->id] = $idea->time_duration_hours ?? '';
+            $this->prio1[$idea->id] = $idea->prio_1 ?? '';
+            $this->prio2[$idea->id] = $idea->prio_2 ?? '';
+            $this->priorities[$idea->id] = $idea->priority ?? '';
+        }
 
         return view('livewire.pipeline-table', [
             'ideas' => $ideas,
-            'activeTeamId' => $activeTeamId, // Pass ID for conditional logic in view
+            'activeTeamId' => $activeTeamId,
         ])->layout('components.layouts.guest');
     }
 }
