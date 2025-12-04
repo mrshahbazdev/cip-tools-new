@@ -12,40 +12,31 @@ use Illuminate\Support\Facades\Auth;
 class PipelineTable extends Component
 {
     use WithPagination;
-    protected $listeners = ['ideaSaved' => 'render']; // Listen for modal save event
+    protected $listeners = ['ideaSaved' => 'render']; 
+
     // --- State Properties for Filtering & Sorting ---
     public $search = '';
     public $statusFilter = '';
     public $sortBy = 'created_at';
     public $sortDirection = 'desc';
-
-    // --- Role-based status options ---
     public $statuses = [
-        'New', 
-        'Reviewed',
-        'Pending Pricing', 
-        'Approved Budget', 
-        'Implementation',
-        'Done'
+        'New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'
     ];
 
     // --- LIFECYCLE HOOKS ---
     
-    // Set default active team if not already set in session
     public function mount()
     {
-        // Agar session mein active_team_id nahi hai, toh user ki pehli joined team ko set karein
+        // Set default active team if not already set in session
         if (!session('active_team_id') && Auth::check()) {
             $tenantUser = TenantUser::find(Auth::id()); 
 
             if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
-                // User ki pehli team ko default active team set karein
                 session(['active_team_id' => $tenantUser->teams->first()->id]);
             }
         }
     }
     
-    // Reset pagination when search/filters change
     public function updatingSearch()
     {
         $this->resetPage();
@@ -55,7 +46,6 @@ class PipelineTable extends Component
         $this->resetPage();
     }
 
-    // Sort function called when a column header is clicked
     public function sortBy($field)
     {
         if ($this->sortBy === $field) {
@@ -68,14 +58,50 @@ class PipelineTable extends Component
 
     // --- SECURITY & IN-GRID SAVE LOGIC ---
 
-    
+    public function saveIdeaField($ideaId, $fieldName, $newValue)
+    {
+        $user = Auth::user();
 
-    // --- MAIN RENDER LOGIC ---
+        // 1. CRITICAL DATA TYPE FIX (Convert empty string to NULL)
+        if ($newValue === '') {
+            $newValue = null;
+        }
+
+        // 2. Authorization Check (logic uses $user->isWorkBee() etc.)
+        $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status', 'prio_1', 'prio_2']); 
+        $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours']);
+        
+        $isAuthorized = false;
+
+        if ($user->isTenantAdmin()) {
+            $isAuthorized = true;
+        } elseif ($isWorkBeeField && $user->isWorkBee()) {
+            $isAuthorized = true;
+        } elseif ($isDeveloperField && $user->isDeveloper()) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
+            session()->flash('error', "Access Denied: You do not have permission to edit the $fieldName.");
+            $this->dispatch('refreshComponent'); 
+            return; 
+        }
+        
+        // 3. Proceed with save
+        $idea = ProjectIdea::find($ideaId);
+        if ($idea) {
+            $idea->update([$fieldName => $newValue]);
+            session()->flash('message', "{$idea->problem_short} ($fieldName) updated successfully!");
+        }
+    }
+
+    // --- MAIN RENDER LOGIC (FINAL) ---
 
     public function render()
     {
         $tenantId = tenant('id');
-        $activeTeamId = session('active_team_id'); // Get active team ID from session
+        $activeTeamId = session('active_team_id'); 
+        $user = Auth::user();
 
         $ideas = ProjectIdea::query()
             ->where('tenant_id', $tenantId) 
@@ -89,7 +115,6 @@ class PipelineTable extends Component
             ->when($this->search, function ($query) {
                 // Use sub-grouping for correct OR logic
                 $query->where(function ($subQuery) {
-                    // FIX: Use 'problem_short' instead of 'name'
                     $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
                              ->orWhere('description', 'like', '%' . $this->search . '%');
                 });
@@ -105,7 +130,11 @@ class PipelineTable extends Component
 
         return view('livewire.pipeline-table', [
             'ideas' => $ideas,
-            'activeTeamId' => $activeTeamId, // Pass ID for conditional logic in view
+            
+            // CRITICAL: Pass the permission booleans to the view
+            'isTenantAdmin' => $user->isTenantAdmin(),
+            'isDeveloper' => $user->isDeveloper(),
+            'isWorkBee' => $user->isWorkBee(),
         ])->layout('components.layouts.guest');
     }
 }
