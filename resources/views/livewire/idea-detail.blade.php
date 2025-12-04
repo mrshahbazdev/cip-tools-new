@@ -1,5 +1,6 @@
 <div class="max-w-4xl mx-auto py-8">
-    <h1 class="text-3xl font-bold mb-4">Idea: {{ $idea->name ?? 'Loading...' }}</h1>
+    
+    <h1 class="text-3xl font-bold mb-4">Idea: {{ $ideaName }}</h1>
     
     @if (session()->has('message'))
         <div class="p-3 bg-green-100 text-green-700 rounded mb-4">{{ session('message') }}</div>
@@ -8,14 +9,14 @@
     <div class="bg-white shadow-lg p-6 rounded-xl mb-8">
         <h3 class="text-xl font-semibold mb-3 border-b pb-2">Description & Goal</h3>
         <p class="mb-4 text-gray-700">{{ $idea->description }}</p>
-        <p class="text-gray-500">Goal: {{ $idea->goal }}</p>
-        <p class="text-sm text-gray-500 mt-4">Status: <span class="font-bold">{{ $idea->status }}</span></p>
+        <p class="text-gray-500">Goal: {{ $ideaGoal }}</p> 
+        <p class="text-sm text-gray-500 mt-4">Status: <span class="font-bold">{{ $currentStatus }}</span></p>
     </div>
 
     <div class="grid grid-cols-3 gap-4 bg-gray-50 p-6 rounded-xl mb-8">
-        <div><span class="font-semibold">Cost:</span> ${{ number_format($idea->cost, 2) }}</div>
-        <div><span class="font-semibold">Pain:</span> {{ $idea->pain_score }}</div>
-        <div><span class="font-semibold">Submitted By:</span> {{ $idea->submitter->name ?? 'Admin' }}</div>
+        <div><span class="font-semibold">Cost:</span> ${{ number_format($idea->cost, 2) ?? 'N/A' }}</div>
+        <div><span class="font-semibold">Pain:</span> {{ $idea->pain_score ?? 'N/A' }}</div>
+        <div><span class="font-semibold">Submitted By:</span> {{ $submittedBy }}</div> 
     </div>
     
     <div class="mt-8">

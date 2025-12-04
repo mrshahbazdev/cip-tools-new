@@ -39,4 +39,9 @@ class ProjectIdea extends Model
     {
         return $this->hasMany(IdeaComment::class, 'project_idea_id');
     }
+    public function submitter()
+{
+    // Submitter is a TenantUser, linked by tenant_user_id
+    return $this->belongsTo(\App\Models\TenantUser::class, 'tenant_user_id');
+}
 }

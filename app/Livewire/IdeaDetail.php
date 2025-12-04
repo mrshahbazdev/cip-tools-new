@@ -19,10 +19,23 @@ class IdeaDetail extends Component
     ];
     
     // Method to load the idea (called when route parameter is passed)
+    public $ideaName; 
+    public $ideaGoal; 
+    public $submittedBy; 
+    public $currentStatus;
+
     public function mount($ideaId)
     {
         $this->ideaId = $ideaId;
-        $this->idea = ProjectIdea::with('comments.user')->findOrFail($ideaId);
+        // CRITICAL FIX: submitter relationship ko eager load karein
+        $idea = ProjectIdea::with(['comments.user', 'submitter'])->findOrFail($ideaId); 
+        $this->idea = $idea;
+        
+        // Data Initialization for the view (Using correct column names)
+        $this->ideaName = $idea->problem_short ?? 'New Idea'; // Use the correct column name
+        $this->ideaGoal = $idea->goal ?? 'No goal specified.'; 
+        $this->currentStatus = $idea->status;
+        $this->submittedBy = $idea->submitter->name ?? 'Admin'; // Access through submitter relationship
     }
     
     // Post new comment action
