@@ -6,8 +6,9 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ProjectIdea;
 use App\Models\TenantUser;
-use App\Models\Team; // Import Team model
+use App\Models\Team; 
 use Illuminate\Support\Facades\Auth;
+
 class PipelineTable extends Component
 {
     use WithPagination;
@@ -21,18 +22,20 @@ class PipelineTable extends Component
     // --- Role-based status options ---
     public $statuses = [
         'New', 
+        'Reviewed',
         'Pending Pricing', 
         'Approved Budget', 
         'Implementation',
         'Done'
     ];
+
+    // --- LIFECYCLE HOOKS ---
+    
+    // Set default active team if not already set in session
     public function mount()
     {
         // Agar session mein active_team_id nahi hai, toh user ki pehli joined team ko set karein
         if (!session('active_team_id') && Auth::check()) {
-            $user = Auth::user();
-            
-            // Ensure user is loaded as TenantUser to access teams() relation
             $tenantUser = TenantUser::find(Auth::id()); 
 
             if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
@@ -41,7 +44,6 @@ class PipelineTable extends Component
             }
         }
     }
-    // --- LIFECYCLE HOOKS ---
     
     // Reset pagination when search/filters change
     public function updatingSearch()
@@ -52,25 +54,32 @@ class PipelineTable extends Component
     {
         $this->resetPage();
     }
+
+    // Sort function called when a column header is clicked
+    public function sortBy($field)
+    {
+        if ($this->sortBy === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+        $this->sortBy = $field;
+    }
+
+    // --- SECURITY & IN-GRID SAVE LOGIC ---
+
     public function saveIdeaField($ideaId, $fieldName, $newValue)
     {
         // Livewire state se user ko load karein (jo TenantUser model hoga)
         $user = Auth::user();
 
-        // --- CRITICAL DATA TYPE FIX (CONVERT EMPTY STRING TO NULL) ---
-        // MySQL Integer/Decimal columns mein empty string nahi jaa sakti.
+        // 1. CRITICAL DATA TYPE FIX: Convert empty strings for integer/decimal fields to NULL
         if ($newValue === '') {
             $newValue = null;
         }
-        // --- END DATA TYPE FIX ---
 
-
-        // Field Identification: Yellow (Work-Bee) vs Red (Developer)
-        // 'prio_1', 'prio_2', 'status', 'pain_score' (Yellow fields)
+        // 2. Field Identification: Yellow (Work-Bee) vs Red (Developer)
         $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status', 'prio_1', 'prio_2']); 
-        
-        // 'developer_notes' (Lösung), 'cost', 'time_duration_hours' (Red fields)
-        // Note: Database mein 'developer_notes' field hai.
         $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours']);
         
         $isAuthorized = false;
@@ -90,59 +99,51 @@ class PipelineTable extends Component
             return; 
         }
         
-        // Proceed with save if authorized
+        // 3. Proceed with save if authorized
         $idea = ProjectIdea::find($ideaId);
         if ($idea) {
-            
-            // --- FINAL UPDATE LOGIC ---
-            // 'loesung' ko 'developer_notes' se map karein (Jaisa ki UI mein hai)
-            $actualFieldName = ($fieldName === 'loesung') ? 'developer_notes' : $fieldName;
-            
-            $idea->update([$actualFieldName => $newValue]);
-            session()->flash('message', "{$idea->name}: {$actualFieldName} updated successfully!");
+            // Final update logic
+            $idea->update([$fieldName => $newValue]);
+            session()->flash('message', "{$idea->problem_short} ($fieldName) updated successfully!");
         }
-    }
-    // Sort function called when a column header is clicked
-    public function sortBy($field)
-    {
-        if ($this->sortBy === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortDirection = 'asc';
-        }
-        $this->sortBy = $field;
     }
 
     // --- MAIN RENDER LOGIC ---
+
     public function render()
     {
         $tenantId = tenant('id');
-        $activeTeamId = session('active_team_id'); // <-- Get active team ID from session
+        $activeTeamId = session('active_team_id'); // Get active team ID from session
 
         $ideas = ProjectIdea::query()
-            ->where('tenant_id', $tenantId) // Scope to current tenant
+            ->where('tenant_id', $tenantId) 
             
-            // --- CRITICAL FIX: Scope ideas by the active team ID ---
+            // 1. Scope ideas by the active team ID (CRITICAL)
             ->when($activeTeamId, function ($query, $activeTeamId) {
-                // Filter ideas by the currently selected team
                 $query->where('team_id', $activeTeamId); 
             })
-            // -------------------------------------------------------
 
+            // 2. Dynamic Search Filter
             ->when($this->search, function ($query) {
-                    // CRITICAL FIX: 'name' ki jagah 'problem_short' use karein
-                    $query->where('problem_short', 'like', '%' . $this->search . '%')
-                        ->orWhere('description', 'like', '%' . $this->search . '%');
-                })
+                // Use sub-grouping for correct OR logic
+                $query->where(function ($subQuery) {
+                    // FIX: Use 'problem_short' instead of 'name'
+                    $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
+                             ->orWhere('description', 'like', '%' . $this->search . '%');
+                });
+            })
+            
+            // 3. Status Filter
             ->when($this->statusFilter, function ($query) {
-                // Filter by Status
                 $query->where('status', $this->statusFilter);
             })
+            
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15); // Pagination setup
+            ->paginate(15); 
 
         return view('livewire.pipeline-table', [
             'ideas' => $ideas,
+            'activeTeamId' => $activeTeamId, // Pass ID for conditional logic in view
         ])->layout('components.layouts.guest');
     }
 }
