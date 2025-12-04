@@ -5,6 +5,14 @@
         $isTenantAdmin = $user->isTenantAdmin();
         $isDeveloper = $user->isDeveloper();
         $isWorkBee = $user->isWorkBee();
+        
+        // Helper to determine the status background color
+        $statusBg = match ($idea->status) {
+            'New' => 'bg-blue-50 text-blue-700',
+            'Pending Pricing' => 'bg-yellow-50 text-yellow-700',
+            'Approved Budget' => 'bg-green-50 text-green-700',
+            default => 'bg-gray-100 text-gray-700',
+        };
     @endphp
 
     <td class="px-6 py-4 whitespace-nowrap">
@@ -12,26 +20,25 @@
         
         @if($isTenantAdmin || $isWorkBee)
              <select 
-                wire:model.live="idea.status" 
                 wire:change="saveIdeaField({{ $idea->id }}, 'status', $event.target.value)"
                 @click.stop 
                 class="mt-1 px-2 py-1 border rounded text-xs bg-gray-100 border-gray-300 focus:ring-indigo-500">
-                <option value="{{ $idea->status }}">{{ $idea->status }}</option>
-                <option value="New">New</option>
-                <option value="Reviewed">Reviewed</option>
-                <option value="Pending Pricing">Pending Pricing</option>
-                <option value="Approved Budget">Approved Budget</option>
-                <option value="Implementation">Implementation</option>
-                <option value="Done">Done</option>
+                
+                <option value="{{ $idea->status }}" selected>{{ $idea->status }}</option>
+                @foreach(['New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'] as $statusOption)
+                    @if($statusOption !== $idea->status)
+                        <option value="{{ $statusOption }}">{{ $statusOption }}</option>
+                    @endif
+                @endforeach
             </select>
         @else
-            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-gray-800 mt-1">{{ $idea->status }}</span>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusBg }} mt-1">{{ $idea->status }}</span>
         @endif
     </td>
     
     <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" wire:model.live="idea.pain_score"
+            <input type="number" min="1" max="10" value="{{ $idea->pain_score }}"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'pain_score', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
@@ -42,7 +49,7 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
-            <input type="text" wire:model.live="idea.developer_notes"
+            <input type="text" value="{{ $idea->developer_notes }}"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'developer_notes', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded bg-red-50 border-red-300">
@@ -53,7 +60,7 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
-            <input type="number" step="0.01" wire:model.live="idea.cost"
+            <input type="number" step="0.01" value="{{ $idea->cost }}"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'cost', $event.target.value)"
                    @click.stop 
                    class="w-24 border rounded text-right bg-red-50 border-red-300">
@@ -64,7 +71,7 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 bg-red-50/50">
         @if($isTenantAdmin || $isDeveloper)
-            <input type="number" wire:model.live="idea.time_duration_hours"
+            <input type="number" value="{{ $idea->time_duration_hours }}"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'time_duration_hours', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-red-50 border-red-300">
@@ -76,7 +83,7 @@
     
     <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" wire:model.live="idea.prio_1"
+            <input type="number" min="1" max="10" value="{{ $idea->prio_1 }}"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'prio_1', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
@@ -87,7 +94,7 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" wire:model.live="idea.prio_2"
+            <input type="number" min="1" max="10" value="{{ $idea->prio_2 }}"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'prio_2', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-yellow-50 border-yellow-300">
@@ -98,7 +105,7 @@
 
     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-700 bg-yellow-50/50">
         @if($isTenantAdmin || $isWorkBee)
-            <input type="number" min="1" max="10" wire:model.live="idea.priority"
+            <input type="number" min="1" max="10" value="{{ $idea->priority }}"
                    wire:blur="saveIdeaField({{ $idea->id }}, 'priority', $event.target.value)"
                    @click.stop 
                    class="w-16 border rounded text-center bg-green-50 border-green-300">
