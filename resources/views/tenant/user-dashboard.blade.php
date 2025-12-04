@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account | {{ tenant('id') }}</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,27 +23,27 @@
         .gradient-header {
             background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
         }
-        .user-avatar {
-             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
-        }
         .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); }
         @media (max-width: 1024px) { .sidebar-toggle { display: block !important; } .mobile-hidden { display: none; } }
+        .user-avatar { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); }
     </style>
 </head>
 <body class="antialiased">
 
     @php
-        $loggedInUser = auth()->user();
+        // Logged-in user is the TenantUser model instance
+        $loggedInUser = auth()->user(); 
         
-        // 1. Fetch TenantUser Model (for relationships and ID)
+        // Fetch TenantUser Model fresh to access relationships and ID (required in Single DB mode)
+        // We use auth()->id() which is the tenant_user_id
         $tenantUser = \App\Models\TenantUser::find(auth()->id());
         $activeTeamId = session('active_team_id');
         $activeTeam = \App\Models\Team::find($activeTeamId);
 
-        // 2. Calculate Stats (Scoped to current user)
-        $teamsJoined = $tenantUser->teams->count();
+        // Calculate Stats (Scoped to current user)
+        $teamsJoined = $tenantUser->teams->count() ?? 0;
         $ideasSubmitted = \App\Models\ProjectIdea::where('tenant_id', tenant('id'))
-                            ->where('tenant_user_id', $loggedInUser->id) // Assuming user_id is submitter ID
+                            ->where('tenant_user_id', $loggedInUser->id)
                             ->count();
         $ideasInProgress = \App\Models\ProjectIdea::where('tenant_id', tenant('id'))
                              ->where('tenant_user_id', $loggedInUser->id)
@@ -97,7 +98,7 @@
         </aside>
 
         <div class="flex-1 flex flex-col">
-            <header class="glass-card border-b border-gray-200/60">
+            <header class="bg-white shadow-md border-b border-gray-200/60">
                 <div class="max-w-7xl mx-auto px-6 lg:px-8">
                     <div class="flex justify-between items-center h-20">
                         <h1 class="text-2xl font-bold bg-clip-text text-gray-900">Welcome Back, {{ $loggedInUser->name ?? 'User' }}!</h1>
@@ -130,7 +131,7 @@
                             </span>
                         </div>
                         <p class="text-sm text-gray-500 mt-2">
-                            Ideas submitted will be tagged under the selected team. Please manage your teams if the list is empty.
+                            Ideas submitted will be tagged under the currently selected team.
                         </p>
                     </div>
 
@@ -179,9 +180,9 @@
             </main>
         </div>
     </div>
-
+    
 <script>
-    // JS for sidebar toggle logic (Essential for mobile)
+    // Simple mobile sidebar toggle
     document.querySelector('.sidebar-toggle')?.addEventListener('click', function() {
          document.querySelector('aside').classList.toggle('hidden');
          document.querySelector('aside').classList.toggle('flex');
@@ -214,4 +215,5 @@
          });
     });
 </script>
-</div>
+</body>
+</html>
