@@ -13,7 +13,7 @@ class IdeaEditModal extends Component
     
     // Form data properties
     public $problem_short, $pain_score, $cost, $time_duration_hours, $developer_notes, $priority, $prio_1, $prio_2, $status;
-    
+    public $goal;
     // State properties (for authorization display)
     public $isTenantAdmin, $isDeveloper, $isWorkBee;
     public $listeners = ['editIdea' => 'openModal'];
