@@ -130,10 +130,10 @@ class PipelineTable extends Component
             // -------------------------------------------------------
 
             ->when($this->search, function ($query) {
-                // Dynamic Live Search (Name or Description)
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%');
-            })
+                    // CRITICAL FIX: 'name' ki jagah 'problem_short' use karein
+                    $query->where('problem_short', 'like', '%' . $this->search . '%')
+                        ->orWhere('description', 'like', '%' . $this->search . '%');
+                })
             ->when($this->statusFilter, function ($query) {
                 // Filter by Status
                 $query->where('status', $this->statusFilter);
