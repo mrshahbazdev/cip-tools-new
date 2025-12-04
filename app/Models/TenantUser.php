@@ -25,7 +25,7 @@ class TenantUser extends Authenticatable
         'stripe_id', // Add new fields to fillable
         'pm_type',
         'pm_last_four',
-        //'role',
+        'role',
     ];
 
     protected $hidden = [
