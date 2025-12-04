@@ -83,4 +83,7 @@
         </div>
     </div>
 
+    {{-- CRITICAL FIX: Load the Modal Component below the table --}}
+    @livewire('idea-edit-modal') 
+
 </div>
