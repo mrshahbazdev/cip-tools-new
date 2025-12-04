@@ -62,13 +62,6 @@
                     </a>
                 </div>
                 
-                <div class="mb-6">
-                    <h3 class="text-xs uppercase font-semibold text-gray-500 mb-3">Settings</h3>
-                    <a href="{{ route('tenant.billing') }}" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 mb-2 font-medium">
-                        <i class="fas fa-credit-card"></i>
-                        <span>Billing & Plan</span>
-                    </a>
-                </div>
             </nav>
             
             <div class="mt-auto p-4">
