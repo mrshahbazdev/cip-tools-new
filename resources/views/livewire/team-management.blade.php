@@ -297,6 +297,7 @@
 @if($manageMembersModalOpen)
     <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
         <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200">
+            
             <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-900">
                     Manage Members for: {{ $currentTeam->name ?? 'Team' }}
@@ -307,29 +308,48 @@
                     </svg>
                 </button>
             </div>
-            
+
             <form wire:submit.prevent="saveMembers" class="p-6 space-y-6">
                 
-                <p class="text-sm text-gray-600">Select the users you want to assign to this team:</p>
-                
-                <div class="max-h-60 overflow-y-auto border border-gray-300 p-4 rounded-lg space-y-3 bg-gray-50">
+                <h4 class="font-semibold text-gray-700">Available Users:</h4>
+                <div class="space-y-3 max-h-96 overflow-y-auto border border-gray-300 p-4 rounded-lg bg-white">
+                    
+                    <div class="flex justify-between text-xs font-semibold text-gray-600 border-b pb-2 px-1">
+                        <span class="w-1/2">User & Email</span>
+                        <span class="w-1/4">Role</span>
+                        <span class="w-1/4 text-right">Join</span>
+                    </div>
+
                     @forelse($availableUsers as $user)
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input type="checkbox" 
-                                       wire:model="selectedMembers" 
-                                       value="{{ $user->id }}" 
-                                       id="member-{{ $user->id }}"
-                                       class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
-                                <label for="member-{{ $user->id }}" class="ml-3 text-sm text-gray-700 font-medium flex items-center gap-2">
-                                    {{ $user->name }} 
-                                    <span class="text-xs {{ $user->role === 'developer' ? 'text-red-500' : 'text-blue-500' }}">({{ ucfirst($user->role) }})</span>
-                                </label>
+                        <div class="flex items-center justify-between py-2 border-b last:border-b-0">
+                            
+                            <div class="w-1/2 text-sm">
+                                <p class="font-medium text-gray-800">{{ $user->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $user->email }}</p>
                             </div>
-                            <span class="text-xs text-gray-500">{{ $user->email }}</span>
+                            
+                            <div class="w-1/4 pr-4">
+                                @if(!$user->is_tenant_admin)
+                                    <select wire:model.live="userRoles.{{ $user->id }}"
+                                            class="w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500">
+                                        <option value="work-bee">Work Bee</option>
+                                        <option value="developer">Developer</option>
+                                    </select>
+                                @else
+                                    <span class="text-xs font-semibold text-purple-600">Admin</span>
+                                @endif
+                            </div>
+
+                            <div class="w-1/4 flex justify-end">
+                                <input type="checkbox" 
+                                    wire:model="selectedMembers" 
+                                    value="{{ $user->id }}" 
+                                    id="member-{{ $user->id }}"
+                                    class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                            </div>
                         </div>
                     @empty
-                        <p class="text-gray-500 italic">No users found in this workspace.</p>
+                        <p class="text-gray-500 italic p-4">No users found in this workspace.</p>
                     @endforelse
                 </div>
 
@@ -337,7 +357,7 @@
                     <button type="button" wire:click="$set('manageMembersModalOpen', false)" class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium">
                         Cancel
                     </button>
-                    <button type="submit" class="px-5 py-2.5 bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 transition">
+                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition">
                         Save Membership
                     </button>
                 </div>

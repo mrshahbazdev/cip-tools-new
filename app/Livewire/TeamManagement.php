@@ -31,7 +31,7 @@ class TeamManagement extends Component
     public $adminUsers;
     public $standardUsers;
     public $currentTenantId; // CRITICAL: Tenant ID State property
-
+    public $userRoles = [];
     // --- Authorization Check ---
     public function authorizeAccess()
     {
@@ -119,12 +119,16 @@ class TeamManagement extends Component
         $this->currentTeam = Team::findOrFail($teamId);
         
         // Fetch all users for the current tenant
-        $this->availableUsers = TenantUser::where('tenant_id', $this->currentTenantId)
+        $availableUsers = TenantUser::where('tenant_id', $this->currentTenantId)
                                         ->get(['id', 'name', 'email', 'role', 'is_tenant_admin']);
         
-        // Pre-select members already assigned to this team
+        // 1. Selected members ko load karein
         $this->selectedMembers = $this->currentTeam->members()->pluck('tenant_user_id')->toArray();
+        
+        // 2. userRoles array ko current roles se initialize karein (Keyed by user ID)
+        $this->userRoles = $availableUsers->keyBy('id')->map(fn ($user) => $user->role)->toArray();
 
+        $this->availableUsers = $availableUsers; 
         $this->manageMembersModalOpen = true;
     }
 
@@ -132,14 +136,28 @@ class TeamManagement extends Component
     public function saveMembers()
     {
         $this->authorizeAccess();
-        
-        // Synchronize the pivot table: detaches old, attaches new
+
+        // 1. Synchronize the pivot table (Team membership)
         $this->currentTeam->members()->sync($this->selectedMembers);
 
-        session()->flash('message', "Team '{$this->currentTeam->name}' members updated successfully.");
+        // 2. Loop through role changes and update TenantUser model
+        foreach ($this->userRoles as $userId => $newRole) {
+            // Hum role ko tabhi update karenge jab woh user abhi bhi selected members mein ho
+            if (in_array($userId, $this->selectedMembers)) {
+                $member = TenantUser::find($userId);
+                if ($member && $member->role !== $newRole) {
+                    $member->role = $newRole;
+                    $member->save();
+                }
+            }
+        }
+
+        session()->flash('message', "Team '{$this->currentTeam->name}' membership and roles updated successfully.");
         
         $this->manageMembersModalOpen = false;
         $this->currentTeam = null;
+        $this->userRoles = []; // Reset state
+        $this->resetPage();
     }
 
 
