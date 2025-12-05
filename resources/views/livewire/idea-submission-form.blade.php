@@ -1,11 +1,8 @@
-@extends('components.layouts.tenant-app-layout', ['title' => 'Idea Submission'])
+@extends('components.layouts.tenant-app-layout', ['title' => 'Submit New Idea'])
 
 @section('content')
-
-<div class="max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto py-8">
     
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Innovation Submission Wizard</h1>
-
     @if (session()->has('error'))
         <div class="mb-6 p-4 rounded-xl bg-red-100 border border-red-400 text-red-700 animate-fade-in">
             <p class="font-medium">
@@ -16,7 +13,13 @@
     @endif
     
     @if (session()->has('message'))
-        @endif
+        <div class="mb-6 p-4 rounded-xl bg-green-100 border border-green-400 text-green-700 animate-fade-in">
+            <p class="font-medium">
+                <i class="fas fa-check-circle mr-2"></i>
+                {{ session('message') }}
+            </p>
+        </div>
+    @endif
 
     <form x-data="{ currentStep: @entangle('currentStep') }" wire:submit.prevent="submitIdea" class="bg-white p-8 rounded-xl shadow-lg border border-gray-200 space-y-6">
         
@@ -52,11 +55,11 @@
                     @error('problem_short') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 
-                <div>
+                {{-- <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Pain Score (1-10) - How badly does this hurt?</label>
                     <input type="number" wire:model="pain_score" min="1" max="10" placeholder="e.g. 8" class="w-24 p-3 border rounded-lg">
                     @error('pain_score') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
+                </div> --}}
             </div>
         </div>
 
