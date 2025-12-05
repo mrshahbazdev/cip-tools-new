@@ -36,25 +36,7 @@
         @include('components.partials.sidebar-nav')
 
         <div class="flex-1 flex flex-col">
-            <header class="glass-card border-b border-gray-200">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between items-center h-16">
-                        <div class="flex items-center">
-                            <h1 class="text-lg font-semibold text-gray-800">Team Management</h1>
-                        </div>
-                        
-                        <div class="flex items-center space-x-4">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="h-9 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition duration-150 flex items-center space-x-2">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span class="mobile-hidden">Logout</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            @include('components.partials.top-header')
 
             <main class="flex-1 py-8">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
