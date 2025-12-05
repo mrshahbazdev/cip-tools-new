@@ -7,10 +7,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Cashier\Billable;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Team; // Import the Team model
-
+use Illuminate\Auth\Passwords\CanResetPassword;
 class TenantUser extends Authenticatable
 {
-    use HasFactory, Billable;
+    use HasFactory, Billable, CanResetPassword;
 
     protected $table = 'tenant_users'; 
 

@@ -14,7 +14,20 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
     Route::get('/login', [TenantAuthController::class, 'showLoginForm'])->name('login'); 
     Route::post('/login', [TenantAuthController::class, 'login'])->name('tenant.login');
     Route::get('/register', TenantUserRegistration::class)->name('tenant.register');
-    
+    Route::get('/forgot-password', [TenantAuthController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    // 2. Send Reset Link Email
+    Route::post('/forgot-password', [TenantAuthController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    // 3. Show Reset Password Form (Token validation ke baad)
+    Route::get('/reset-password/{token}', [TenantAuthController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    // 4. Handle Password Reset
+    Route::post('/reset-password', [TenantAuthController::class, 'resetPassword'])
+        ->name('password.update');
     // Expired Page (Must be accessible without CheckTrialExpiry)
     Route::get('/expired', function () {
         return view('tenant.expired-access'); 
