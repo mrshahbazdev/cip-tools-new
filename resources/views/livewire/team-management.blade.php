@@ -1,3 +1,6 @@
+@extends('components.layouts.tenant-app-layout', ['title' => 'Team Management'])
+
+@section('content')
 <div class="antialiased min-h-screen">
     
     <style>
@@ -419,3 +422,4 @@
     });
 </script>
 </div>
+@endsection
