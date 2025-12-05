@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class PipelineTable extends Component
 {
     use WithPagination;
-    protected $listeners = ['ideaSaved' => 'render']; 
+    protected $listeners = ['ideaSaved' => 'render', 'refreshComponent' => '$refresh']; 
 
     // --- State Properties for Filtering & Sorting ---
     public $search = '';
@@ -22,6 +22,32 @@ class PipelineTable extends Component
     public $statuses = [
         'New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'
     ];
+
+    // --- ADD THESE METHODS FOR EDITING ---
+    
+    public function edit($ideaId)
+    {
+        // Dispatch event to open edit modal
+        $this->dispatch('openEditModal', $ideaId);
+    }
+    
+    public function delete($ideaId)
+    {
+        $user = Auth::user();
+        
+        // Authorization check
+        if (!$user->isTenantAdmin() && !$user->isDeveloper()) {
+            session()->flash('error', 'Access Denied: You do not have permission to delete ideas.');
+            return;
+        }
+        
+        $idea = ProjectIdea::find($ideaId);
+        if ($idea) {
+            $idea->delete();
+            session()->flash('message', 'Idea deleted successfully!');
+            $this->dispatch('refreshComponent');
+        }
+    }
 
     // --- LIFECYCLE HOOKS ---
     
@@ -41,16 +67,19 @@ class PipelineTable extends Component
     {
         $this->resetPage();
     }
+    
     public function updatingStatusFilter()
     {
         $this->resetPage();
     }
+    
     public function resetFilters()
     {
         $this->search = '';
         $this->statusFilter = ''; // Reset the filter property to empty string
         $this->resetPage();
     }
+    
     public function sortBy($field)
     {
         if ($this->sortBy === $field) {
