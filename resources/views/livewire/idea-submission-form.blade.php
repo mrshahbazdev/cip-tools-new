@@ -1,6 +1,3 @@
-@extends('components.layouts.tenant-app-layout', ['title' => 'Submit New Idea'])
-
-@section('content')
 <div class="max-w-4xl mx-auto py-8">
     
     @if (session()->has('error'))
@@ -13,13 +10,7 @@
     @endif
     
     @if (session()->has('message'))
-        <div class="mb-6 p-4 rounded-xl bg-green-100 border border-green-400 text-green-700 animate-fade-in">
-            <p class="font-medium">
-                <i class="fas fa-check-circle mr-2"></i>
-                {{ session('message') }}
-            </p>
-        </div>
-    @endif
+        @endif
 
     <form x-data="{ currentStep: @entangle('currentStep') }" wire:submit.prevent="submitIdea" class="bg-white p-8 rounded-xl shadow-lg border border-gray-200 space-y-6">
         
@@ -45,8 +36,7 @@
             @endif
         </div>
         
-        <div x-show="currentStep === 1">
-            <h2 class="text-xl font-bold mb-4">Step 1: Your Problem</h2>
+        <div x-show="currentStep === 1"> <h2 class="text-xl font-bold mb-4">Step 1: Your Problem</h2>
             <div class="space-y-4">
                 
                 <div>
@@ -63,8 +53,7 @@
             </div>
         </div>
 
-        <div x-show="currentStep === 2" style="display: none;">
-            <h2 class="text-xl font-bold mb-4">Step 2: Your Goal</h2>
+        <div x-show="currentStep === 2" style="display: none;"> <h2 class="text-xl font-bold mb-4">Step 2: Your Goal</h2>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">What needs to change for you to be satisfied?</label>
                 <textarea wire:model="goal" rows="3" placeholder="Describe the desired outcome." class="w-full p-3 border rounded-lg"></textarea>
@@ -72,8 +61,7 @@
             </div>
         </div>
 
-        <div x-show="currentStep === 3" style="display: none;">
-            <h2 class="text-xl font-bold mb-4">Step 3: Problem Details</h2>
+        <div x-show="currentStep === 3" style="display: none;"> <h2 class="text-xl font-bold mb-4">Step 3: Problem Details</h2>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Describe your problem or pain point in as much detail as possible here.</label>
                 <textarea wire:model="problem_detail" rows="6" placeholder="Provide context, examples, and affected users." class="w-full p-3 border rounded-lg"></textarea>
@@ -81,8 +69,7 @@
             </div>
         </div>
 
-        <div x-show="currentStep === 4" style="display: none;">
-            <h2 class="text-xl font-bold mb-4">Step 4: Review & Submit</h2>
+        <div x-show="currentStep === 4" style="display: none;"> <h2 class="text-xl font-bold mb-4">Step 4: Review & Submit</h2>
             <div class="space-y-4">
                 <div class="p-4 border rounded-lg bg-gray-50">
                     <h3 class="font-semibold text-lg mb-2">Summary Review</h3>
@@ -118,4 +105,3 @@
         </div>
     </form>
 </div>
-@endsection
