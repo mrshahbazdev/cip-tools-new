@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ProjectIdea;
 use App\Models\TenantUser;
+use App\Models\Team; 
 use Illuminate\Support\Facades\Auth;
 
 class MyIdeasTable extends Component
@@ -23,6 +24,18 @@ class MyIdeasTable extends Component
     ];
     
     // --- LIFECYCLE HOOKS ---
+    
+    public function mount()
+    {
+        // Set default active team if not already set in session
+        if (!session('active_team_id') && Auth::check()) {
+            $tenantUser = TenantUser::find(Auth::id()); 
+
+            if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
+                session(['active_team_id' => $tenantUser->teams->first()->id]);
+            }
+        }
+    }
     
     // Reset pagination when search/filters change
     public function updatingSearch()
@@ -50,6 +63,7 @@ class MyIdeasTable extends Component
     {
         $tenantId = tenant('id');
         $userId = Auth::id(); // Get the authenticated user's ID
+        $user = Auth::user(); // For passing permissions to the view
         
         $ideas = ProjectIdea::query()
             ->where('tenant_id', $tenantId) // Scope by current tenant
@@ -73,9 +87,15 @@ class MyIdeasTable extends Component
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(15); 
 
+        // We reuse the central pipeline view file, but pass the necessary data
         return view('livewire.pipeline-table', [
             'ideas' => $ideas,
-            'isMyIdeasView' => true, // Flag for display logic in the view
+            
+            // CRITICAL: Pass permission flags required by pipeline-table-row.blade.php
+            'isTenantAdmin' => $user->isTenantAdmin(),
+            'isDeveloper' => $user->isDeveloper(),
+            'isWorkBee' => $user->isWorkBee(),
+            'isMyIdeasView' => true, // Flag to indicate a modified view title/behavior
         ])->layout('components.layouts.guest');
     }
 }
