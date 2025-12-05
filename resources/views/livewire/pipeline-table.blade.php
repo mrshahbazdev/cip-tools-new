@@ -167,98 +167,62 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                         <tr>
-                            <!-- IDEA / PROBLEM -->
-                            <th class="px-6 py-4 text-left">
-                                @include('livewire.partials.pipeline-table-header', [
-                                    'field' => 'problem_short', 
-                                    'label' => 'IDEA / PROBLEM',
-                                    'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                                ])
-                            </th>
+                            <!-- 1. IDEA / PROBLEM -->
+                            @include('livewire.partials.pipeline-table-header', ['field' => 'problem_short', 'label' => 'IDEA / PROBLEM'])
                             
-                            <!-- Status -->
-                            <th class="px-6 py-4 text-left">
-                                @include('livewire.partials.pipeline-table-header', [
-                                    'field' => 'status', 
-                                    'label' => 'Status',
-                                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
-                                ])
-                            </th>
+                            <!-- 2. Status -->
+                            @include('livewire.partials.pipeline-table-header', ['field' => 'status', 'label' => 'Status'])
+
+                            <!-- 3. Schmerz -->
+                            @include('livewire.partials.pipeline-table-header', ['field' => 'pain_score', 'label' => 'Schmerz'])
                             
-                            <!-- Pain Score -->
-                            <th class="px-6 py-4 text-left">
-                                @include('livewire.partials.pipeline-table-header', [
-                                    'field' => 'pain_score', 
-                                    'label' => 'Pain',
-                                    'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-                                ])
-                            </th>
-                            
-                            <!-- LÖSUNG -->
-                            <th class="px-6 py-4 text-left bg-red-50/50">
+                            <!-- 4. LÖSUNG (Static column - no include needed) -->
+                            <th class="bg-red-50/50 px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                 <div class="flex items-center space-x-1">
                                     <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                     </svg>
-                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">LÖSUNG</span>
+                                    <span>LÖSUNG</span>
                                 </div>
                             </th>
                             
-                            <!-- Cost -->
-                            <th class="px-6 py-4 text-left">
-                                @include('livewire.partials.pipeline-table-header', [
-                                    'field' => 'cost', 
-                                    'label' => 'Cost',
-                                    'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-                                ])
-                            </th>
+                            <!-- 5. Kosten -->
+                            @include('livewire.partials.pipeline-table-header', ['field' => 'cost', 'label' => 'Kosten'])
                             
-                            <!-- Duration -->
-                            <th class="px-6 py-4 text-left">
-                                @include('livewire.partials.pipeline-table-header', [
-                                    'field' => 'time_duration_hours', 
-                                    'label' => 'Duration',
-                                    'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                                ])
-                            </th>
+                            <!-- 6. Dauer -->
+                            @include('livewire.partials.pipeline-table-header', ['field' => 'time_duration_hours', 'label' => 'Dauer'])
                             
-                            <!-- PRIO 1 -->
-                            <th class="px-6 py-4 text-left">
+                            <!-- 7. PRIO 1 (Static column) -->
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider bg-gradient-to-r from-amber-50 to-amber-100/50">
                                 <div class="flex items-center space-x-1">
                                     <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                                     </svg>
-                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">PRIO 1</span>
+                                    <span>PRIO 1</span>
                                 </div>
                             </th>
                             
-                            <!-- PRIO 2 -->
-                            <th class="px-6 py-4 text-left">
+                            <!-- 8. PRIO 2 (Static column) -->
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider bg-gradient-to-r from-orange-50 to-orange-100/50">
                                 <div class="flex items-center space-x-1">
                                     <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
                                     </svg>
-                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">PRIO 2</span>
+                                    <span>PRIO 2</span>
                                 </div>
                             </th>
                             
-                            <!-- Priority -->
-                            <th class="px-6 py-4 text-left">
-                                @include('livewire.partials.pipeline-table-header', [
-                                    'field' => 'priority', 
-                                    'label' => 'Priority',
-                                    'icon' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'
-                                ])
-                            </th>
-                            
-                            <!-- Actions -->
-                            <th class="px-6 py-4 text-right">
+                            <!-- 9. Umsetzung -->
+                            @include('livewire.partials.pipeline-table-header', ['field' => 'priority', 'label' => 'Umsetzung'])
+
+                            <!-- Actions Column (Static) -->
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                                 <div class="flex items-center justify-end space-x-1">
                                     <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                     </svg>
-                                    <span class="text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</span>
+                                    <span>Actions</span>
                                 </div>
                             </th>
                         </tr>
