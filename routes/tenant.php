@@ -45,7 +45,10 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
                 }
                 return view('tenant.user-dashboard'); // Normal User View
             })->name('tenant.dashboard');
-
+            Route::get('/ideas/export', function () {
+                // Yahan future mein CSV/Excel export logic aayegi
+                return "Export functionality pending implementation.";
+            })->name('ideas.export');
             // USER MANAGEMENT (Protected)
             Route::get('/users', \App\Livewire\TenantUserManagement::class)->name('tenant.users.manage');
             Route::get('/settings', \App\Livewire\TenantBrandingSettings::class)->name('tenant.settings');
