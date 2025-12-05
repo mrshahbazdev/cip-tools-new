@@ -1,16 +1,19 @@
 @extends('components.layouts.tenant-app-layout', ['title' => 'Innovation Pipeline'])
 
 @section('content')
-    
-    <div class="space-y-8">
 
+    <div class="space-y-8">
+        
         <div class="mb-6">
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                     Innovation Pipeline
                 </h1>
-                <a href="{{ route('tenant.submit_idea') }}" class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 group">
-                    <i class="fas fa-paper-plane"></i> Submit New Idea
+                <a href="{{ route('tenant.submit_idea') }}" class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-xl transition-all duration-300 flex items-center gap-2 group">
+                    <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Submit New Idea
                 </a>
             </div>
             <p class="text-gray-600">Manage all submitted ideas, track status, and set priority.</p>
@@ -18,6 +21,7 @@
 
         <div class="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8 p-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +134,7 @@
                 @forelse($ideas as $idea)
                     @include('livewire.partials.pipeline-card-view', ['idea' => $idea])
                 @empty
-                    <div class="text-center py-12"><h3 class="text-lg font-medium text-gray-900">No ideas found</h3></div>
+                    <div class="text-center py-12"><h3 class="text-lg font-medium text-gray-900 mb-2">No ideas found</h3></div>
                 @endforelse
             </div>
             
@@ -155,17 +159,17 @@
             <div class="flex items-center space-x-3">
                 <button 
                     wire:click="$refresh"
-                    class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center"
+                    class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center shadow-sm"
                 >
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     Refresh Data
                 </button>
+                
+                {{-- Developer Export Link (Optional: Add conditional logic here if needed) --}}
             </div>
         </div>
     </div>
 
     {{-- MODAL COMPONENT LOAD --}}
     @livewire('idea-edit-modal')
-</div>
-
-{{-- Final Blade Structure: Remove all other tags like <head>, <body>, etc., as this is a partial now. --}}
+@endsection
