@@ -3,7 +3,7 @@
 {{-- Layout Title set: Project Overview | [Tenant ID] --}}
 {{-- Full HTML structure and Navigation is now handled by tenant-app-layout.blade.php --}}
 
-@section('content')
+@section('content') 
     
     @php
         // Tenant record retrieval
@@ -102,6 +102,10 @@
             <a href="/reports" class="glass-card p-5 rounded-xl flex items-center gap-3 hover:border-indigo-300 hover-lift">
                 <div class="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center"><i class="fas fa-chart-line text-green-600"></i></div>
                 <p class="font-medium text-gray-800">View Reports</p>
+            </a>
+            <a href="/pipeline" class="glass-card p-5 rounded-xl flex items-center gap-3 hover:border-indigo-300 hover-lift">
+                <div class="h-10 w-10 rounded-lg bg-purple-50 flex items-center justify-center"><i class="fas fa-search text-purple-600"></i></div>
+                <p class="font-medium text-gray-800">Innovation Pipeline</p>
             </a>
         </div>
 
