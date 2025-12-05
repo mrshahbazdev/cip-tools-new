@@ -1,5 +1,11 @@
-<div class="max-w-4xl mx-auto py-8">
+@extends('components.layouts.tenant-app-layout', ['title' => 'Idea Submission'])
+
+@section('content')
+
+<div class="max-w-4xl mx-auto">
     
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Innovation Submission Wizard</h1>
+
     @if (session()->has('error'))
         <div class="mb-6 p-4 rounded-xl bg-red-100 border border-red-400 text-red-700 animate-fade-in">
             <p class="font-medium">
@@ -36,7 +42,8 @@
             @endif
         </div>
         
-        <div x-show="currentStep === 1"> <h2 class="text-xl font-bold mb-4">Step 1: Your Problem</h2>
+        <div x-show="currentStep === 1">
+            <h2 class="text-xl font-bold mb-4">Step 1: Your Problem</h2>
             <div class="space-y-4">
                 
                 <div>
@@ -45,15 +52,16 @@
                     @error('problem_short') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 
-                {{-- <div>
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Pain Score (1-10) - How badly does this hurt?</label>
                     <input type="number" wire:model="pain_score" min="1" max="10" placeholder="e.g. 8" class="w-24 p-3 border rounded-lg">
                     @error('pain_score') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div> --}}
+                </div>
             </div>
         </div>
 
-        <div x-show="currentStep === 2" style="display: none;"> <h2 class="text-xl font-bold mb-4">Step 2: Your Goal</h2>
+        <div x-show="currentStep === 2" style="display: none;">
+            <h2 class="text-xl font-bold mb-4">Step 2: Your Goal</h2>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">What needs to change for you to be satisfied?</label>
                 <textarea wire:model="goal" rows="3" placeholder="Describe the desired outcome." class="w-full p-3 border rounded-lg"></textarea>
@@ -61,7 +69,8 @@
             </div>
         </div>
 
-        <div x-show="currentStep === 3" style="display: none;"> <h2 class="text-xl font-bold mb-4">Step 3: Problem Details</h2>
+        <div x-show="currentStep === 3" style="display: none;">
+            <h2 class="text-xl font-bold mb-4">Step 3: Problem Details</h2>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Describe your problem or pain point in as much detail as possible here.</label>
                 <textarea wire:model="problem_detail" rows="6" placeholder="Provide context, examples, and affected users." class="w-full p-3 border rounded-lg"></textarea>
@@ -69,7 +78,8 @@
             </div>
         </div>
 
-        <div x-show="currentStep === 4" style="display: none;"> <h2 class="text-xl font-bold mb-4">Step 4: Review & Submit</h2>
+        <div x-show="currentStep === 4" style="display: none;">
+            <h2 class="text-xl font-bold mb-4">Step 4: Review & Submit</h2>
             <div class="space-y-4">
                 <div class="p-4 border rounded-lg bg-gray-50">
                     <h3 class="font-semibold text-lg mb-2">Summary Review</h3>
@@ -105,3 +115,4 @@
         </div>
     </form>
 </div>
+@endsection
