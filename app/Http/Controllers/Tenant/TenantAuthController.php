@@ -5,20 +5,38 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; 
-use Stancl\Tenancy\Resolvers\DomainTenantResolver; // Context check ke liye
+use Illuminate\Support\Facades\Password;
+use Stancl\Tenancy\Resolvers\DomainTenantResolver;
+
+// CRITICAL FIX: Base Traits ko use karein (These are the standard Laravel traits)
+use Illuminate\Foundation\Auth\SendsPasswordResetEmails; 
+use Illuminate\Foundation\Auth\ResetsPasswords; 
+use Illuminate\Foundation\Auth\ThrottlesLogins;
 
 class TenantAuthController extends Controller
 {
+    // FINAL FIX: In traits ko Controller mein use karein
+    use SendsPasswordResetEmails, ResetsPasswords, ThrottlesLogins;
+    
+    // Auth system ko batayein ki konsa password broker use karna hai
+    protected $broker = 'users'; 
+    protected $redirectTo = '/dashboard'; 
+    
+    // --- LIFECYCLE ---
+    public function __construct()
+    {
+        // Custom broker set karna zaroori hai
+        $this->broker = 'users'; 
+    }
+
     // 1. LOGIN FORM DIKHANA
     public function showLoginForm()
     {
-        // Agar user already logged in hai, toh unhe seedha dashboard par bhej do
         if (Auth::check()) {
             return redirect()->route('tenant.dashboard');
         }
-        
-        // Login view ko load karein
-        return view('tenant.login');
+        // Isay return view('tenant.login') kar dein agar aapka login form simple hai.
+        return view('tenant.login'); 
     }
 
     // 2. LOGIN PROCESS (FORM SUBMIT)
@@ -30,27 +48,19 @@ class TenantAuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // --- CRITICAL SECURITY FIX START (User Isolation) ---
-        
-        // 1. Current Tenant ID ko fetch karein (Jo InitializeTenancyByDomain middleware se set hua hai)
+        // Current Tenant ID ko credentials mein inject karein (SECURITY FIX)
         $tenantId = tenant('id');
 
-        // Agar tenant ID nahi mila, toh authentication possible nahi hai
         if (!$tenantId) {
             return back()->withErrors(['email' => 'Could not identify the project domain.'])->onlyInput('email');
         }
 
-        // 2. Credentials mein tenant_id inject karein
-        // Ab Auth::attempt email, password AUR tenant_id check karega (Single DB isolation).
+        // Credentials mein tenant_id inject karein
         $credentials['tenant_id'] = $tenantId;
         
-        // --- CRITICAL SECURITY FIX END ---
-
         // Authentication attempt
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-
-            // Login successful hone par dashboard par redirect karein
             return redirect()->route('tenant.dashboard');
         }
 
@@ -59,7 +69,7 @@ class TenantAuthController extends Controller
             'email' => 'These credentials do not match our records.',
         ])->onlyInput('email');
     }
-
+    
     // 3. LOGOUT PROCESS
     public function logout(Request $request)
     {
@@ -71,4 +81,7 @@ class TenantAuthController extends Controller
         // Logout ke baad wapas landing page par bhej dein
         return redirect()->route('tenant.landing');
     }
+    
+    // Note: showLinkRequestForm, sendResetLinkEmail, showResetForm, aur resetPassword methods 
+    // ab traits (SendsPasswordResetEmails, ResetsPasswords) se automatic provide ho jayenge.
 }
