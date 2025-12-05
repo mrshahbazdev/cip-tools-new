@@ -28,10 +28,10 @@
                 <span>Submit Idea</span>
             </a>
             
-            <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 mb-2 font-medium">
+            <a href="{{ route('tenant.my_ideas') }}" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 mb-2 font-medium">
                 <i class="fas fa-lightbulb"></i>
-                <span>My Ideas</span>
-            </a>
+                <span>My Ideas ({{ $ideasSubmitted ?? 0 }})</span>
+            </a>>
         </div>
         
         <div class="mb-6">

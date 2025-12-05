@@ -56,6 +56,7 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
             Route::get('/teams', \App\Livewire\TeamManagement::class)->name('tenant.teams.manage');
             Route::get('/submit-idea', \App\Livewire\IdeaSubmissionForm::class)->name('tenant.submit_idea');
             Route::get('/pipeline/{ideaId}', \App\Livewire\IdeaDetail::class)->name('tenant.idea.detail');
+            Route::get('/my-ideas', \App\Livewire\MyIdeasTable::class)->name('tenant.my_ideas');
         });
     });
 });
