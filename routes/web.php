@@ -17,3 +17,7 @@ foreach (config('tenancy.central_domains') as $domain) {
         });
     });
 }
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
