@@ -84,7 +84,7 @@ class TenantAuthController extends Controller
     
     // --- PASSWORD RESET FUNCTIONALITY ---
     
-    // Show link request form
+    // ADD THIS METHOD - it's missing
     public function showLinkRequestForm()
     {
         return view('tenant.auth.passwords.email');
