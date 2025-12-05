@@ -6,10 +6,33 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; 
 use Stancl\Tenancy\Resolvers\DomainTenantResolver; // Context check ke liye
-
+use Illuminate\Foundation\Auth\SendsPasswordResetEmails; // For sending link
+use Illuminate\Foundation\Auth\ResetsPasswords; // For resetting password
+use Illuminate\Foundation\Auth\ThrottlesLogins;
+use Illuminate\Support\Facades\Password;
 class TenantAuthController extends Controller
 {
     // 1. LOGIN FORM DIKHANA
+    use SendsPasswordResetEmails, ResetsPasswords, ThrottlesLogins;
+    protected $redirectTo = '/dashboard'; 
+    
+    // IMPORTANT: Broker ko 'users' par set karna hoga (jo config/auth.php mein hai)
+    public function __construct()
+    {
+        $this->broker = 'users'; 
+    }
+    public function showLinkRequestForm()
+    {
+        return view('tenant.passwords.email');
+    }
+
+    // Password reset form dikhana
+    public function showResetForm(Request $request, $token = null)
+    {
+        return view('tenant.passwords.reset')->with(
+            ['token' => $token, 'email' => $request->email]
+        );
+    }
     public function showLoginForm()
     {
         // Agar user already logged in hai, toh unhe seedha dashboard par bhej do
