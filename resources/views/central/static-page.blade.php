@@ -348,28 +348,33 @@
             </div>
         </div>
     </main>
+    @php
+        // Fetch dynamic content and static pages
+        $staticPages = App\Models\StaticPage::where('is_published', true)->orderBy('title')->get();
 
+        // Fetch settings dynamically (assuming Super Admin has populated them)
+        $settings = [
+            'email' => App\Models\Setting::getValue('contact_email'),
+            'phone' => App\Models\Setting::getValue('contact_phone'),
+            'twitter' => App\Models\Setting::getValue('social_twitter_url'),
+            'linkedin' => App\Models\Setting::getValue('social_linkedin_url'),
+            'github' => App\Models\Setting::getValue('social_github_url'),
+        ];
+
+        // Fallbacks if setting is not found
+        $settings = array_map(fn($v) => $v ?? 'N/A', $settings);
+    @endphp
     <!-- Footer -->
     <footer class="footer-sticky bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 py-12 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8 mb-8">
-                <!-- Company Info -->
                 <div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                            <span class="text-white font-bold">C</span>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-white text-lg">Cip Tools</h3>
-                            <p class="text-sm text-gray-400">Innovation Platform</p>
-                        </div>
-                    </div>
+                    <h3 class="font-bold text-white text-lg mb-4">Cip Tools</h3>
                     <p class="text-sm text-gray-400">
                         Empowering teams to innovate, collaborate, and transform ideas into reality.
                     </p>
                 </div>
 
-                <!-- Quick Links -->
                 <div>
                     <h4 class="font-semibold text-white mb-4">Quick Links</h4>
                     <ul class="space-y-2">
@@ -380,47 +385,44 @@
                     </ul>
                 </div>
 
-                <!-- Legal -->
                 <div>
-                    <h4 class="font-semibold text-white mb-4">Legal</h4>
+                    <h4 class="font-semibold text-white mb-4">Legal & Support</h4>
                     <ul class="space-y-2">
                         <li><a href="/privacy" class="text-gray-400 hover:text-white transition">Privacy Policy</a></li>
                         <li><a href="/terms" class="text-gray-400 hover:text-white transition">Terms of Service</a></li>
-                        <li><a href="/cookies" class="text-gray-400 hover:text-white transition">Cookie Policy</a></li>
+                        <li><a href="mailto:{{ $settings['email'] }}" class="text-gray-400 hover:text-white transition">Contact Us</a></li>
                     </ul>
                 </div>
 
-                <!-- Contact -->
                 <div>
-                    <h4 class="font-semibold text-white mb-4">Contact</h4>
+                    <h4 class="font-semibold text-white mb-4">Contact & Connect</h4>
                     <ul class="space-y-2">
                         <li class="flex items-center gap-2">
                             <i class="fas fa-envelope text-indigo-400"></i>
-                            <span>support@cip-tools.com</span>
+                            <span>{{ $settings['email'] }}</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <i class="fas fa-phone text-indigo-400"></i>
-                            <span>+1 (555) 123-4567</span>
+                            <span>{{ $settings['phone'] }}</span>
                         </li>
                     </ul>
                     <div class="flex gap-3 mt-4">
-                        <a href="#" class="h-10 w-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition">
-                            <i class="fab fa-twitter text-gray-400"></i>
-                        </a>
-                        <a href="#" class="h-10 w-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition">
-                            <i class="fab fa-linkedin text-gray-400"></i>
-                        </a>
-                        <a href="#" class="h-10 w-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition">
-                            <i class="fab fa-github text-gray-400"></i>
-                        </a>
+                        {{-- Dynamic Social Media Icons --}}
+                        @if($settings['twitter'] !== 'N/A')
+                            <a href="{{ $settings['twitter'] }}" target="_blank" class="h-10 w-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition"><i class="fab fa-twitter text-gray-400"></i></a>
+                        @endif
+                        @if($settings['linkedin'] !== 'N/A')
+                            <a href="{{ $settings['linkedin'] }}" target="_blank" class="h-10 w-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition"><i class="fab fa-linkedin text-gray-400"></i></a>
+                        @endif
+                        @if($settings['github'] !== 'N/A')
+                            <a href="{{ $settings['github'] }}" target="_blank" class="h-10 w-10 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition"><i class="fab fa-github text-gray-400"></i></a>
+                        @endif
                     </div>
                 </div>
             </div>
 
-            <!-- Copyright -->
             <div class="pt-8 border-t border-gray-800 text-center">
                 <p>&copy; 2025 Cip Tools. All rights reserved.</p>
-                <p class="text-sm mt-2 text-gray-500">Building the future of innovation, one idea at a time.</p>
             </div>
         </div>
     </footer>
