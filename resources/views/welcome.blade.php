@@ -24,6 +24,16 @@
             }
         }
     </script>
+    <style>
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 30px) scale(0.9); }
+        }
+        .animate-blob { animation: blob 10s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .user-avatar { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); }
+    </style>
 </head>
 <body class="bg-gray-50 text-slate-600 font-sans antialiased">
 
@@ -35,10 +45,14 @@
                     <span class="font-bold text-xl text-slate-900 tracking-tight">Cip Tools</span>
                 </div>
 
-                <div class="hidden md:flex items-center space-x-8">
+                <div class="hidden md:flex items-center space-x-6">
                     <a href="#features" class="text-sm font-medium text-slate-600 hover:text-primary transition">Features</a>
                     <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-primary transition">Pricing</a>
-                    <a href="#" class="text-sm font-medium text-slate-900 hover:text-primary transition">Login</a>
+
+                    <a href="/about" class="text-sm font-medium text-slate-600 hover:text-primary transition">About</a>
+                    <a href="/privacy" class="text-sm font-medium text-slate-600 hover:text-primary transition">Privacy Policy</a>
+
+                    <a href="/admin/login" class="text-sm font-medium text-slate-900 hover:text-primary transition">Admin Login</a>
                     <a href="#" class="bg-primary hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md shadow-indigo-200">
                         Get Started
                     </a>
