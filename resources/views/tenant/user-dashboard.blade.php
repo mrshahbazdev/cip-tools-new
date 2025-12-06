@@ -80,7 +80,7 @@
                         <i class="fas fa-paper-plane"></i>
                         <span>Submit New Idea</span>
                     </a>
-                    <a href="#" class="flex items-center gap-3 p-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium hover-lift">
+                    <a href="/my-ideas" class="flex items-center gap-3 p-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium hover-lift">
                         <i class="fas fa-lightbulb"></i>
                         <span>My Ideas ({{ $ideasSubmitted }})</span>
                     </a>
