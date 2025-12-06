@@ -2,40 +2,38 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cip Tools - Project Management</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#4F46E5', // Indigo 600
-                        secondary: '#1E293B', // Slate 800
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: { primary: '#4F46E5', secondary: '#1E293B', }
                 }
             }
         }
     </script>
     <style>
-        @keyframes blob {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 30px) scale(0.9); }
-        }
+        @keyframes blob { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } }
         .animate-blob { animation: blob 10s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .user-avatar { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); }
     </style>
 </head>
 <body class="bg-gray-50 text-slate-600 font-sans antialiased">
+
+    @php
+        $aboutPage = App\Models\StaticPage::where('title', 'About')->first();
+        $privacyPage = App\Models\StaticPage::where('title', 'Privacy Policy')->first();
+
+        $aboutSlug = $aboutPage->slug ?? 'about';
+        $privacySlug = $privacyPage->slug ?? 'privacy';
+    @endphp
 
     <nav class="bg-white border-b border-gray-200 fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,8 +47,8 @@
                     <a href="#features" class="text-sm font-medium text-slate-600 hover:text-primary transition">Features</a>
                     <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-primary transition">Pricing</a>
 
-                    <a href="/about" class="text-sm font-medium text-slate-600 hover:text-primary transition">About</a>
-                    <a href="/privacy" class="text-sm font-medium text-slate-600 hover:text-primary transition">Privacy Policy</a>
+                    <a href="/{{ $aboutSlug }}" class="text-sm font-medium text-slate-600 hover:text-primary transition">About</a>
+                    <a href="/{{ $privacySlug }}" class="text-sm font-medium text-slate-600 hover:text-primary transition">Privacy Policy</a>
 
                     <a href="/admin/login" class="text-sm font-medium text-slate-900 hover:text-primary transition">Admin Login</a>
                     <a href="#" class="bg-primary hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md shadow-indigo-200">
