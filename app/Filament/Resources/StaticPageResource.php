@@ -17,7 +17,8 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Set;
 use Illuminate\Support\Str;
-
+use Filament\Tables\Columns\TextColumn; // <-- Naya Import
+use Filament\Tables\Columns\IconColumn; // <-- Naya Import
 class StaticPageResource extends Resource
 {
     protected static ?string $model = StaticPage::class;
