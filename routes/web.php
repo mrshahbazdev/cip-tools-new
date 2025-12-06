@@ -16,3 +16,9 @@ foreach (config('tenancy.central_domains') as $domain) {
         });
     });
 }
+Route::get('/{slug}', function ($slug) {
+    $page = App\Models\StaticPage::where('slug', $slug)->where('is_published', true)->firstOrFail();
+
+    // Yahan ek custom view render hoga (e.g., 'central.static-page')
+    return view('central.static-page', ['page' => $page]);
+})->where('slug', '(about|privacy|terms|contact)'); // Only allow specific slugs
