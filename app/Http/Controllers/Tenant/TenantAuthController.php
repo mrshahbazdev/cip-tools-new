@@ -26,6 +26,35 @@ class TenantAuthController extends Controller
     // ... [keep existing login/showLoginForm/logout methods] ...
 
     // Password reset link request form dikhana
+    public function login(Request $request)
+    {
+        // Validation check
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        // Current Tenant ID ko credentials mein inject karein (SECURITY FIX)
+        $tenantId = tenant('id');
+
+        if (!$tenantId) {
+            return back()->withErrors(['email' => 'Could not identify the project domain.'])->onlyInput('email');
+        }
+
+        // Credentials mein tenant_id inject karein (Single DB isolation ke liye)
+        $credentials['tenant_id'] = $tenantId;
+
+        // Authentication attempt
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            return redirect()->route('tenant.dashboard');
+        }
+
+        // Login fail hone par error ke saath wapas bhejein
+        return back()->withErrors([
+            'email' => 'These credentials do not match our records.',
+        ])->onlyInput('email');
+    }
     public function showLinkRequestForm()
     {
         return view('tenant.passwords.email');
