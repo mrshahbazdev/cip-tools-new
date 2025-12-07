@@ -55,6 +55,16 @@ class TenantAuthController extends Controller
             'email' => 'These credentials do not match our records.',
         ])->onlyInput('email');
     }
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Logout के बाद wapas landing page par bhej dein
+        return redirect()->route('tenant.landing');
+    }
     public function showLinkRequestForm()
     {
         return view('tenant.passwords.email');
