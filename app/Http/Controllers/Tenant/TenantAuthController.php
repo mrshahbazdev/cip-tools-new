@@ -38,7 +38,13 @@ class TenantAuthController extends Controller
             ['token' => $token, 'email' => $request->email]
         );
     }
-
+    public function showLoginForm()
+    {
+        if (Auth::check()) {
+            return redirect()->route('tenant.dashboard');
+        }
+        return view('tenant.login');
+    }
     // Send password reset link (MANUAL IMPLEMENTATION)
     public function sendResetLinkEmail(Request $request)
     {
