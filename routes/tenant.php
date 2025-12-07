@@ -11,14 +11,29 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
     ->group(function () {
 
     // --- PUBLIC AUTH ROUTES & LANDING ---
-    Route::get('/login', [TenantAuthController::class, 'showLoginForm'])->name('login'); 
+    Route::get('/login', [TenantAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [TenantAuthController::class, 'login'])->name('tenant.login');
     Route::get('/register', TenantUserRegistration::class)->name('tenant.register');
-    
+    // --- PASSWORD RESET ROUTES (CRITICAL BLOCK) ---
+    // 1. Forgot Password Form (GET)
+    Route::get('/forgot-password', [App\Http\Controllers\Tenant\TenantAuthController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    // 2. Send Reset Link (POST)
+    Route::post('/forgot-password', [App\Http\Controllers\Tenant\TenantAuthController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    // 3. Reset Password Form (GET)
+    Route::get('/reset-password/{token}', [App\Http\Controllers\Tenant\TenantAuthController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    // 4. Update Password (POST)
+    Route::post('/reset-password', [App\Http\Controllers\Tenant\TenantAuthController::class, 'resetPassword'])
+        ->name('password.update');
     // Expired Page (Must be accessible without CheckTrialExpiry)
     Route::get('/expired', function () {
-        return view('tenant.expired-access'); 
-    })->name('tenant.expired'); 
+        return view('tenant.expired-access');
+    })->name('tenant.expired');
 
     // Root URL (Landing Page)
     Route::get('/', function () {
@@ -30,14 +45,14 @@ Route::middleware(['web', InitializeTenancyByDomain::class])
 
     // --- LOGGED IN ROUTES (Auth Protection) ---
     Route::middleware('auth')->group(function () {
-        
+
         // 1. SAFE ROUTES (Billing/Logout - No Expiry Check)
         Route::get('/billing', \App\Livewire\BillingPlans::class)->name('tenant.billing');
-        Route::post('/logout', [TenantAuthController::class, 'logout'])->name('logout'); 
-        
+        Route::post('/logout', [TenantAuthController::class, 'logout'])->name('logout');
+
         // 2. SENSITIVE ROUTES (Expiry Check Applied)
         Route::middleware([CheckTrialExpiry::class])->group(function () {
-            
+
             // DASHBOARD ROUTE (The core protected asset)
             Route::get('/dashboard', function () {
                 if (auth()->user()->isTenantAdmin()) {
