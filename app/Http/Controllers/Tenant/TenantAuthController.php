@@ -4,14 +4,37 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Authentication ke liye
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password; // Password facade ke liye zaroori
+
+// CRITICAL TRAITS (Password Reset functionality Laravel se inherit karein)
+use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Foundation\Auth\ThrottlesLogins; // Optional, security ke liye
 
 class TenantAuthController extends Controller
 {
+    // FINAL FIX: In traits ko Controller mein use karein
+    use SendsPasswordResetEmails, ResetsPasswords, ThrottlesLogins;
+
+    // CRITICAL: Broker set karein jise humne config/auth.php mein TenantUser model ke liye define kiya tha.
+    protected $broker = 'tenant_users'; // Naya custom broker
+    protected $redirectTo = '/dashboard';
+
+    // --- LIFECYCLE ---
+    public function __construct()
+    {
+        // Broker ko initialize karein
+        $this->broker = 'tenant_users';
+    }
+
     // 1. LOGIN FORM DIKHANA
     public function showLoginForm()
     {
-        // Login view ko load karein
+        // Agar user already logged in hai (ye check CheckTrialExpiry middleware mein bhi hota hai)
+        if (Auth::check()) {
+            return redirect()->route('tenant.dashboard');
+        }
         return view('tenant.login');
     }
 
@@ -24,12 +47,19 @@ class TenantAuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // Current Tenant ID ko credentials mein inject karein (SECURITY FIX)
+        $tenantId = tenant('id');
+
+        if (!$tenantId) {
+            return back()->withErrors(['email' => 'Could not identify the project domain.'])->onlyInput('email');
+        }
+
+        // Credentials mein tenant_id inject karein (Single DB isolation ke liye)
+        $credentials['tenant_id'] = $tenantId;
+
         // Authentication attempt
-        // Tenancy middleware ki wajah se ye sirf current tenant ki DB mein dhoondega
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-
-            // Login successful hone par dashboard par redirect karein
             return redirect()->route('tenant.dashboard');
         }
 
@@ -49,5 +79,21 @@ class TenantAuthController extends Controller
 
         // Logout ke baad wapas landing page par bhej dein
         return redirect()->route('tenant.landing');
+    }
+
+    // --- PASSWORD RESET METHODS (Traits se Inherit hote hain, lekin hum views ko dikhate hain) ---
+
+    // Password reset link request form dikhana
+    public function showLinkRequestForm()
+    {
+        return view('tenant.passwords.email');
+    }
+
+    // Password reset form dikhana (token aur email ke saath)
+    public function showResetForm(Request $request, $token = null)
+    {
+        return view('tenant.passwords.reset')->with(
+            ['token' => $token, 'email' => $request->email]
+        );
     }
 }

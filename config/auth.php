@@ -41,9 +41,9 @@ return [
             'provider' => 'users',
         ],
         // Dhyan dein: Koi extra comma ya missing array entry na ho
-        'admin' => [ 
+        'admin' => [
             'driver' => 'session',
-            'provider' => 'admins', 
+            'provider' => 'admins',
         ],
     ],
 
@@ -72,8 +72,12 @@ return [
         // NAYA PROVIDER: Super Admin ke liye
         'admins' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class, 
+            'model' => App\Models\User::class,
             'connection' => 'mysql', // Central DB connection use karein
+        ],
+        'tenant_users_provider' => [ // Naya provider jo TenantUser model use karega
+            'driver' => 'eloquent',
+            'model' => App\Models\TenantUser::class, // <-- Ye zaroori hai
         ],
     ],
     // 2. New Guard (Use the new provider)
@@ -101,6 +105,12 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'tenant_users' => [
+            'provider' => 'tenant_users_provider', // Naya provider name
+            'table' => 'password_reset_tokens', // Default table use karein
             'expire' => 60,
             'throttle' => 60,
         ],
