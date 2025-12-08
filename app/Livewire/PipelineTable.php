@@ -108,12 +108,12 @@ class PipelineTable extends Component
     $isTenantAdmin = $user->isTenantAdmin();
 
     $query = ProjectIdea::query()
-        ->where('tenant_id', $tenantId);
+        ->where('tenant_id', $tenantId)
 
     // 1. Team Scoping (Admin Bypass is working correctly here)
     ->when(!$isTenantAdmin && $activeTeamId, function (Builder $query, $activeTeamId) {
         $query->where('team_id', $activeTeamId);
-    });
+    })
 
     // 2. Dynamic Search Filter
     ->when($this->search, function (Builder $query) {
@@ -122,7 +122,7 @@ class PipelineTable extends Component
                      ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
                      ->orWhere('goal', 'like', '%' . $this->search . '%');
         });
-    });
+    })
 
     // 3. Status Filter
     ->when($this->statusFilter, function (Builder $query) {
