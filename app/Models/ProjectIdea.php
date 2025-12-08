@@ -21,21 +21,18 @@ class ProjectIdea extends Model
             $cost = (float) $idea->cost;
             $duration = (float) $idea->time_duration_hours;
 
-            // --- FORMULA IMPLEMENTATION ---
-
-            // 1. PRIO 2 = Schmerz (Direct Mapping)
-            // Note: Agar Schmerz integer field hai, toh direct assign karein.
-
-
-            // 2. PRIO 1 = (Kosten / 100) + Dauer (Cost is weighted down)
+            // --- 1. PRIO 1 CALCULATION (Original Formula) ---
+            // PRIO 1 = (Kosten / 100) + Dauer
             if ($cost >= 0 && $duration >= 0) {
                 $idea->prio_1 = ($cost / 100) + $duration;
             } else {
-                // Agar input invalid ho, toh 0 set karein
                 $idea->prio_1 = 0;
             }
+
+            // --- 2. PRIO 2 CALCULATION (NEW REQUESTED FORMULA) ---
+            // PRIO 2 = Pain * PRIO 1
             $idea->prio_2 = $pain * $idea->prio_1;
-            // Note: `prio_1` aur `prio_2` fields ko database mein float/decimal hona chahiye.
+
         });
     }
     protected $fillable = [
