@@ -100,46 +100,65 @@ class PipelineTable extends Component
     // --- MAIN RENDER LOGIC (FINAL) ---
 
     public function render()
-    {
-        $tenantId = tenant('id');
-        $activeTeamId = session('active_team_id');
-        $user = Auth::user();
+{
+    $tenantId = tenant('id');
+    $activeTeamId = session('active_team_id');
+    $user = Auth::user();
 
-        $ideas = ProjectIdea::query()
-            ->where('tenant_id', $tenantId)
+    // Base Query Setup
+    $query = ProjectIdea::query()
+        ->where('tenant_id', $tenantId);
 
-            // 1. Team Scoping (CRITICAL)
-            ->when($activeTeamId, function (Builder $query, $activeTeamId) {
-                $query->where('team_id', $activeTeamId);
-            })
+    // 1. Team Scoping (CRITICAL)
+    $query->when($activeTeamId, function (Builder $query, $activeTeamId) {
+        $query->where('team_id', $activeTeamId);
+    });
 
-            // 2. Dynamic Search Filter (Working now)
-            ->when($this->search, function (Builder $query) {
-                // Use sub-grouping for correct OR logic
-                $query->where(function (Builder $subQuery) {
-                    $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
-                             ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
-                             ->orWhere('goal', 'like', '%' . $this->search . '%');
-                });
-            })
+    // 2. Dynamic Search Filter
+    $query->when($this->search, function (Builder $query) {
+        $query->where(function (Builder $subQuery) {
+            $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
+                     ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
+                     ->orWhere('goal', 'like', '%' . $this->search . '%');
+        });
+    });
 
-            // 3. Status Filter (Working now)
-            ->when($this->statusFilter, function (Builder $query) {
-                $query->where('status', $this->statusFilter);
-            })
+    // 3. Status Filter
+    $query->when($this->statusFilter, function (Builder $query) {
+        $query->where('status', $this->statusFilter);
+    });
 
-            // 4. Default Sorting (Hardcoded to creation time - most recent first)
-            ->orderBy('created_at', 'desc')
+    // --- DD DEBUG CHECK (YAHAN AA KAR EXECUTION RUK JAYEGI) ---
+    if ($this->search || $this->statusFilter) {
 
-            ->paginate(15);
+        // Final Query aur Bindings ko nikalen
+        $debugQuery = $query->toSql();
+        $debugBindings = $query->getBindings();
 
-        return view('livewire.pipeline-table', [
-            'ideas' => $ideas,
-
-            // Pass the permission booleans to the view
-            'isTenantAdmin' => $user->isTenantAdmin(),
-            'isDeveloper' => $user->isDeveloper(),
-            'isWorkBee' => $user->isWorkBee(),
-        ])->layout('components.layouts.guest');
+        // Screen par saari information display karein
+        dd([
+            'ISSUE' => 'Filtering Logic Check',
+            'Active Search' => $this->search,
+            'Active Status Filter' => $this->statusFilter,
+            'Active Team ID (Session)' => $activeTeamId,
+            'Raw SQL Query' => $debugQuery,
+            'Query Bindings' => $debugBindings,
+            'NEXT STEP' => 'Copy the SQL query and run it in phpMyAdmin to verify results.',
+        ]);
     }
+    // --- DD DEBUG CHECK END ---
+
+    // 4. Final Query Execution (Pagination)
+    $ideas = $query
+        ->orderBy('created_at', 'desc')
+        ->paginate(15);
+
+    // ... return view ...
+    return view('livewire.pipeline-table', [
+        'ideas' => $ideas,
+        'isTenantAdmin' => Auth::user()->isTenantAdmin(),
+        'isDeveloper' => Auth::user()->isDeveloper(),
+        'isWorkBee' => Auth::user()->isWorkBee(),
+    ]);
+}
 }
