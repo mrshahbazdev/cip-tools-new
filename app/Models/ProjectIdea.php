@@ -25,7 +25,7 @@ class ProjectIdea extends Model
 
             // 1. PRIO 2 = Schmerz (Direct Mapping)
             // Note: Agar Schmerz integer field hai, toh direct assign karein.
-            $idea->prio_2 = $pain;
+
 
             // 2. PRIO 1 = (Kosten / 100) + Dauer (Cost is weighted down)
             if ($cost >= 0 && $duration >= 0) {
@@ -34,7 +34,7 @@ class ProjectIdea extends Model
                 // Agar input invalid ho, toh 0 set karein
                 $idea->prio_1 = 0;
             }
-
+            $idea->prio_2 = $pain * $idea->prio_1;
             // Note: `prio_1` aur `prio_2` fields ko database mein float/decimal hona chahiye.
         });
     }
