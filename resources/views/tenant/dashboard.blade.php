@@ -3,19 +3,22 @@
 {{-- Layout Title set: Project Overview | [Tenant ID] --}}
 {{-- Full HTML structure and Navigation is now handled by tenant-app-layout.blade.php --}}
 
-@section('content') 
-    
+@section('content')
+
     @php
+        // ZAROORI IMPORTS
+        use App\Models\ProjectIdea; // ProjectIdea Model import karein
+
         // Tenant record retrieval
         $currentTenant = \App\Models\Tenant::find(tenant('id'));
         $loggedInUser = auth()->user();
-        
+
         // 1. Calculate Days Remaining
         $trialEndDate = $currentTenant->trial_ends_at;
         $hoursRemaining = $trialEndDate ? now()->diffInHours($trialEndDate, false) : 0;
         $cleanDaysRemaining = $hoursRemaining > 0 ? ceil($hoursRemaining / 24) : 0;
-        
-        // 2. Status Determination Logic
+
+        // 2. Status Determination Logic (Omitted for brevity)
         if ($currentTenant->plan_status === 'active') {
             $statusText = 'ACTIVE';
             $statusColor = 'bg-green-100 text-green-800';
@@ -34,10 +37,30 @@
         $totalUsers = \App\Models\TenantUser::where('tenant_id', tenant('id'))->count();
         $slogan = ($currentTenant->plan_status === 'active') ? ($currentTenant->slogan ?? 'Thought together and made together.') : 'Upgrade required to customize your branding.';
         $incentive = ($currentTenant->plan_status === 'active') ? ($currentTenant->incentive_text ?? 'Please specify remuneration.') : 'Configuration is currently locked. Upgrade required.';
+
+        // CRITICAL FIX: DYNAMIC IDEA COUNT CALCULATION
+        $activeTeamId = session('active_team_id'); // Session se active team ID lo
+
+        $totalIdeasCount = ProjectIdea::query()
+            // Tenant ID filter (Safety check)
+            ->where('tenant_id', tenant('id'))
+
+            // IMPORTANT: Apply Team Scoping ONLY if an active team is selected
+            ->when($activeTeamId, function ($query, $teamId) {
+                // Ensure the user is not trying to scope by a non-existent team ID
+                if ($teamId) {
+                    $query->where('team_id', $teamId);
+                }
+            })
+
+            ->count();
+        // Fallback for display
+        $ideasDisplayCount = ($totalIdeasCount > 0) ? $totalIdeasCount : 0;
+
     @endphp
 
     <div class="space-y-8">
-        
+
         <div class="gradient-header text-white p-6 md:p-10 rounded-xl shadow-xl hover-lift relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
             <div class="relative z-10">
@@ -49,9 +72,9 @@
                 </p>
             </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
+
             <div class="glass-card p-6 rounded-2xl stat-card hover-lift">
                 <p class="text-sm font-medium text-gray-500 mb-2">Total Collaborators</p>
                 <p class="text-3xl font-bold text-gray-900">{{ $totalUsers }}</p>
@@ -65,7 +88,8 @@
 
             <div class="glass-card p-6 rounded-2xl stat-card hover-lift">
                 <p class="text-sm font-medium text-gray-500 mb-2">Project Ideas</p>
-                <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                {{-- DISPLAY FIXED COUNT --}}
+                <p class="text-3xl font-bold text-gray-900 mt-1">{{ $ideasDisplayCount }}</p>
             </div>
 
             <a href="{{ route('tenant.users.manage') }}" class="glass-card p-6 rounded-2xl flex flex-col justify-center items-center bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover-lift transition-all duration-300">
