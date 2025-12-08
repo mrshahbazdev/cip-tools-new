@@ -14,24 +14,17 @@ class PipelineTable extends Component
 {
     use WithPagination;
 
-    // Listeners for external events (e.g., modal closure)
     protected $listeners = ['ideaSaved' => 'render'];
 
-    // --- State Properties for Filtering ---
     public $search = '';
     public $statusFilter = '';
-
-    // Sorting properties removed as requested.
 
     public $statuses = [
         'New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'
     ];
 
-    // --- LIFECYCLE HOOKS ---
-
     public function mount()
     {
-        // Set default active team if not already set in session
         if (!session('active_team_id') && Auth::check()) {
             $tenantUser = TenantUser::find(Auth::id());
 
@@ -41,11 +34,11 @@ class PipelineTable extends Component
         }
     }
 
-    // Reset pagination when search or filters update
     public function updatingSearch()
     {
         $this->resetPage();
     }
+
     public function updatingStatusFilter()
     {
         $this->resetPage();
@@ -58,18 +51,14 @@ class PipelineTable extends Component
         $this->resetPage();
     }
 
-    // --- SECURITY & IN-GRID SAVE LOGIC (UNCHANGED) ---
-
     public function saveIdeaField($ideaId, $fieldName, $newValue)
     {
         $user = Auth::user();
 
-        // 1. CRITICAL DATA TYPE FIX (Convert empty string to NULL)
         if ($newValue === '') {
             $newValue = null;
         }
 
-        // 2. Authorization Check (logic uses $user->isWorkBee() etc.)
         $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status', 'prio_1', 'prio_2']);
         $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours']);
 
@@ -89,7 +78,6 @@ class PipelineTable extends Component
             return;
         }
 
-        // 3. Proceed with save
         $idea = ProjectIdea::find($ideaId);
         if ($idea) {
             $idea->update([$fieldName => $newValue]);
@@ -97,21 +85,37 @@ class PipelineTable extends Component
         }
     }
 
-    // --- MAIN RENDER LOGIC (FINAL WITH DD DEBUG) ---
-
     public function render()
     {
-        $tenantId = tenant('id');
-        $activeTeamId = session('active_team_id');
+        // بہتر طریقہ سے tenant_id حاصل کریں
         $user = Auth::user();
+        $tenantId = $user->tenant_id ?? null;
 
+        // اگر tenant_id نہیں ملا تو database سے related tenant تلاش کریں
+        if (!$tenantId && $user instanceof TenantUser) {
+            $tenantId = $user->tenant_id;
+        }
+
+        // اگر پھر بھی نہیں ملا تو fallback
+        if (!$tenantId) {
+            $tenantId = tenant('id');
+        }
+
+        // Debugging کے لیے temporary log
+        \Log::info('PipelineTable Tenant ID:', [
+            'user_id' => $user->id,
+            'tenant_id' => $tenantId,
+            'tenant_from_user' => $user->tenant_id,
+            'tenant_from_helper' => tenant('id')
+        ]);
+
+        $activeTeamId = session('active_team_id');
         $isTenantAdmin = $user->isTenantAdmin();
 
         $query = ProjectIdea::query()
             ->where('tenant_id', $tenantId);
 
-        // 1. Team Scoping (Admin Bypass is working correctly here)
-        // Only apply team filter if the user is NOT a Tenant Admin AND an active team ID is set.
+        // 1. Team Scoping
         $query->when(!$isTenantAdmin && $activeTeamId, function (Builder $query, $activeTeamId) {
             $query->where('team_id', $activeTeamId);
         });
@@ -129,31 +133,6 @@ class PipelineTable extends Component
         $query->when($this->statusFilter, function (Builder $query) {
             $query->where('status', $this->statusFilter);
         });
-
-        // --- DD DEBUG CHECK (YAHAN AA KAR EXECUTION RUK JAYEGI) ---
-        if ($this->search || $this->statusFilter) {
-
-            // CRITICAL FIX: Clone the query builder before count to preserve state for toSql/getBindings
-            $debugClone = clone $query;
-
-            $debugQuery = $debugClone->toSql();
-            $debugBindings = $debugClone->getBindings();
-
-            // Run count on the original query
-            $resultCount = $query->count();
-
-            dd([
-                'ISSUE' => 'Tenant Admin Filtering Logic Check',
-                'Active Search' => $this->search,
-                'Active Status Filter' => $this->statusFilter,
-                'Is Admin?' => $isTenantAdmin ? 'YES (Team Scope Bypassed)' : 'NO (Team Scope Applied)',
-                'RESULTS COUNT WITH FILTERS' => $resultCount,
-                'Raw SQL Query' => $debugQuery,
-                'Query Bindings' => $debugBindings,
-                'NEXT STEP' => 'If RESULT COUNT is 0, database data does not match search/status.',
-            ]);
-        }
-        // --- DD DEBUG CHECK END ---
 
         // 4. Final Query Execution (Pagination)
         $ideas = $query
