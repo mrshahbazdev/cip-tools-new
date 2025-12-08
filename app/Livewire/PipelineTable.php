@@ -140,6 +140,6 @@ class PipelineTable extends Component
             'isTenantAdmin' => $user->isTenantAdmin(),
             'isDeveloper' => $user->isDeveloper(),
             'isWorkBee' => $user->isWorkBee(),
-        ]);
+        ])->layout('components.layouts.guest');
     }
 }
