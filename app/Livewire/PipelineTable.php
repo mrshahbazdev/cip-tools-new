@@ -4,86 +4,142 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\ProjectIdea; // Zaroori model import
+use App\Models\ProjectIdea;
+use App\Models\TenantUser;
+use App\Models\Team;
+use Illuminate\Support\Facades\Auth;
 
 class PipelineTable extends Component
 {
     use WithPagination;
+    protected $listeners = ['ideaSaved' => 'render'];
 
-    // Properties for filtering and sorting (Inse data aa raha hai)
+    // --- State Properties for Filtering ---
     public $search = '';
     public $statusFilter = '';
-    public $sortBy = 'created_at';
-    public $sortDirection = 'desc';
 
-    // Authorization
-    public $isDeveloper = false;
+    // Sorting properties removed (as requested)
 
-    // Statuses array (from Blade view)
-    public $statuses = ['New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'];
+    public $statuses = [
+        'New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'
+    ];
 
+    // --- LIFECYCLE HOOKS ---
 
     public function mount()
     {
-        $user = Auth::user();
-        $this->isDeveloper = $user->isDeveloper();
+        // Set default active team if not already set in session
+        if (!session('active_team_id') && Auth::check()) {
+            $tenantUser = TenantUser::find(Auth::id());
 
-        // Initial state set karein
-        if (empty($this->statusFilter)) {
-            $this->statusFilter = 'New'; // Default filter to 'New' as shown in snapshot
+            if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
+                session(['active_team_id' => $tenantUser->teams->first()->id]);
+            }
         }
     }
 
-    // Filters ko reset karne ke liye
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+    public function updatingStatusFilter()
+    {
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
-        $this->reset(['search', 'statusFilter']);
-        $this->statusFilter = 'New'; // Default filter set karein
-        $this->resetPage(); // Pagination reset karein
+        $this->search = '';
+        $this->statusFilter = ''; // Reset the filter property to empty string
+        $this->resetPage();
     }
 
-    // Sort function (already defined implicitly by Blade headers, but needed here)
-    public function sortBy($field)
+    // sortBy method and $sortBy, $sortDirection properties REMOVED.
+
+    // --- SECURITY & IN-GRID SAVE LOGIC ---
+
+    public function saveIdeaField($ideaId, $fieldName, $newValue)
     {
-        if ($this->sortBy === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $field;
-            $this->sortDirection = 'asc';
+        $user = Auth::user();
+
+        // 1. CRITICAL DATA TYPE FIX (Convert empty string to NULL)
+        if ($newValue === '') {
+            $newValue = null;
+        }
+
+        // 2. Authorization Check (logic uses $user->isWorkBee() etc.)
+        $isWorkBeeField = in_array($fieldName, ['pain_score', 'priority', 'status', 'prio_1', 'prio_2']);
+        $isDeveloperField = in_array($fieldName, ['developer_notes', 'cost', 'time_duration_hours']);
+
+        $isAuthorized = false;
+
+        if ($user->isTenantAdmin()) {
+            $isAuthorized = true;
+        } elseif ($isWorkBeeField && $user->isWorkBee()) {
+            $isAuthorized = true;
+        } elseif ($isDeveloperField && $user->isDeveloper()) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
+            session()->flash('error', "Access Denied: You do not have permission to edit the $fieldName.");
+            $this->dispatch('refreshComponent');
+            return;
+        }
+
+        // 3. Proceed with save
+        $idea = ProjectIdea::find($ideaId);
+        if ($idea) {
+            $idea->update([$fieldName => $newValue]);
+            session()->flash('message', "{$idea->problem_short} ($fieldName) updated successfully!");
         }
     }
 
-    // CRITICAL: Data fetch method ko update karein
+    // --- MAIN RENDER LOGIC (FINAL) ---
+
     public function render()
     {
-        // Start query with Tenant scope and filter by Team ID
-        $query = ProjectIdea::query()
-            ->where('tenant_id', tenant('id'));
-
-        // 1. Team Scoping (Assuming session('active_team_id') is set)
+        $tenantId = tenant('id');
         $activeTeamId = session('active_team_id');
-        $query->when($activeTeamId, fn($q) => $q->where('team_id', $activeTeamId));
+        $user = Auth::user();
 
-        // 2. Search Filter (CRITICAL)
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('problem_short', 'like', '%' . $this->search . '%')
-                  ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
-                  ->orWhere('goal', 'like', '%' . $this->search . '%');
-            });
-        }
+        $ideas = ProjectIdea::query()
+            ->where('tenant_id', $tenantId)
 
-        // 3. Status Filter (CRITICAL)
-        if ($this->statusFilter) {
-            $query->where('status', $this->statusFilter);
-        }
+            // 1. Scope ideas by the active team ID (CRITICAL)
+            ->when($activeTeamId, function ($query, $activeTeamId) {
+                $query->where('team_id', $activeTeamId);
+            })
 
-        // 4. Sorting
-        $ideas = $query->orderBy($this->sortBy, $this->sortDirection)
-                       ->paginate(15); // Example pagination limit
+            // 2. Dynamic Search Filter
+            ->when($this->search, function ($query) {
+                // Use sub-grouping for correct OR logic
+                $query->where(function ($subQuery) {
+                    // Assuming 'description' and 'problem_short' are searchable fields.
+                    // Note: Your Blade view code uses 'description', verify if it should be 'developer_notes' or 'goal'.
+                    $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
+                             ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
+                             ->orWhere('goal', 'like', '%' . $this->search . '%');
+                });
+            })
+
+            // 3. Status Filter
+            ->when($this->statusFilter, function ($query) {
+                $query->where('status', $this->statusFilter);
+            })
+
+            // 4. Default Sorting (Hardcoded to the original primary sort order)
+            ->orderBy('created_at', 'desc')
+
+            ->paginate(15);
 
         return view('livewire.pipeline-table', [
             'ideas' => $ideas,
-        ]);
+
+            // CRITICAL: Pass the permission booleans to the view
+            'isTenantAdmin' => $user->isTenantAdmin(),
+            'isDeveloper' => $user->isDeveloper(),
+            'isWorkBee' => $user->isWorkBee(),
+        ])->layout('components.layouts.guest');
     }
 }
