@@ -159,6 +159,6 @@ class PipelineTable extends Component
         'isTenantAdmin' => Auth::user()->isTenantAdmin(),
         'isDeveloper' => Auth::user()->isDeveloper(),
         'isWorkBee' => Auth::user()->isWorkBee(),
-    ]);
+    ])->layout('components.layouts.guest');
 }
 }
