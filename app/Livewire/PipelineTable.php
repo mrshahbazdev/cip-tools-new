@@ -58,7 +58,7 @@ class PipelineTable extends Component
         $this->resetPage();
     }
 
-    // --- SECURITY & IN-GRID SAVE LOGIC ---
+    // --- SECURITY & IN-GRID SAVE LOGIC (UNCHANGED) ---
 
     public function saveIdeaField($ideaId, $fieldName, $newValue)
     {
@@ -97,68 +97,74 @@ class PipelineTable extends Component
         }
     }
 
-    // --- MAIN RENDER LOGIC (FINAL) ---
+    // --- MAIN RENDER LOGIC (FINAL WITH DD DEBUG) ---
 
     public function render()
-{
-    $tenantId = tenant('id');
-    $activeTeamId = session('active_team_id');
-    $user = Auth::user();
+    {
+        $tenantId = tenant('id');
+        $activeTeamId = session('active_team_id');
+        $user = Auth::user();
 
-    $isTenantAdmin = $user->isTenantAdmin();
+        $isTenantAdmin = $user->isTenantAdmin();
 
-    $query = ProjectIdea::query()
-        ->where('tenant_id', $tenantId)
+        $query = ProjectIdea::query()
+            ->where('tenant_id', $tenantId);
 
-    // 1. Team Scoping (Admin Bypass is working correctly here)
-    ->when(!$isTenantAdmin && $activeTeamId, function (Builder $query, $activeTeamId) {
-        $query->where('team_id', $activeTeamId);
-    })
-
-    // 2. Dynamic Search Filter
-    ->when($this->search, function (Builder $query) {
-        $query->where(function (Builder $subQuery) {
-            $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
-                     ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
-                     ->orWhere('goal', 'like', '%' . $this->search . '%');
+        // 1. Team Scoping (Admin Bypass is working correctly here)
+        // Only apply team filter if the user is NOT a Tenant Admin AND an active team ID is set.
+        $query->when(!$isTenantAdmin && $activeTeamId, function (Builder $query, $activeTeamId) {
+            $query->where('team_id', $activeTeamId);
         });
-    })
 
-    // 3. Status Filter
-    ->when($this->statusFilter, function (Builder $query) {
-        $query->where('status', $this->statusFilter);
-    });
+        // 2. Dynamic Search Filter
+        $query->when($this->search, function (Builder $query) {
+            $query->where(function (Builder $subQuery) {
+                $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
+                         ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
+                         ->orWhere('goal', 'like', '%' . $this->search . '%');
+            });
+        });
 
-    // --- DD DEBUG CHECK (YAHAN AA KAR EXECUTION RUK JAYEGI) ---
-    // Jab bhi search ya filter active ho, hum final SQL dekhenge
-    if ($this->search || $this->statusFilter) {
+        // 3. Status Filter
+        $query->when($this->statusFilter, function (Builder $query) {
+            $query->where('status', $this->statusFilter);
+        });
 
-        $debugQuery = $query->toSql();
-        $debugBindings = $query->getBindings();
+        // --- DD DEBUG CHECK (YAHAN AA KAR EXECUTION RUK JAYEGI) ---
+        if ($this->search || $this->statusFilter) {
 
-        // 4. Test run: Query ko execute karke dekhein kitne results aa rahe hain
-        $resultCount = $query->count();
+            // CRITICAL FIX: Clone the query builder before count to preserve state for toSql/getBindings
+            $debugClone = clone $query;
 
-        dd([
-            'ISSUE' => 'Tenant Admin Filtering Logic Check',
-            'Active Search' => $this->search,
-            'Active Status Filter' => $this->statusFilter,
-            'Is Admin?' => $isTenantAdmin ? 'YES (Team Scope Bypassed)' : 'NO (Team Scope Applied)',
-            'RESULTS COUNT WITH FILTERS' => $resultCount, // CRITICAL: Check this number
-            'Raw SQL Query' => $debugQuery,
-            'Query Bindings' => $debugBindings,
-            'NEXT STEP' => 'If RESULT COUNT is 0, database data does not match search/status.',
-        ]);
+            $debugQuery = $debugClone->toSql();
+            $debugBindings = $debugClone->getBindings();
+
+            // Run count on the original query
+            $resultCount = $query->count();
+
+            dd([
+                'ISSUE' => 'Tenant Admin Filtering Logic Check',
+                'Active Search' => $this->search,
+                'Active Status Filter' => $this->statusFilter,
+                'Is Admin?' => $isTenantAdmin ? 'YES (Team Scope Bypassed)' : 'NO (Team Scope Applied)',
+                'RESULTS COUNT WITH FILTERS' => $resultCount,
+                'Raw SQL Query' => $debugQuery,
+                'Query Bindings' => $debugBindings,
+                'NEXT STEP' => 'If RESULT COUNT is 0, database data does not match search/status.',
+            ]);
+        }
+        // --- DD DEBUG CHECK END ---
+
+        // 4. Final Query Execution (Pagination)
+        $ideas = $query
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('livewire.pipeline-table', [
+            'ideas' => $ideas,
+            'isTenantAdmin' => $isTenantAdmin,
+            'isDeveloper' => $user->isDeveloper(),
+            'isWorkBee' => $user->isWorkBee(),
+        ])->layout('components.layouts.guest');
     }
-    // --- DD DEBUG CHECK END ---
-
-    // 4. Final Query Execution (Pagination)
-    $ideas = $query
-        ->orderBy('created_at', 'desc')
-        ->paginate(15);
-
-    return view('livewire.pipeline-table', [
-        // ...
-    ])->layout('components.layouts.guest');
-}
 }
