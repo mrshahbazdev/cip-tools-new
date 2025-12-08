@@ -31,11 +31,12 @@ class PipelineTable extends Component
 
     public function mount()
     {
-        // Set default active team if not already set in session
+        // ...
         if (!session('active_team_id') && Auth::check()) {
             $tenantUser = TenantUser::find(Auth::id());
 
             if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
+                // Check karein ki ye line chal rahi hai
                 session(['active_team_id' => $tenantUser->teams->first()->id]);
             }
         }
@@ -107,7 +108,7 @@ class PipelineTable extends Component
 
     // Base Query Setup
     $query = ProjectIdea::query()
-        ->where('tenant_id', $tenantId);
+        ->where('tenant_id', $tenantId ?? 'testing');
 
     // 1. Team Scoping (CRITICAL)
     $query->when($activeTeamId, function (Builder $query, $activeTeamId) {
