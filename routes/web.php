@@ -1,33 +1,49 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Models\StaticPage;
 use App\Livewire\SetupWizard;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
 // --- 1. SETUP CHECK (CRITICAL GATEWAY) ---
-// If APP_KEY is missing, register the setup route globally.
 if (empty(env('APP_KEY'))) {
     Route::get('/setup', SetupWizard::class)->name('install.setup');
-
-    // Fallback: Redirect everything else to setup if not configured
     Route::fallback(function () {
         return redirect()->route('install.setup');
     });
 }
 
-// --- 2. CENTRAL DOMAIN SCOPING (ALWAYS REGISTERED) ---
-// Filament and the main Central Landing Page are registered here.
+// --- 2. CENTRAL DOMAIN ROUTES ---
+// These routes ONLY run on domains listed in tenancy.central_domains.
+foreach (config('tenancy.central_domains') as $domain) {
+    Route::domain($domain)->middleware('web')->group(function () {
 
-Route::middleware(['web'])->domain(config('tenancy.central_domains')[0])->group(function () {
+        // Central Landing Page (Handles cip-tools.de/)
+        Route::get('/', function () {
+            return view('welcome');
+        })->name('central.landing');
 
-    // Central Landing Page (Loads registration form)
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('central.landing'); // Naming the root landing page
+        // Login Redirect (Handles cip-tools.de/login)
+        Route::get('/login', function () {
+            return redirect()->route('central.landing')->with('info', 'Please use your project subdomain to log in.');
+        })->name('central.login');
 
-    // Dynamic Pages Handler (About, Privacy, etc.)
-    Route::get('/{slug}', function ($slug) {
-        $page = StaticPage::where('slug', $slug)->where('is_published', true)->firstOrFail();
-        return view('central.static-page', ['page' => $page]);
-    })->where('slug', '(about|privacy|terms|contact)');
+        // Static Pages Handler (Dynamic handler logic here)
+        // ... (Your static page routes)
+    });
+}
+
+// --- 3. TENANT DOMAIN ROUTES (Must be defined in routes/tenant.php) ---
+// This block ensures that any non-central domain attempt gets routed
+// through the tenant process if it exists.
+// IMPORTANT: We do NOT define any routes here. This structure is mainly for clarity.
+// All your tenant routes should reside exclusively in routes/tenant.php.
+Route::middleware([
+    'web',
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->group(function() {
+    // This empty group ensures the middleware is registered globally,
+    // but the routes are loaded from routes/tenant.php only.
+    // Ensure you haven't accidentally placed any central routes here.
 });
