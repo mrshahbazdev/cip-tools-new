@@ -31,12 +31,11 @@ class PipelineTable extends Component
 
     public function mount()
     {
-        // ...
+        // Set default active team if not already set in session
         if (!session('active_team_id') && Auth::check()) {
             $tenantUser = TenantUser::find(Auth::id());
 
             if ($tenantUser && $tenantUser->teams->isNotEmpty()) {
-                // Check karein ki ye line chal rahi hai
                 session(['active_team_id' => $tenantUser->teams->first()->id]);
             }
         }
@@ -101,65 +100,49 @@ class PipelineTable extends Component
     // --- MAIN RENDER LOGIC (FINAL) ---
 
     public function render()
-{
-    $tenantId = tenant('id');
-    $activeTeamId = session('active_team_id');
-    $user = Auth::user();
+    {
+        $tenantId = tenant('id');
+        $activeTeamId = session('active_team_id');
+        $user = Auth::user();
 
-    // Base Query Setup
-    $query = ProjectIdea::query()
-        ->where('tenant_id', $tenantId ?? 'testing');
+        $isTenantAdmin = $user->isTenantAdmin(); // Check Admin status once
 
-    // 1. Team Scoping (CRITICAL)
-    $query->when($activeTeamId, function (Builder $query, $activeTeamId) {
-        $query->where('team_id', $activeTeamId);
-    });
+        $ideas = ProjectIdea::query()
+            ->where('tenant_id', $tenantId)
 
-    // 2. Dynamic Search Filter
-    $query->when($this->search, function (Builder $query) {
-        $query->where(function (Builder $subQuery) {
-            $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
-                     ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
-                     ->orWhere('goal', 'like', '%' . $this->search . '%');
-        });
-    });
+            // 1. Team Scoping (CRITICAL LOGIC UPDATE)
+            // Only apply team filter if the user is NOT a Tenant Admin
+            // AND an active team ID is set.
+            ->when(!$isTenantAdmin && $activeTeamId, function (Builder $query, $activeTeamId) {
+                $query->where('team_id', $activeTeamId);
+            })
 
-    // 3. Status Filter
-    $query->when($this->statusFilter, function (Builder $query) {
-        $query->where('status', $this->statusFilter);
-    });
+            // 2. Dynamic Search Filter (No change)
+            ->when($this->search, function (Builder $query) {
+                $query->where(function (Builder $subQuery) {
+                    $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
+                            ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
+                            ->orWhere('goal', 'like', '%' . $this->search . '%');
+                });
+            })
 
-    // --- DD DEBUG CHECK (YAHAN AA KAR EXECUTION RUK JAYEGI) ---
-    if ($this->search || $this->statusFilter) {
+            // 3. Status Filter (No change)
+            ->when($this->statusFilter, function (Builder $query) {
+                $query->where('status', $this->statusFilter);
+            })
 
-        // Final Query aur Bindings ko nikalen
-        $debugQuery = $query->toSql();
-        $debugBindings = $query->getBindings();
+            // 4. Default Sorting
+            ->orderBy('created_at', 'desc')
 
-        // Screen par saari information display karein
-        dd([
-            'ISSUE' => 'Filtering Logic Check',
-            'Active Search' => $this->search,
-            'Active Status Filter' => $this->statusFilter,
-            'Active Team ID (Session)' => $activeTeamId,
-            'Raw SQL Query' => $debugQuery,
-            'Query Bindings' => $debugBindings,
-            'NEXT STEP' => 'Copy the SQL query and run it in phpMyAdmin to verify results.',
-        ]);
+            ->paginate(15);
+
+        return view('livewire.pipeline-table', [
+            'ideas' => $ideas,
+
+            // Pass the permission booleans to the view
+            'isTenantAdmin' => $isTenantAdmin,
+            'isDeveloper' => $user->isDeveloper(),
+            'isWorkBee' => $user->isWorkBee(),
+        ])->layout('components.layouts.guest');
     }
-    // --- DD DEBUG CHECK END ---
-
-    // 4. Final Query Execution (Pagination)
-    $ideas = $query
-        ->orderBy('created_at', 'desc')
-        ->paginate(15);
-
-    // ... return view ...
-    return view('livewire.pipeline-table', [
-        'ideas' => $ideas,
-        'isTenantAdmin' => Auth::user()->isTenantAdmin(),
-        'isDeveloper' => Auth::user()->isDeveloper(),
-        'isWorkBee' => Auth::user()->isWorkBee(),
-    ])->layout('components.layouts.guest');
-}
 }
