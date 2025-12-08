@@ -100,49 +100,65 @@ class PipelineTable extends Component
     // --- MAIN RENDER LOGIC (FINAL) ---
 
     public function render()
-    {
-        $tenantId = tenant('id');
-        $activeTeamId = session('active_team_id');
-        $user = Auth::user();
+{
+    $tenantId = tenant('id');
+    $activeTeamId = session('active_team_id');
+    $user = Auth::user();
 
-        $isTenantAdmin = $user->isTenantAdmin(); // Check Admin status once
+    $isTenantAdmin = $user->isTenantAdmin();
 
-        $ideas = ProjectIdea::query()
-            ->where('tenant_id', $tenantId)
+    $query = ProjectIdea::query()
+        ->where('tenant_id', $tenantId);
 
-            // 1. Team Scoping (CRITICAL LOGIC UPDATE)
-            // Only apply team filter if the user is NOT a Tenant Admin
-            // AND an active team ID is set.
-            ->when(!$isTenantAdmin && $activeTeamId, function (Builder $query, $activeTeamId) {
-                $query->where('team_id', $activeTeamId);
-            })
+    // 1. Team Scoping (Admin Bypass is working correctly here)
+    ->when(!$isTenantAdmin && $activeTeamId, function (Builder $query, $activeTeamId) {
+        $query->where('team_id', $activeTeamId);
+    });
 
-            // 2. Dynamic Search Filter (No change)
-            ->when($this->search, function (Builder $query) {
-                $query->where(function (Builder $subQuery) {
-                    $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
-                            ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
-                            ->orWhere('goal', 'like', '%' . $this->search . '%');
-                });
-            })
+    // 2. Dynamic Search Filter
+    ->when($this->search, function (Builder $query) {
+        $query->where(function (Builder $subQuery) {
+            $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
+                     ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
+                     ->orWhere('goal', 'like', '%' . $this->search . '%');
+        });
+    });
 
-            // 3. Status Filter (No change)
-            ->when($this->statusFilter, function (Builder $query) {
-                $query->where('status', $this->statusFilter);
-            })
+    // 3. Status Filter
+    ->when($this->statusFilter, function (Builder $query) {
+        $query->where('status', $this->statusFilter);
+    });
 
-            // 4. Default Sorting
-            ->orderBy('created_at', 'desc')
+    // --- DD DEBUG CHECK (YAHAN AA KAR EXECUTION RUK JAYEGI) ---
+    // Jab bhi search ya filter active ho, hum final SQL dekhenge
+    if ($this->search || $this->statusFilter) {
 
-            ->paginate(15);
+        $debugQuery = $query->toSql();
+        $debugBindings = $query->getBindings();
 
-        return view('livewire.pipeline-table', [
-            'ideas' => $ideas,
+        // 4. Test run: Query ko execute karke dekhein kitne results aa rahe hain
+        $resultCount = $query->count();
 
-            // Pass the permission booleans to the view
-            'isTenantAdmin' => $isTenantAdmin,
-            'isDeveloper' => $user->isDeveloper(),
-            'isWorkBee' => $user->isWorkBee(),
-        ])->layout('components.layouts.guest');
+        dd([
+            'ISSUE' => 'Tenant Admin Filtering Logic Check',
+            'Active Search' => $this->search,
+            'Active Status Filter' => $this->statusFilter,
+            'Is Admin?' => $isTenantAdmin ? 'YES (Team Scope Bypassed)' : 'NO (Team Scope Applied)',
+            'RESULTS COUNT WITH FILTERS' => $resultCount, // CRITICAL: Check this number
+            'Raw SQL Query' => $debugQuery,
+            'Query Bindings' => $debugBindings,
+            'NEXT STEP' => 'If RESULT COUNT is 0, database data does not match search/status.',
+        ]);
     }
+    // --- DD DEBUG CHECK END ---
+
+    // 4. Final Query Execution (Pagination)
+    $ideas = $query
+        ->orderBy('created_at', 'desc')
+        ->paginate(15);
+
+    return view('livewire.pipeline-table', [
+        // ...
+    ])->layout('components.layouts.guest');
+}
 }
