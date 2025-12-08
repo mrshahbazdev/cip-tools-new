@@ -8,17 +8,20 @@ use App\Models\ProjectIdea;
 use App\Models\TenantUser;
 use App\Models\Team;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 
 class PipelineTable extends Component
 {
     use WithPagination;
+
+    // Listeners for external events (e.g., modal closure)
     protected $listeners = ['ideaSaved' => 'render'];
 
     // --- State Properties for Filtering ---
     public $search = '';
     public $statusFilter = '';
 
-    // Sorting properties removed (as requested)
+    // Sorting properties removed as requested.
 
     public $statuses = [
         'New', 'Reviewed', 'Pending Pricing', 'Approved Budget', 'Implementation', 'Done'
@@ -38,6 +41,7 @@ class PipelineTable extends Component
         }
     }
 
+    // Reset pagination when search or filters update
     public function updatingSearch()
     {
         $this->resetPage();
@@ -50,11 +54,9 @@ class PipelineTable extends Component
     public function resetFilters()
     {
         $this->search = '';
-        $this->statusFilter = ''; // Reset the filter property to empty string
+        $this->statusFilter = '';
         $this->resetPage();
     }
-
-    // sortBy method and $sortBy, $sortDirection properties REMOVED.
 
     // --- SECURITY & IN-GRID SAVE LOGIC ---
 
@@ -106,29 +108,27 @@ class PipelineTable extends Component
         $ideas = ProjectIdea::query()
             ->where('tenant_id', $tenantId)
 
-            // 1. Scope ideas by the active team ID (CRITICAL)
-            ->when($activeTeamId, function ($query, $activeTeamId) {
+            // 1. Team Scoping (CRITICAL)
+            ->when($activeTeamId, function (Builder $query, $activeTeamId) {
                 $query->where('team_id', $activeTeamId);
             })
 
-            // 2. Dynamic Search Filter
-            ->when($this->search, function ($query) {
+            // 2. Dynamic Search Filter (Working now)
+            ->when($this->search, function (Builder $query) {
                 // Use sub-grouping for correct OR logic
-                $query->where(function ($subQuery) {
-                    // Assuming 'description' and 'problem_short' are searchable fields.
-                    // Note: Your Blade view code uses 'description', verify if it should be 'developer_notes' or 'goal'.
+                $query->where(function (Builder $subQuery) {
                     $subQuery->where('problem_short', 'like', '%' . $this->search . '%')
                              ->orWhere('developer_notes', 'like', '%' . $this->search . '%')
                              ->orWhere('goal', 'like', '%' . $this->search . '%');
                 });
             })
 
-            // 3. Status Filter
-            ->when($this->statusFilter, function ($query) {
+            // 3. Status Filter (Working now)
+            ->when($this->statusFilter, function (Builder $query) {
                 $query->where('status', $this->statusFilter);
             })
 
-            // 4. Default Sorting (Hardcoded to the original primary sort order)
+            // 4. Default Sorting (Hardcoded to creation time - most recent first)
             ->orderBy('created_at', 'desc')
 
             ->paginate(15);
@@ -136,10 +136,10 @@ class PipelineTable extends Component
         return view('livewire.pipeline-table', [
             'ideas' => $ideas,
 
-            // CRITICAL: Pass the permission booleans to the view
+            // Pass the permission booleans to the view
             'isTenantAdmin' => $user->isTenantAdmin(),
             'isDeveloper' => $user->isDeveloper(),
             'isWorkBee' => $user->isWorkBee(),
-        ])->layout('components.layouts.guest');
+        ]);
     }
 }
