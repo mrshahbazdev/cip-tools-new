@@ -9,15 +9,43 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant; // CRITICAL IMPORT
 class ProjectIdea extends Model
 {
     use HasFactory, BelongsToTenant; // Add BelongsToTenant trait
+    protected static function boot()
+    {
+        parent::boot();
 
+        // Model ke 'saving' event ko hook karein
+        static::saving(function ($idea) {
+
+            // Input values ko safety ke liye float mein convert karein
+            $pain = (float) $idea->pain_score;
+            $cost = (float) $idea->cost;
+            $duration = (float) $idea->time_duration_hours;
+
+            // --- FORMULA IMPLEMENTATION ---
+
+            // 1. PRIO 2 = Schmerz (Direct Mapping)
+            // Note: Agar Schmerz integer field hai, toh direct assign karein.
+            $idea->prio_2 = $pain;
+
+            // 2. PRIO 1 = (Kosten / 100) + Dauer (Cost is weighted down)
+            if ($cost >= 0 && $duration >= 0) {
+                $idea->prio_1 = ($cost / 100) + $duration;
+            } else {
+                // Agar input invalid ho, toh 0 set karein
+                $idea->prio_1 = 0;
+            }
+
+            // Note: `prio_1` aur `prio_2` fields ko database mein float/decimal hona chahiye.
+        });
+    }
     protected $fillable = [
-        'tenant_id', 
+        'tenant_id',
         'team_id',
         'problem_short', // <--- CRITICAL FIX: Ye fillable mein hona chahiye
         'goal',          // <--- Ye fillable mein hona chahiye
-        'description', 
-        'status', 
-        'pain_score', 
+        'description',
+        'status',
+        'pain_score',
         'priority',
         'developer_notes',
         'cost',
