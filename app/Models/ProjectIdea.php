@@ -31,7 +31,7 @@ class ProjectIdea extends Model
 
             // --- 2. PRIO 2 CALCULATION (NEW REQUESTED FORMULA) ---
             // PRIO 2 = Pain * PRIO 1
-            $idea->prio_2 = $pain * $idea->prio_1;
+            $idea->prio_2 =$idea->prio_1 / $pain;
 
         });
     }
